@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context=".activity.MainActivity">
+
+    <item android:id="@+id/action_add_account"
+          android:title="@string/action_add_account"
+          android:icon="@drawable/ic_bank_plus"
+          app:showAsAction="ifRoom"/>
+
+    <item android:id="@+id/action_login"
+          android:title="@string/active_auto_backup"
+          android:icon="@drawable/ic_cloud_upload"
+          app:showAsAction="ifRoom"/>
+
+</menu>

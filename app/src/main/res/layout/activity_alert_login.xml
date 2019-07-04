@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimary"
+        tools:context=".activity.AlertLoginActivity">
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/activity_vertical_margin"
+            android:orientation="vertical">
+
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:text="@string/active_sync_title"/>
+
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:layout_marginTop="25dp"
+                android:text="@string/active_sync_message"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/bt_positive"
+                style="@style/ButtonWhite"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:layout_marginTop="25dp"
+                android:text="@string/active_sync_positive"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/bt_negative"
+                style="@style/ButtonLinkWhite"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:layout_marginTop="10dp"
+                android:textAllCaps="false"
+                android:text="@string/active_sync_negative"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/bt_never_show"
+                style="@style/ButtonLinkWhite"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/white70"
+                android:textSize="15sp"
+                android:layout_marginTop="10dp"
+                android:textAllCaps="false"
+                android:text="@string/not_interested"/>
+    </LinearLayout>
+</ScrollView>

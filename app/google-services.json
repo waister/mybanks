@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "647635468078",
+    "firebase_url": "https://my-banks.firebaseio.com",
+    "project_id": "my-banks",
+    "storage_bucket": "my-banks.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:647635468078:android:a6071b6145d4d336",
+        "android_client_info": {
+          "package_name": "com.duduapps.mybanks"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "647635468078-39fb1lh7m004264s6irl1vgm42lkst8k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.duduapps.mybanks",
+            "certificate_hash": "b8ff66bd7f063143df3366c8300eb6a01e1f69e7"
+          }
+        },
+        {
+          "client_id": "647635468078-21g5dcuqkr5h88o12phr34inl86vnore.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAA40OPkbl69cfSt9d2OtGKNl_ehd5_1WU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "647635468078-21g5dcuqkr5h88o12phr34inl86vnore.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
