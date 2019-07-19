@@ -67,8 +67,9 @@ class LoginActivity : AppCompatActivity(), TextView.OnEditorActionListener {
         rl_progress.hideKeyboard()
 
         val params = listOf(API_EMAIL to userEmail)
+        val t = 1000 * 60
 
-        API_ROUTE_EMAIL_SEND_CODE.httpPost(params).responseString { request, response, result ->
+        API_ROUTE_EMAIL_SEND_CODE.httpPost(params).timeout(t).timeoutRead(t).responseString { request, response, result ->
             printFuelLog(request, response, result)
 
             rl_progress.visibility = View.GONE

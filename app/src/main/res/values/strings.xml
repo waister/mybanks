@@ -27,6 +27,8 @@
     <string name="error_holder">Informe o nome do titular da conta</string>
     <string name="error_document">Informe o CPF ou o CNPJ do titular da conta</string>
     <string name="error_account_not_found">Conta não encontrador, tente fechar o app e abrir novamente</string>
+    <string name="error_load_video">Ops, o vídeo não carregou 😭</string>
+    <string name="error_load_reward">Você não recebeu o prêmio, tente assistir novamente.</string>
     <string name="data_copied">Dados copiados</string>
     <string name="account_copied">Conta copiada</string>
     <string name="accounts_copied">Contas copiadas</string>
@@ -41,6 +43,7 @@
     <string name="update_available">Lançamos uma nova versão do aplicativo, atualize para receber as novidades e correções.</string>
     <string name="update_needed">Lançamos uma nova atualização crítica, você PRECISA atualizar para continuar usando.</string>
     <string name="no_accounts_found">Nenhum conta encontrada.\nSe você já tinha conta, ative o backup.</string>
+    <string name="search_no_accounts_found">Nenhum conta encontrada.</string>
     <string name="error_unknown">Não foi possível conectar ao servidor, verifique sua conexão.</string>
     <string name="loading_settings">Carregando configurações…</string>
     <string name="loading_banks">Carregando bancos…</string>
@@ -95,4 +98,24 @@
     <string name="confirm_code">Confirmar código</string>
     <string name="code_sent_to_email">Código enviado por email</string>
     <string name="active_auto_backup">Ativar o backup automático</string>
+    <string name="remove_adas">Remover anúncios</string>
+    <string name="search">Pesquisar</string>
+    <string name="wait_settings">Aguarde as configurações carregarem</string>
+    <string name="watch_to_by_phrase">Também odiamos anúncios!</string>
+    <string name="watch_to_by_body">Você pode assistir um vídeo publicitário para remover os anúncios por %1$d dias, e ainda nos ajuda a manter o app sempre atualizado e ainda.</string>
+    <string name="watch_to_by_body_paid">OBRIGADO! Você tem um plano ativo por mais %1$d dia(s). Mas pode assistir novamente, assim ajuda o app e ainda renova a duração do plano.</string>
+    <string name="tank_you">Obrigado</string>
+    <string name="watch_to_by_tanks">Agora você está livre de anúncios por %1$d dia(s) 😍</string>
+    <string name="watch_to_by_button">Assistir ao vídeo</string>
+    <string name="watch_to_by_button_again">Assistir novamente</string>
+    <string name="send_feedback">Enviar feedback</string>
+    <string name="feedback_instructions">Se você tem alguma dúvida, crítica ou sugestão, envie uma mensagem para nós:</string>
+    <string name="name">Nome</string>
+    <string name="email">E-mail</string>
+    <string name="message">Mensagem</string>
+    <string name="error_name">Ops, digite seu nome 😅</string>
+    <string name="error_email">Ops, digite seu e-mail 😅</string>
+    <string name="error_comments">Ops, digite uma mensagem 😅</string>
+    <string name="sending_feedback">Enviando…</string>
+    <string name="error_connection">Ops, ocorreu um erro na comunicação com o servidor. Verifique sua conexão e tente novamente.</string>
 </resources>

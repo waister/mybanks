@@ -1,7 +1,7 @@
 package com.duduapps.mybanks.activity
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import com.duduapps.mybanks.R
 import com.duduapps.mybanks.util.PREF_SHOW_ALERT_LOGIN
 import com.orhanobut.hawk.Hawk

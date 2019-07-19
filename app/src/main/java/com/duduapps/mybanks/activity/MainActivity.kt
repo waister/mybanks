@@ -1,12 +1,16 @@
 package com.duduapps.mybanks.activity
 
 import android.app.Activity
+import android.app.SearchManager
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,9 +22,11 @@ import com.duduapps.mybanks.model.Account
 import com.duduapps.mybanks.util.*
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
+import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.InterstitialAd
 import com.google.android.gms.ads.MobileAds
 import com.orhanobut.hawk.Hawk
+import io.realm.Case
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.inc_progress_dark.*
@@ -33,7 +39,10 @@ class MainActivity : AppCompatActivity() {
     private var accounts: MutableList<Account> = mutableListOf()
     private var accountsAdapter: AccountsAdapter? = null
     private var menuLogin: MenuItem? = null
+    private var menuSearch: MenuItem? = null
+    private var searchView: SearchView? = null
     private var interstitialAd: InterstitialAd? = null
+    private var lastTerms: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -107,29 +116,60 @@ class MainActivity : AppCompatActivity() {
 
         renderData()
         apiSyncAccounts()
+        searchVisibility()
 
         menuLogin?.isVisible = !isLogged()
     }
 
+    private fun getAccounts(terms: String = ""): MutableList<Account> {
+        var items: MutableList<Account>? = null
+
+        if (!realm.isClosed) {
+            val query = realm.where(Account::class.java)
+                .isNull("deleted")
+
+            if (terms.isNotEmpty())
+                query.contains("label", terms, Case.INSENSITIVE)
+
+            items = query.findAll()
+        }
+
+        return items ?: mutableListOf()
+    }
+
+    private fun searchVisibility() {
+        val size = getAccounts("").size
+        menuSearch?.isVisible = size > 3
+    }
+
     private fun renderData() {
-        accounts = realm.where(Account::class.java).isNull("deleted").findAll()
+        accounts = getAccounts(lastTerms)
 
         if (accounts.size == 0) {
 
             rv_accounts.visibility = View.GONE
             ll_empty.visibility = View.VISIBLE
-            tv_alert.setText(R.string.no_accounts_found)
 
-            bt_add_account.setOnClickListener {
-                startActivity(intentFor<CreateAccountActivity>())
-            }
+            if (lastTerms.isNotEmpty()) {
 
-            if (isLogged()) {
-                bt_login.visibility = View.GONE
+                tv_alert.setText(R.string.search_no_accounts_found)
+
             } else {
-                bt_login.setOnClickListener {
-                    startActivityForResult(intentFor<LoginActivity>(), REQUEST_CODE_FORCE_REFRESH)
+
+                tv_alert.setText(R.string.no_accounts_found)
+
+                bt_add_account.setOnClickListener {
+                    startActivity(intentFor<CreateAccountActivity>())
                 }
+
+                if (isLogged()) {
+                    bt_login.visibility = View.GONE
+                } else {
+                    bt_login.setOnClickListener {
+                        startActivityForResult(intentFor<LoginActivity>(), REQUEST_CODE_FORCE_REFRESH)
+                    }
+                }
+
             }
 
             showHideButtons(false)
@@ -179,7 +219,7 @@ class MainActivity : AppCompatActivity() {
     private fun checkVersion() {
         val token = Hawk.get(PREF_FCM_TOKEN, "")
 
-        if (isLogged() && token.isNotEmpty()) {
+        if (/*isLogged() && */token.isNotEmpty()) {
             val params = listOf(API_TOKEN to token)
 
             API_ROUTE_IDENTIFY.httpGet(params).responseString { request, response, result ->
@@ -221,10 +261,39 @@ class MainActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.menu_main, menu)
 
         menuLogin = menu?.findItem(R.id.action_login)
+        menuSearch = menu?.findItem(R.id.action_search)
 
         menuLogin?.isVisible = !isLogged()
 
+        searchView = menuSearch?.actionView as SearchView
+        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        searchView?.setSearchableInfo(searchManager.getSearchableInfo(componentName))
+
+        searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                searchView?.clearFocus()
+                return true
+            }
+
+            override fun onQueryTextChange(terms: String): Boolean = doneSearch(terms)
+        })
+
+        searchVisibility()
+
         return true
+    }
+
+    fun doneSearch(terms: String): Boolean {
+        if (accountsAdapter != null) {
+            lastTerms = terms
+
+            renderData()
+
+            if (terms.isNotEmpty())
+                return true
+        }
+
+        return false
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
@@ -236,6 +305,14 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.action_login -> {
                 startActivity(intentFor<LoginActivity>())
+                true
+            }
+            R.id.action_remove_ads -> {
+                startActivity(intentFor<RemoveAdsActivity>())
+                true
+            }
+            R.id.action_send_feedback -> {
+                startActivity(intentFor<SendFeedbackActivity>())
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -346,8 +423,45 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showInterstitialAd() {
-        if (!havePlan() && interstitialAd != null && interstitialAd!!.isLoaded) {
+        if (canShowInterstitial() && interstitialAd != null && interstitialAd!!.isLoaded) {
+            val tag = "SHOW_INTERSTITIAL"
+
             interstitialAd!!.show()
+            interstitialAd!!.adListener = object: AdListener() {
+                override fun onAdLoaded() {
+                    Log.w(tag, "onAdLoaded()")
+                }
+
+                override fun onAdFailedToLoad(errorCode: Int) {
+                    Log.w(tag, "onAdFailedToLoad() error code: $errorCode")
+                }
+
+                override fun onAdOpened() {
+                    Log.w(tag, "onAdOpened()")
+
+                    Hawk.put(PREF_LAST_INTERSTITIAL_SHOW, System.currentTimeMillis())
+                }
+
+                override fun onAdClicked() {
+                    Log.w(tag, "onAdClicked()")
+                }
+
+                override fun onAdLeftApplication() {
+                    Log.w(tag, "onAdLeftApplication()")
+                }
+
+                override fun onAdClosed() {
+                    Log.w(tag, "onAdClosed()")
+                }
+            }
+        }
+    }
+
+    override fun onBackPressed() {
+        if (searchView != null && !searchView!!.isIconified) {
+            searchView?.onActionViewCollapsed()
+        } else {
+            super.onBackPressed()
         }
     }
 

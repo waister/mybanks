@@ -11,9 +11,9 @@ import android.net.Uri
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import android.util.Log
 import com.duduapps.mybanks.BuildConfig
 import com.duduapps.mybanks.R
 import com.duduapps.mybanks.activity.SplashActivity
@@ -48,12 +48,10 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
             Hawk.put(PREF_FCM_TOKEN, token)
 
-            if (isLogged()) {
-                val params = listOf(API_TOKEN to token)
+            val params = listOf(API_TOKEN to token)
 
-                API_ROUTE_IDENTIFY.httpGet(params).responseString { request, response, result ->
-                    printFuelLog(request, response, result)
-                }
+            API_ROUTE_IDENTIFY.httpGet(params).responseString { request, response, result ->
+                printFuelLog(request, response, result)
             }
         }
     }

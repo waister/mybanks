@@ -12,6 +12,7 @@ const val API_ROUTE_ACCOUNTS = "/accounts"
 const val API_ROUTE_ACCOUNT_REGISTER = "/account/register"
 const val API_ROUTE_IDENTIFY = "/identify"
 const val API_ROUTE_EMAIL_SEND_CODE = "/email-send-code"
+const val API_ROUTE_FEEDBACK_SEND = "/message/send"
 
 const val API_ANDROID = "android"
 const val API_IDENTIFIER = "identifier"
@@ -48,7 +49,11 @@ const val API_APP_NAME = "app_name"
 const val API_ADMOB_ID = "admob_id"
 const val API_ADMOB_AD_MAIN_ID = "admob_ad_main_id"
 const val API_ADMOB_INTERSTITIAL_ID = "admob_interstitial_id"
+const val API_ADMOB_REMOVE_ADS = "admob_remove_ads"
 const val API_EMAIL = "email"
+const val API_COMMENTS = "comments"
+const val API_PLAN_VIDEO_DURATION = "plan_video_duration"
+const val API_INTERSTITIAL_MIN_INTERVAL = "interstitial_min_interval"
 
 fun String?.getValidJSONObject(): JSONObject? {
     if (this != null && this.isNotEmpty() && this != "null") {

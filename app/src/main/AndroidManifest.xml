@@ -42,7 +42,7 @@
                 android:name=".activity.AccountDetailsActivity"
                 android:label="@string/account_details"
                 android:theme="@style/AppTheme.NoActionBar"
-                android:windowSoftInputMode="stateHidden"/>
+                android:windowSoftInputMode="stateAlwaysHidden"/>
         <activity
                 android:name=".activity.CreateAccountActivity"
                 android:label="@string/action_add_account"
@@ -51,11 +51,19 @@
                 android:name=".activity.AlertLoginActivity"
                 android:label="@string/active_sync_title"
                 android:theme="@style/AppTheme.NoActionBar"
-                android:windowSoftInputMode="stateHidden"/>
+                android:windowSoftInputMode="stateAlwaysHidden"/>
         <activity
                 android:name=".activity.LoginActivity"
                 android:label="@string/active_sync_title"
                 android:theme="@style/AppTheme.NoActionBar"
+                android:windowSoftInputMode="stateVisible"/>
+        <activity
+                android:name=".activity.RemoveAdsActivity"
+                android:label="@string/remove_adas"
+                android:windowSoftInputMode="stateAlwaysHidden"/>
+        <activity
+                android:name=".activity.SendFeedbackActivity"
+                android:label="@string/send_feedback"
                 android:windowSoftInputMode="stateVisible"/>
 
         <service

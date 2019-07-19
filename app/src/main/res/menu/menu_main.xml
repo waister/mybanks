@@ -3,14 +3,36 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context=".activity.MainActivity">
 
+    <item
+            android:id="@+id/action_search"
+            android:icon="@drawable/ic_search"
+            android:orderInCategory="1"
+            android:title="@string/search"
+            app:actionViewClass="androidx.appcompat.widget.SearchView"
+            app:showAsAction="ifRoom" />
+
     <item android:id="@+id/action_add_account"
+          android:orderInCategory="2"
           android:title="@string/action_add_account"
           android:icon="@drawable/ic_bank_plus"
           app:showAsAction="ifRoom"/>
 
     <item android:id="@+id/action_login"
+          android:orderInCategory="3"
           android:title="@string/active_auto_backup"
           android:icon="@drawable/ic_cloud_upload"
           app:showAsAction="ifRoom"/>
+
+    <item android:id="@+id/action_remove_ads"
+          android:orderInCategory="4"
+          android:title="@string/remove_adas"
+          android:icon="@drawable/ic_tag_remove"
+          app:showAsAction="never"/>
+
+    <item android:id="@+id/action_send_feedback"
+          android:orderInCategory="5"
+          android:title="@string/send_feedback"
+          android:icon="@drawable/ic_voice"
+          app:showAsAction="never"/>
 
 </menu>

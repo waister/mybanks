@@ -6,6 +6,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.*
 import android.util.Base64
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.webkit.URLUtil
@@ -34,6 +35,12 @@ const val PARAM_ID = "ParamId"
 const val PARAM_TYPE = "ParamType"
 const val PARAM_ITEM_ID = "ParamItemId"
 
+const val ONE_SECOND: Long = 1000
+const val ONE_MINUTE: Long = ONE_SECOND * 60
+const val ONE_HOUR: Long = ONE_MINUTE * 60
+const val ONE_DAY: Long = ONE_HOUR * 24
+const val FIVE_DAYS: Long = ONE_DAY * 5
+
 fun isLogged(): Boolean {
     return Hawk.get(PREF_IDENTIFIER, "").isNotEmpty()
 }
@@ -41,21 +48,21 @@ fun isLogged(): Boolean {
 fun Context.storeAppLink(): String = "https://play.google.com/store/apps/details?id=$packageName"
 
 fun havePlan(): Boolean {
-    if (Hawk.get(PREF_IDENTIFIER, "") == "b2ba5e776e817ea576b6ce1c4924865a")
-        return true
-
-    return Hawk.get(PREF_HAVE_PLAN, false)
+    val planVideoMillis = Hawk.get(PREF_PLAN_VIDEO_MILLIS, 0L)
+    if (planVideoMillis != 0L) {
+        val panVideoDuration = Hawk.get(PREF_PLAN_VIDEO_DURATION, FIVE_DAYS)
+        val expiration = Hawk.get(PREF_PLAN_VIDEO_MILLIS, 0L) + panVideoDuration
+        return expiration > System.currentTimeMillis()
+    }
+    return false
 }
 
 fun getAdRequest(): AdRequest? {
-    if (!havePlan()) {
-        val adBuilder = AdRequest.Builder()
-        adBuilder.addTestDevice("B4118570F70F9787F3E6A3C043D16B92")
-        adBuilder.addTestDevice("3DD600467B203917CE779952D8023F26")
-        adBuilder.addTestDevice("C2C5A6EA376FDCAEC49F962CE9D39DAA")
-        return adBuilder.build()
-    }
-    return null
+    val adBuilder = AdRequest.Builder()
+    adBuilder.addTestDevice("B4118570F70F9787F3E6A3C043D16B92")
+    adBuilder.addTestDevice("3DD600467B203917CE779952D8023F26")
+    adBuilder.addTestDevice("C2C5A6EA376FDCAEC49F962CE9D39DAA")
+    return adBuilder.build()
 }
 
 fun Activity.loadAdBanner(adUnitId: String?, buttonsRoot: View? = null) {
@@ -101,6 +108,38 @@ fun Activity.loadAdBanner(adUnitId: String?, buttonsRoot: View? = null) {
             }
         }
     }
+}
+
+fun canShowInterstitial(): Boolean {
+    var response = false
+
+    Log.w("CAN_SHOW_INTERSTITIAL", "User have valid billing plan: ${havePlan()}")
+
+    if (!havePlan()) {
+        val lastInterstitialShow = Hawk.get(PREF_LAST_INTERSTITIAL_SHOW, 0L)
+
+        Log.w("CAN_SHOW_INTERSTITIAL", "Last show interstitial in millis $lastInterstitialShow")
+
+        if (lastInterstitialShow == 0L) {
+            response = true
+        } else {
+            val interval = if (lastInterstitialShow > 0)
+                System.currentTimeMillis() - lastInterstitialShow
+            else
+                ONE_HOUR
+
+            val minInterval = Hawk.get(PREF_INTERSTITIAL_MIN_INTERVAL, ONE_HOUR)
+
+            response = interval >= minInterval
+
+            Log.w("CAN_SHOW_INTERSTITIAL", "API min interval in millis $minInterval")
+            Log.w("CAN_SHOW_INTERSTITIAL", "Interval between last show and now: $interval")
+        }
+    }
+
+    Log.w("CAN_SHOW_INTERSTITIAL", "Response can show interstitial: $response")
+
+    return response
 }
 
 fun Context.copyToClipboard(text: String) {
@@ -212,6 +251,9 @@ fun Realm?.saveBanks(result: Result<String, FuelError>): Boolean {
             Hawk.put(PREF_ADMOB_ID, apiObj.getStringVal(API_ADMOB_ID))
             Hawk.put(PREF_ADMOB_AD_MAIN_ID, apiObj.getStringVal(API_ADMOB_AD_MAIN_ID))
             Hawk.put(PREF_ADMOB_INTERSTITIAL_ID, apiObj.getStringVal(API_ADMOB_INTERSTITIAL_ID))
+            Hawk.put(PREF_ADMOB_REMOVE_ADS, apiObj.getStringVal(API_ADMOB_REMOVE_ADS))
+            Hawk.put(PREF_PLAN_VIDEO_DURATION, apiObj.getLongVal(API_PLAN_VIDEO_DURATION))
+            Hawk.put(PREF_INTERSTITIAL_MIN_INTERVAL, apiObj.getLongVal(API_INTERSTITIAL_MIN_INTERVAL))
 
             val banksArr = apiObj.getJSONArrayVal(API_BANKS)
 

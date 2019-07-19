@@ -141,6 +141,10 @@ class AccountDetailsActivity : AppCompatActivity() {
                 }.show()
                 true
             }
+            R.id.action_remove_ads -> {
+                startActivity(intentFor<RemoveAdsActivity>())
+                true
+            }
             else -> {
                 onBackPressed()
                 super.onOptionsItemSelected(item)

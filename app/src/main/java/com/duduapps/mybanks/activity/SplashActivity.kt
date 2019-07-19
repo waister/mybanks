@@ -7,7 +7,6 @@ import android.provider.Settings
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.duduapps.mybanks.BuildConfig
 import com.duduapps.mybanks.R
 import com.duduapps.mybanks.application.CustomApplication
 import com.duduapps.mybanks.model.Bank
@@ -39,14 +38,18 @@ class SplashActivity : AppCompatActivity() {
 
         Log.w(TAG, "Token FCM: " + Hawk.get(PREF_FCM_TOKEN, ""))
 
-//        if (BuildConfig.DEBUG) {
-//            val token = Hawk.get(PREF_FCM_TOKEN, "")
-//            Hawk.deleteAll()
-//            Hawk.put(PREF_FCM_TOKEN, token)
-//            realm.executeTransaction { realm.deleteAll() }
-//        }
+        if (!isLogged()) {
+            Hawk.put(PREF_IDENTIFIER, Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID))
+            CustomApplication().updateFuelParams()
+        }
 
-        val updateOnSplash = Hawk.get(PREF_UPDATE_ON_SPLASH, true)
+        var updateOnSplash = Hawk.get(PREF_UPDATE_ON_SPLASH, true)
+
+        if (Hawk.get(PREF_PLAN_VIDEO_DURATION, 0L) == 0L)
+            updateOnSplash = true
+
+        if (Hawk.get(PREF_INTERSTITIAL_MIN_INTERVAL, 0L) == 0L)
+            updateOnSplash = true
 
         val banks = realm.where(Bank::class.java).count()
 

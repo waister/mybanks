@@ -1,11 +1,11 @@
 package com.duduapps.mybanks.adapter
 
 import android.content.Context
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import com.duduapps.mybanks.R
 import com.duduapps.mybanks.activity.AccountDetailsActivity
 import com.duduapps.mybanks.model.Account

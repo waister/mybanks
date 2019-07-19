@@ -13,4 +13,5 @@
     <color name="black">#000000</color>
 
     <color name="whiteOpaque">#CCFFFFFF</color>
+    <color name="colorDividerLight">#0DFFFFFF</color>
 </resources>
