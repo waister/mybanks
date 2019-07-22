@@ -42,7 +42,7 @@ const val ONE_DAY: Long = ONE_HOUR * 24
 const val FIVE_DAYS: Long = ONE_DAY * 5
 
 fun isLogged(): Boolean {
-    return Hawk.get(PREF_IDENTIFIER, "").isNotEmpty()
+    return Hawk.get(PREF_LOGGED, false)
 }
 
 fun Context.storeAppLink(): String = "https://play.google.com/store/apps/details?id=$packageName"
@@ -321,6 +321,7 @@ fun Realm?.saveAccounts(result: Result<String, FuelError>): Boolean {
                     }
                 }
 
+                Hawk.put(PREF_LOGGED, true)
             }
 
             return true

@@ -120,6 +120,7 @@ class LoginActivity : AppCompatActivity(), TextView.OnEditorActionListener {
         if (userCode == apiCode) {
 
             Hawk.put(PREF_IDENTIFIER, apiIdentifier)
+            Hawk.put(PREF_LOGGED, true)
 
             CustomApplication().updateFuelParams()
 

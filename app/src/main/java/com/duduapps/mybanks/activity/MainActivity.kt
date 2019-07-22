@@ -165,6 +165,7 @@ class MainActivity : AppCompatActivity() {
                 if (isLogged()) {
                     bt_login.visibility = View.GONE
                 } else {
+                    bt_login.visibility = View.VISIBLE
                     bt_login.setOnClickListener {
                         startActivityForResult(intentFor<LoginActivity>(), REQUEST_CODE_FORCE_REFRESH)
                     }
@@ -309,6 +310,17 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.action_remove_ads -> {
                 startActivity(intentFor<RemoveAdsActivity>())
+                true
+            }
+            R.id.action_share -> {
+                val subject = getString(R.string.share_subject)
+                val link = Hawk.get(PREF_SHARE_LINK, storeAppLink())
+                val body = getString(R.string.share_text, link)
+                share(body, subject)
+                true
+            }
+            R.id.action_rate -> {
+                browse(storeAppLink())
                 true
             }
             R.id.action_send_feedback -> {
