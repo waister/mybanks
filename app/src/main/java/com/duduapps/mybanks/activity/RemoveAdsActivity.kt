@@ -140,7 +140,7 @@ class RemoveAdsActivity : AppCompatActivity(), RewardedVideoAdListener {
         longToast(R.string.error_load_video)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
         onBackPressed()
         return super.onOptionsItemSelected(item)
     }

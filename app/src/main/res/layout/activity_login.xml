@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorPrimary"
@@ -15,81 +14,81 @@
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="@dimen/activity_vertical_margin"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:padding="@dimen/activity_vertical_margin">
 
             <TextView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:textColor="@color/white"
-                    android:textSize="24sp"
                     android:layout_marginTop="@dimen/activity_vertical_margin"
-                    android:text="@string/login_title"/>
+                    android:gravity="center"
+                    android:text="@string/login_title"
+                    android:textColor="@color/white"
+                    android:textSize="24sp" />
 
             <TextView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:textColor="@color/white"
-                    android:textSize="15sp"
                     android:layout_marginTop="25dp"
-                    android:text="@string/login_message"/>
+                    android:gravity="center"
+                    android:text="@string/login_message"
+                    android:textColor="@color/white"
+                    android:textSize="15sp" />
 
             <EditText
                     android:id="@+id/et_email"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:layout_marginTop="25dp"
                     android:layout_marginStart="4dp"
+                    android:layout_marginTop="25dp"
                     android:layout_marginEnd="4dp"
-                    android:textSize="18sp"
-                    android:textColor="@color/white"
                     android:background="@drawable/rounded_border_edittext"
+                    android:gravity="center"
                     android:hint="@string/write_your_email"
                     android:imeOptions="actionSend"
                     android:inputType="textEmailAddress"
-                    tools:ignore="Autofill"/>
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    tools:ignore="Autofill" />
 
-            <com.santalu.widget.MaskEditText
+            <com.santalu.maskedittext.MaskEditText
                     android:id="@+id/et_code"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:digits="0123456789"
-                    android:imeOptions="actionSend"
-                    android:inputType="numberDecimal"
-                    android:layout_marginTop="25dp"
                     android:layout_marginStart="4dp"
+                    android:layout_marginTop="25dp"
                     android:layout_marginEnd="4dp"
                     android:background="@drawable/rounded_border_edittext"
+                    android:digits="0123456789"
+                    android:gravity="center"
                     android:hint="@string/code_sent_to_email"
-                    android:textSize="20sp"
+                    android:imeOptions="actionSend"
+                    android:inputType="numberDecimal"
                     android:textColor="@color/white"
-                    app:met_mask="### ###"/>
+                    android:textSize="20sp"
+                    app:met_mask="### ###" />
 
             <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/bt_positive"
                     style="@style/ButtonWhite"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:gravity="center"
                     android:layout_marginTop="25dp"
-                    android:text="@string/receive_code"/>
+                    android:gravity="center"
+                    android:text="@string/receive_code" />
 
             <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/bt_negative"
                     style="@style/ButtonLinkWhite"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:textColor="@color/white"
                     android:layout_marginTop="10dp"
+                    android:gravity="center"
+                    android:text="@string/cancel"
                     android:textAllCaps="false"
-                    android:text="@string/cancel"/>
+                    android:textColor="@color/white" />
         </LinearLayout>
     </ScrollView>
 
-    <include layout="@layout/inc_progress_dark"/>
+    <include layout="@layout/inc_progress_dark" />
 </RelativeLayout>

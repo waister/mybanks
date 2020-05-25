@@ -113,7 +113,7 @@ class SendFeedbackActivity : AppCompatActivity() {
         Hawk.put(PREF_COMMENTS, et_comments.text.toString())
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
         onBackPressed()
         return super.onOptionsItemSelected(item)
     }

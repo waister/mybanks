@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.duduapps.mybanks.util
 
 import org.json.JSONArray

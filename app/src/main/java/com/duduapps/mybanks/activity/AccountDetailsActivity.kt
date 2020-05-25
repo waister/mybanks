@@ -116,8 +116,8 @@ class AccountDetailsActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return when (item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
             R.id.action_edit -> {
                 startActivity(intentFor<CreateAccountActivity>(PARAM_ID to account.id))
                 true

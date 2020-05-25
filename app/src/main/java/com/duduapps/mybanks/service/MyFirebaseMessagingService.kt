@@ -40,19 +40,17 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         const val TAG = "MyFCM"
     }
 
-    override fun onNewToken(token: String?) {
+    override fun onNewToken(token: String) {
         super.onNewToken(token)
 
-        if (token != null) {
-            Log.i(TAG, "New token: $token")
+        Log.i(TAG, "New token: $token")
 
-            Hawk.put(PREF_FCM_TOKEN, token)
+        Hawk.put(PREF_FCM_TOKEN, token)
 
-            val params = listOf(API_TOKEN to token)
+        val params = listOf(API_TOKEN to token)
 
-            API_ROUTE_IDENTIFY.httpGet(params).responseString { request, response, result ->
-                printFuelLog(request, response, result)
-            }
+        API_ROUTE_IDENTIFY.httpGet(params).responseString { request, response, result ->
+            printFuelLog(request, response, result)
         }
     }
 

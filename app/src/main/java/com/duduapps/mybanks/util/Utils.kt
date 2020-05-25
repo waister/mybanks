@@ -11,7 +11,6 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.webkit.URLUtil
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import com.duduapps.mybanks.BuildConfig
 import com.duduapps.mybanks.R
 import com.duduapps.mybanks.model.Account
@@ -20,16 +19,14 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.result.Result
-import com.google.android.gms.ads.AdListener
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.*
 import com.orhanobut.hawk.Hawk
 import io.realm.Realm
 import org.jetbrains.anko.dip
 import org.jetbrains.anko.find
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 const val PARAM_ID = "ParamId"
 const val PARAM_TYPE = "ParamType"
@@ -58,11 +55,15 @@ fun havePlan(): Boolean {
 }
 
 fun getAdRequest(): AdRequest? {
-    val adBuilder = AdRequest.Builder()
-    adBuilder.addTestDevice("B4118570F70F9787F3E6A3C043D16B92")
-    adBuilder.addTestDevice("3DD600467B203917CE779952D8023F26")
-    adBuilder.addTestDevice("C2C5A6EA376FDCAEC49F962CE9D39DAA")
-    return adBuilder.build()
+    val testDevices: MutableList<String> = ArrayList()
+    testDevices.add(AdRequest.DEVICE_ID_EMULATOR)
+
+    val requestConfiguration = RequestConfiguration.Builder()
+        .setTestDeviceIds(testDevices)
+        .build()
+    MobileAds.setRequestConfiguration(requestConfiguration)
+
+    return AdRequest.Builder().build()
 }
 
 fun Activity.loadAdBanner(adUnitId: String?, buttonsRoot: View? = null) {
@@ -145,7 +146,7 @@ fun canShowInterstitial(): Boolean {
 fun Context.copyToClipboard(text: String) {
     val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     val clip = ClipData.newPlainText(getString(R.string.app_name), text)
-    clipboard.primaryClip = clip
+    clipboard.setPrimaryClip(clip)
 }
 
 fun printFuelLog(request: Request, response: Response, result: Result<String, FuelError>) {
@@ -194,7 +195,12 @@ fun String?.getApiImage(): String {
     return ""
 }
 
-fun Context?.getThumbUrl(image: String?, width: Int = 220, height: Int = 0, quality: Int = 85): String {
+fun Context?.getThumbUrl(
+    image: String?,
+    width: Int = 220,
+    height: Int = 0,
+    quality: Int = 85
+): String {
     if (this != null && image != null && !image.contains("http") && image.contains("/uploads/")) {
         return APP_HOST + "thumb?src=$image&w=$width&h=$height&q=$quality"
     }
@@ -253,7 +259,10 @@ fun Realm?.saveBanks(result: Result<String, FuelError>): Boolean {
             Hawk.put(PREF_ADMOB_INTERSTITIAL_ID, apiObj.getStringVal(API_ADMOB_INTERSTITIAL_ID))
             Hawk.put(PREF_ADMOB_REMOVE_ADS, apiObj.getStringVal(API_ADMOB_REMOVE_ADS))
             Hawk.put(PREF_PLAN_VIDEO_DURATION, apiObj.getLongVal(API_PLAN_VIDEO_DURATION))
-            Hawk.put(PREF_INTERSTITIAL_MIN_INTERVAL, apiObj.getLongVal(API_INTERSTITIAL_MIN_INTERVAL))
+            Hawk.put(
+                PREF_INTERSTITIAL_MIN_INTERVAL,
+                apiObj.getLongVal(API_INTERSTITIAL_MIN_INTERVAL)
+            )
 
             val banksArr = apiObj.getJSONArrayVal(API_BANKS)
 
@@ -331,10 +340,6 @@ fun Realm?.saveAccounts(result: Result<String, FuelError>): Boolean {
     return false
 }
 
-fun ScrollView?.focusOnView(view: View) {
-    this?.post { this.scrollTo(0, view.bottom) }
-}
-
 fun View.hideKeyboard() {
     val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.hideSoftInputFromWindow(windowToken, 0)
@@ -364,6 +369,7 @@ fun Realm.unsentAccountsCount(): Long {
         .count()
 }
 
+@Suppress("unused")
 fun encode64(text: String): String {
     val data = text.toByteArray(Charsets.UTF_8)
     return Base64.encodeToString(data, Base64.DEFAULT)
