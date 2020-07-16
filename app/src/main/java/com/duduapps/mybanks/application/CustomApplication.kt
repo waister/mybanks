@@ -19,7 +19,8 @@ class CustomApplication : Application() {
         Realm.setDefaultConfiguration(
             RealmConfiguration.Builder()
                 .deleteRealmIfMigrationNeeded()
-                .build())
+                .build()
+        )
 
         FuelManager.instance.basePath = API_ROOT
 

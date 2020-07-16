@@ -8,10 +8,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.duduapps.mybanks.R
 import com.duduapps.mybanks.model.Account
 import com.duduapps.mybanks.util.*
+import com.google.android.gms.ads.AdSize
 import com.orhanobut.hawk.Hawk
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_account_details.*
-import kotlinx.android.synthetic.main.inc_toolbar.*
 import org.jetbrains.anko.*
 
 class AccountDetailsActivity : AppCompatActivity() {
@@ -23,7 +23,6 @@ class AccountDetailsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_account_details)
-        setSupportActionBar(toolbar)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -88,7 +87,8 @@ class AccountDetailsActivity : AppCompatActivity() {
         tv_holder.setOnClickListener { copyItem(account.holder) }
         tv_document.setOnClickListener { copyItem(account.document) }
 
-        loadAdBanner(Hawk.get(PREF_ADMOB_AD_MAIN_ID, ""), ll_buttons)
+        val adMobId = Hawk.get(PREF_ADMOB_AD_MAIN_ID, "")
+        loadAdBanner(ll_banner, adMobId, AdSize.MEDIUM_RECTANGLE)
     }
 
     private fun copyItem(text: String) {
@@ -124,8 +124,7 @@ class AccountDetailsActivity : AppCompatActivity() {
             }
             R.id.action_delete -> {
                 alert(R.string.confirm_deleted_account, R.string.confirmation) {
-                    positiveButton(R.string.confirm) {}
-                    negativeButton(R.string.cancel) {
+                    positiveButton(R.string.confirm) {
                         realm.executeTransaction {
                             account.updated = currentTimestamp()
                             account.deleted = currentTimestamp()
@@ -138,6 +137,7 @@ class AccountDetailsActivity : AppCompatActivity() {
                             finish()
                         }
                     }
+                    negativeButton(R.string.cancel) {}
                 }.show()
                 true
             }

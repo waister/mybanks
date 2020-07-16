@@ -1,13 +1,16 @@
 package com.duduapps.mybanks.activity
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.duduapps.mybanks.BuildConfig
 import com.duduapps.mybanks.R
 import com.duduapps.mybanks.util.*
+import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.reward.RewardItem
 import com.google.android.gms.ads.reward.RewardedVideoAd
@@ -15,9 +18,7 @@ import com.google.android.gms.ads.reward.RewardedVideoAdListener
 import com.orhanobut.hawk.Hawk
 import kotlinx.android.synthetic.main.activity_remove_ads.*
 import kotlinx.android.synthetic.main.inc_progress_dark.*
-import org.jetbrains.anko.alert
 import org.jetbrains.anko.longToast
-import org.jetbrains.anko.okButton
 
 class RemoveAdsActivity : AppCompatActivity(), RewardedVideoAdListener {
 
@@ -37,10 +38,10 @@ class RemoveAdsActivity : AppCompatActivity(), RewardedVideoAdListener {
         supportActionBar?.setDisplayShowTitleEnabled(false)
         supportActionBar?.elevation = 0f
 
-        if (BuildConfig.DEBUG)
-            admobRemoveAds = "ca-app-pub-3940256099942544/5224354917"
+        admobRemoveAds = if (BuildConfig.DEBUG)
+            "ca-app-pub-3940256099942544/5224354917"
         else
-            admobRemoveAds = Hawk.get(PREF_ADMOB_REMOVE_ADS, "")
+            Hawk.get(PREF_ADMOB_REMOVE_ADS, "")
 
         if (admobRemoveAds.isEmpty()) {
 
@@ -57,10 +58,7 @@ class RemoveAdsActivity : AppCompatActivity(), RewardedVideoAdListener {
             bt_watch.setOnClickListener {
                 rl_progress?.visibility = View.VISIBLE
 
-                val adRequest = getAdRequest()
-
-                if (adRequest != null)
-                    mRewardedVideoAd.loadAd(admobRemoveAds, adRequest)
+                mRewardedVideoAd.loadAd(admobRemoveAds, AdRequest.Builder().build())
             }
 
             checkPlan()
@@ -121,10 +119,18 @@ class RemoveAdsActivity : AppCompatActivity(), RewardedVideoAdListener {
         val days = checkPlan()
 
         if (days > 0) {
-            val title = getString(R.string.tank_you)
-            val body = getString(R.string.watch_to_by_tanks, days)
-
-            alert (body, title) { okButton { finish() } }.show()
+            AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setTitle(R.string.tank_you)
+                .setMessage(getString(R.string.watch_to_by_tanks, days))
+                .setPositiveButton(R.string.close) { _, _ ->
+                    val intent = Intent(this, SplashActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    startActivity(intent)
+                    finish()
+                }
+                .create()
+                .show()
         }
     }
 

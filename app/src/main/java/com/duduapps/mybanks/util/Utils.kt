@@ -6,7 +6,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.*
 import android.util.Base64
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.webkit.URLUtil
@@ -19,11 +18,12 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.result.Result
-import com.google.android.gms.ads.*
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.InterstitialAd
 import com.orhanobut.hawk.Hawk
 import io.realm.Realm
-import org.jetbrains.anko.dip
-import org.jetbrains.anko.find
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -54,93 +54,42 @@ fun havePlan(): Boolean {
     return false
 }
 
-fun getAdRequest(): AdRequest? {
-    val testDevices: MutableList<String> = ArrayList()
-    testDevices.add(AdRequest.DEVICE_ID_EMULATOR)
+fun Activity?.createInterstitialAd(): InterstitialAd? {
+    var interstitialAd: InterstitialAd? = null
 
-    val requestConfiguration = RequestConfiguration.Builder()
-        .setTestDeviceIds(testDevices)
-        .build()
-    MobileAds.setRequestConfiguration(requestConfiguration)
-
-    return AdRequest.Builder().build()
-}
-
-fun Activity.loadAdBanner(adUnitId: String?, buttonsRoot: View? = null) {
-    val rootView: LinearLayout? = find(R.id.ll_banner)
-
-    if (rootView != null && adUnitId != null && adUnitId.isNotEmpty()) {
-        rootView.removeAllViews()
-
-        if (!havePlan()) {
-            val adView = AdView(this)
-            adView.adSize = AdSize.SMART_BANNER
-            adView.adUnitId = adUnitId
-
-            val params = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-
-            rootView.addView(adView, params)
-
-            adView.loadAd(getAdRequest())
-
-            if (buttonsRoot != null) {
-                adView.adListener = object : AdListener() {
-                    override fun onAdLoaded() {
-                        super.onAdLoaded()
-
-                        buttonsRoot.setPadding(0, 0, 0, dip(50))
-                    }
-
-                    override fun onAdClosed() {
-                        super.onAdClosed()
-
-                        buttonsRoot.setPadding(0, 0, 0, 0)
-                    }
-
-                    override fun onAdFailedToLoad(p0: Int) {
-                        super.onAdFailedToLoad(p0)
-
-                        buttonsRoot.setPadding(0, 0, 0, 0)
-                    }
-                }
-            }
-        }
-    }
-}
-
-fun canShowInterstitial(): Boolean {
-    var response = false
-
-    Log.w("CAN_SHOW_INTERSTITIAL", "User have valid billing plan: ${havePlan()}")
-
-    if (!havePlan()) {
-        val lastInterstitialShow = Hawk.get(PREF_LAST_INTERSTITIAL_SHOW, 0L)
-
-        Log.w("CAN_SHOW_INTERSTITIAL", "Last show interstitial in millis $lastInterstitialShow")
-
-        if (lastInterstitialShow == 0L) {
-            response = true
+    if (this != null && !havePlan()) {
+        val adUnitId = if (BuildConfig.DEBUG) {
+            "ca-app-pub-3940256099942544/1033173712"
         } else {
-            val interval = if (lastInterstitialShow > 0)
-                System.currentTimeMillis() - lastInterstitialShow
-            else
-                ONE_HOUR
+            Hawk.get(PREF_ADMOB_INTERSTITIAL_ID, "")
+        }
 
-            val minInterval = Hawk.get(PREF_INTERSTITIAL_MIN_INTERVAL, ONE_HOUR)
-
-            response = interval >= minInterval
-
-            Log.w("CAN_SHOW_INTERSTITIAL", "API min interval in millis $minInterval")
-            Log.w("CAN_SHOW_INTERSTITIAL", "Interval between last show and now: $interval")
+        if (adUnitId.isNotEmpty()) {
+            interstitialAd = InterstitialAd(this)
+            interstitialAd.adUnitId = adUnitId
         }
     }
 
-    Log.w("CAN_SHOW_INTERSTITIAL", "Response can show interstitial: $response")
+    return interstitialAd
+}
 
-    return response
+fun Activity?.loadAdBanner(root: LinearLayout?, adUnitId: String, adSize: AdSize?) {
+    if (this == null || root == null || havePlan()) return
+
+    val testAdUnitId = "ca-app-pub-3940256099942544/6300978111"
+
+    val adView = AdView(this)
+    adView.adSize = adSize ?: AdSize.SMART_BANNER
+    adView.adUnitId = if (BuildConfig.DEBUG) testAdUnitId else adUnitId
+
+    root.addView(
+        adView, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+    )
+
+    adView.loadAd(AdRequest.Builder().build())
 }
 
 fun Context.copyToClipboard(text: String) {
@@ -259,10 +208,6 @@ fun Realm?.saveBanks(result: Result<String, FuelError>): Boolean {
             Hawk.put(PREF_ADMOB_INTERSTITIAL_ID, apiObj.getStringVal(API_ADMOB_INTERSTITIAL_ID))
             Hawk.put(PREF_ADMOB_REMOVE_ADS, apiObj.getStringVal(API_ADMOB_REMOVE_ADS))
             Hawk.put(PREF_PLAN_VIDEO_DURATION, apiObj.getLongVal(API_PLAN_VIDEO_DURATION))
-            Hawk.put(
-                PREF_INTERSTITIAL_MIN_INTERVAL,
-                apiObj.getLongVal(API_INTERSTITIAL_MIN_INTERVAL)
-            )
 
             val banksArr = apiObj.getJSONArrayVal(API_BANKS)
 

@@ -69,47 +69,48 @@ class LoginActivity : AppCompatActivity(), TextView.OnEditorActionListener {
         val params = listOf(API_EMAIL to userEmail)
         val t = 1000 * 60
 
-        API_ROUTE_EMAIL_SEND_CODE.httpPost(params).timeout(t).timeoutRead(t).responseString { request, response, result ->
-            printFuelLog(request, response, result)
+        API_ROUTE_EMAIL_SEND_CODE.httpPost(params).timeout(t).timeoutRead(t)
+            .responseString { request, response, result ->
+                printFuelLog(request, response, result)
 
-            rl_progress.visibility = View.GONE
+                rl_progress.visibility = View.GONE
 
-            val (data, error) = result
-            var success = false
-            var message = ""
+                val (data, error) = result
+                var success = false
+                var message = ""
 
-            if (error == null) {
-                val apiObj = data.getValidJSONObject()
+                if (error == null) {
+                    val apiObj = data.getValidJSONObject()
 
-                success = apiObj.getBooleanVal(API_SUCCESS)
-                message = apiObj.getStringVal(API_MESSAGE)
-                apiIdentifier = apiObj.getStringVal(API_IDENTIFIER)
-                apiCode = decode64(apiObj.getStringVal(API_VERIFIER))
+                    success = apiObj.getBooleanVal(API_SUCCESS)
+                    message = apiObj.getStringVal(API_MESSAGE)
+                    apiIdentifier = apiObj.getStringVal(API_IDENTIFIER)
+                    apiCode = decode64(apiObj.getStringVal(API_VERIFIER))
 
-                if (success) {
+                    if (success) {
 
-                    alert(message, getString(R.string.success)) {
-                        okButton {
-                            et_code.requestFocus()
-                            et_code.showKeyboard()
-                        }
-                    }.show()
+                        alert(message, getString(R.string.success)) {
+                            okButton {
+                                et_code.requestFocus()
+                                et_code.showKeyboard()
+                            }
+                        }.show()
 
-                    et_email.visibility = View.GONE
-                    et_code.visibility = View.VISIBLE
+                        et_email.visibility = View.GONE
+                        et_code.visibility = View.VISIBLE
 
-                    bt_positive.setText(R.string.confirm_code)
+                        bt_positive.setText(R.string.confirm_code)
 
+                    }
+                }
+
+                if (!success) {
+                    if (message.isEmpty())
+                        message = getString(R.string.error_unknown)
+
+                    alert(message, getString(R.string.ops)) { okButton {} }.show()
                 }
             }
-
-            if (!success) {
-                if (message.isEmpty())
-                    message = getString(R.string.error_unknown)
-
-                alert(message, getString(R.string.ops)) { okButton {} }.show()
-            }
-        }
     }
 
     private fun confirmCode() {

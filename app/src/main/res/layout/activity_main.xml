@@ -1,26 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".activity.MainActivity">
 
-    <include layout="@layout/inc_toolbar"/>
-
     <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            tools:showIn="@layout/activity_main"
-            tools:context=".activity.MainActivity">
+            android:layout_above="@+id/ll_banner">
 
         <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_accounts"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_above="@+id/ll_banner"/>
+                android:layout_above="@+id/ll_banner" />
 
         <LinearLayout
                 android:id="@+id/ll_empty"
@@ -35,51 +30,52 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/fab_margin"
-                    android:textSize="15sp"
                     android:gravity="center"
-                    android:text="@string/no_accounts_found"/>
+                    android:text="@string/no_accounts_found"
+                    android:textSize="15sp" />
 
             <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/bt_add_account"
                     style="@style/ButtonLink"
                     android:layout_width="wrap_content"
-                    android:text="@string/add_first_account"/>
+                    android:text="@string/add_first_account" />
 
             <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/bt_login"
                     style="@style/ButtonLink"
                     android:layout_width="wrap_content"
-                    android:text="@string/active_auto_backup"/>
+                    android:text="@string/active_auto_backup" />
         </LinearLayout>
 
-        <LinearLayout
-                android:id="@+id/ll_banner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:orientation="vertical"/>
-
-        <include layout="@layout/inc_progress_light"/>
+        <include layout="@layout/inc_progress_light" />
     </RelativeLayout>
 
     <LinearLayout
             android:id="@+id/ll_buttons"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:orientation="vertical"
-            android:gravity="center">
+            android:layout_above="@+id/ll_banner"
+            android:layout_alignParentEnd="true"
+            android:gravity="center"
+            android:orientation="vertical">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fab_copy_all"
                 style="@style/FloatingActionButton"
                 android:src="@drawable/ic_content_copy"
-                app:fabSize="mini"/>
+                app:fabSize="mini" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fab_share_all"
                 style="@style/FloatingActionButton"
-                android:src="@drawable/ic_share"/>
+                android:src="@drawable/ic_share" />
     </LinearLayout>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <LinearLayout
+            android:id="@+id/ll_banner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="vertical" />
+
+</RelativeLayout>

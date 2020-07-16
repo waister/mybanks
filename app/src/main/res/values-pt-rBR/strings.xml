@@ -50,6 +50,7 @@
     <string name="sending">Enviando…</string>
     <string name="ops">Ops!</string>
     <string name="ok">OK</string>
+    <string name="close">Fechar</string>
     <string name="congratulations">Parabéns!</string>
     <string name="success">Sucesso!</string>
     <string name="success_account_added">Conta cadastrada com sucesso.</string>
@@ -114,4 +115,5 @@
     <string name="error_connection">Ops, ocorreu um erro na comunicação com o servidor. Verifique sua conexão e tente novamente.</string>
     <string name="share_subject">Conheça o app Meus Bancos</string>
     <string name="share_text">Organize de forma simples suas contas em bancos, e ainda copie-as facilmente, tudo na palma da sua mão:\n\n%1$s</string>
+    <string name="tip_touch_values">DICA: Toque nas informações para copiar os valores.</string>
 </resources>

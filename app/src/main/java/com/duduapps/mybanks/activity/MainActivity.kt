@@ -5,7 +5,6 @@ import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -22,7 +21,8 @@ import com.duduapps.mybanks.model.Account
 import com.duduapps.mybanks.util.*
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
-import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.InterstitialAd
 import com.google.android.gms.ads.MobileAds
 import com.orhanobut.hawk.Hawk
@@ -30,7 +30,6 @@ import io.realm.Case
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.inc_progress_dark.*
-import kotlinx.android.synthetic.main.inc_toolbar.*
 import org.jetbrains.anko.*
 
 class MainActivity : AppCompatActivity() {
@@ -47,9 +46,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
 
-        MobileAds.initialize(this, Hawk.get(PREF_ADMOB_ID, ""))
+        MobileAds.initialize(this) {}
 
         fab_copy_all.setOnClickListener {
             val text = getShareText()
@@ -71,8 +69,11 @@ class MainActivity : AppCompatActivity() {
             showInterstitialAd()
         }
 
-        loadAdBanner(Hawk.get(PREF_ADMOB_AD_MAIN_ID, ""), ll_buttons)
-        loadInterstitialAd()
+        val adMobId = Hawk.get(PREF_ADMOB_AD_MAIN_ID, "")
+        loadAdBanner(ll_banner, adMobId, AdSize.SMART_BANNER)
+
+        interstitialAd = createInterstitialAd()
+        interstitialAd?.loadAd(AdRequest.Builder().build())
 
         initViews()
         apiUpdateBanks()
@@ -167,7 +168,10 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     bt_login.visibility = View.VISIBLE
                     bt_login.setOnClickListener {
-                        startActivityForResult(intentFor<LoginActivity>(), REQUEST_CODE_FORCE_REFRESH)
+                        startActivityForResult(
+                            intentFor<LoginActivity>(),
+                            REQUEST_CODE_FORCE_REFRESH
+                        )
                     }
                 }
 
@@ -203,7 +207,11 @@ class MainActivity : AppCompatActivity() {
                 if (fullText.isNotEmpty())
                     fullText += "\n--\n"
 
-                fullText += getString(R.string.label_bank, account.bank!!.name, account.bank!!.code) + "\n"
+                fullText += getString(
+                    R.string.label_bank,
+                    account.bank!!.name,
+                    account.bank!!.code
+                ) + "\n"
                 fullText += getString(R.string.label_agency, account.agency) + "\n"
                 fullText += getString(R.string.label_account, account.account) + "\n"
                 if (account.operation.isNotEmpty())
@@ -236,7 +244,10 @@ class MainActivity : AppCompatActivity() {
                         val versionMin = apiObj.getIntVal(API_VERSION_MIN)
 
                         if (BuildConfig.VERSION_CODE < versionMin) {
-                            alert(getString(R.string.update_needed), getString(R.string.updated_title)) {
+                            alert(
+                                getString(R.string.update_needed),
+                                getString(R.string.updated_title)
+                            ) {
                                 positiveButton(R.string.updated_positive) {
                                     browse(storeAppLink())
                                 }
@@ -244,7 +255,10 @@ class MainActivity : AppCompatActivity() {
                                 onCancelled { finish() }
                             }.show()
                         } else if (BuildConfig.VERSION_CODE < versionLast) {
-                            alert(getString(R.string.update_available), getString(R.string.updated_title)) {
+                            alert(
+                                getString(R.string.update_available),
+                                getString(R.string.updated_title)
+                            ) {
                                 positiveButton(R.string.updated_positive) {
                                     browse(storeAppLink())
                                 }
@@ -371,30 +385,31 @@ class MainActivity : AppCompatActivity() {
                 API_DELETED to account.deleted
             )
 
-            API_ROUTE_ACCOUNT_REGISTER.httpPost(params).responseString { request, response, result ->
-                printFuelLog(request, response, result)
+            API_ROUTE_ACCOUNT_REGISTER.httpPost(params)
+                .responseString { request, response, result ->
+                    printFuelLog(request, response, result)
 
-                val success = realm.saveAccounts(result)
+                    val success = realm.saveAccounts(result)
 
-                if (success) {
+                    if (success) {
 
-                    realm.executeTransaction {
-                        account.deleteFromRealm()
-                    }
+                        realm.executeTransaction {
+                            account.deleteFromRealm()
+                        }
 
-                    renderData()
+                        renderData()
 
-                    if (realm.unsentAccountsCount() > 0)
-                        apiSyncAccounts()
-                    else
+                        if (realm.unsentAccountsCount() > 0)
+                            apiSyncAccounts()
+                        else
+                            apiUpdateAccounts()
+
+                    } else {
+
                         apiUpdateAccounts()
 
-                } else {
-
-                    apiUpdateAccounts()
-
+                    }
                 }
-            }
 
         } else {
 
@@ -420,52 +435,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadInterstitialAd() {
-        if (!havePlan()) {
-            interstitialAd = InterstitialAd(this)
-
-            if (BuildConfig.DEBUG) {
-                interstitialAd?.adUnitId = "ca-app-pub-3940256099942544/1033173712"
-            } else {
-                interstitialAd?.adUnitId = Hawk.get(PREF_ADMOB_INTERSTITIAL_ID, "")
-            }
-
-            interstitialAd?.loadAd(getAdRequest())
-        }
-    }
-
     private fun showInterstitialAd() {
-        if (canShowInterstitial() && interstitialAd != null && interstitialAd!!.isLoaded) {
-            val tag = "SHOW_INTERSTITIAL"
-
+        if (!havePlan() && interstitialAd != null && interstitialAd!!.isLoaded) {
             interstitialAd!!.show()
-            interstitialAd!!.adListener = object: AdListener() {
-                override fun onAdLoaded() {
-                    Log.w(tag, "onAdLoaded()")
-                }
-
-                override fun onAdFailedToLoad(errorCode: Int) {
-                    Log.w(tag, "onAdFailedToLoad() error code: $errorCode")
-                }
-
-                override fun onAdOpened() {
-                    Log.w(tag, "onAdOpened()")
-
-                    Hawk.put(PREF_LAST_INTERSTITIAL_SHOW, System.currentTimeMillis())
-                }
-
-                override fun onAdClicked() {
-                    Log.w(tag, "onAdClicked()")
-                }
-
-                override fun onAdLeftApplication() {
-                    Log.w(tag, "onAdLeftApplication()")
-                }
-
-                override fun onAdClosed() {
-                    Log.w(tag, "onAdClosed()")
-                }
-            }
         }
     }
 
