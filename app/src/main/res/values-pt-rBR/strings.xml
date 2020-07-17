@@ -29,6 +29,10 @@
     <string name="data_copied">Dados copiados</string>
     <string name="account_copied">Conta copiada</string>
     <string name="accounts_copied">Contas copiadas</string>
+    <string name="copy_account">Copiar dados da conta</string>
+    <string name="copy_accounts">Copiar dados das contas</string>
+    <string name="share_account">Compartilhar dados da conta</string>
+    <string name="share_accounts">Compartilhar dados das contas</string>
     <string name="my_bank_account">Minha conta bancária</string>
     <string name="my_bank_accounts">Minhas contas bancárias</string>
     <string name="updated_title">Atualização disponível</string>

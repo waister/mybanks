@@ -17,26 +17,26 @@
     <item android:id="@+id/action_login"
           android:title="@string/active_auto_backup"
           android:icon="@drawable/ic_cloud_upload"
-          app:showAsAction="ifRoom"/>
+          app:showAsAction="never"/>
 
     <item android:id="@+id/action_remove_ads"
           android:title="@string/remove_adas"
           android:icon="@drawable/ic_tag_remove"
-          app:showAsAction="ifRoom"/>
+          app:showAsAction="never"/>
 
     <item android:id="@+id/action_share"
           android:title="@string/share_app"
           android:icon="@drawable/ic_share_variant"
-          app:showAsAction="ifRoom"/>
+          app:showAsAction="never"/>
 
     <item android:id="@+id/action_rate"
           android:title="@string/rate_on_store"
           android:icon="@drawable/ic_star"
-          app:showAsAction="ifRoom"/>
+          app:showAsAction="never"/>
 
     <item android:id="@+id/action_send_feedback"
           android:title="@string/send_feedback"
           android:icon="@drawable/ic_voice"
-          app:showAsAction="ifRoom"/>
+          app:showAsAction="never"/>
 
 </menu>

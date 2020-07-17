@@ -29,6 +29,10 @@
     <string name="data_copied">Data copied</string>
     <string name="account_copied">Account copied</string>
     <string name="accounts_copied">Copied accounts</string>
+    <string name="copy_account">Copy account data</string>
+    <string name="copy_accounts">Copy accounts data</string>
+    <string name="share_account">Share account data</string>
+    <string name="share_accounts">Share accounts data</string>
     <string name="my_bank_account">My bank account</string>
     <string name="my_bank_accounts">My bank accounts</string>
     <string name="updated_title">Update Available</string>

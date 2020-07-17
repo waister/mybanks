@@ -11,8 +11,8 @@ android {
         applicationId "com.duduapps.mybanks"
         minSdkVersion 19
         targetSdkVersion 30
-        versionCode 4
-        versionName "1.0.3"
+        versionCode 5
+        versionName "1.0.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
         buildConfigField 'String', 'API_APP_NAME', '"mybanks"'

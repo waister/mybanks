@@ -28,6 +28,8 @@ class AccountDetailsActivity : AppCompatActivity() {
 
         accountId = intent.getLongExtra(PARAM_ID, 0L)
 
+        val adMobId = Hawk.get(PREF_ADMOB_AD_MAIN_ID, "")
+        loadAdBanner(ll_banner, adMobId, AdSize.MEDIUM_RECTANGLE)
     }
 
     override fun onResume() {
@@ -46,12 +48,12 @@ class AccountDetailsActivity : AppCompatActivity() {
 
             renderData()
 
-            fab_copy.setOnClickListener {
+            bt_copy.setOnClickListener {
                 copyToClipboard(getShareText())
                 toast(R.string.account_copied)
             }
 
-            fab_share.setOnClickListener {
+            bt_share.setOnClickListener {
                 share(getShareText(), getString(R.string.my_bank_account))
             }
 
@@ -86,9 +88,6 @@ class AccountDetailsActivity : AppCompatActivity() {
         tv_type.setOnClickListener { copyItem(account.type) }
         tv_holder.setOnClickListener { copyItem(account.holder) }
         tv_document.setOnClickListener { copyItem(account.document) }
-
-        val adMobId = Hawk.get(PREF_ADMOB_AD_MAIN_ID, "")
-        loadAdBanner(ll_banner, adMobId, AdSize.MEDIUM_RECTANGLE)
     }
 
     private fun copyItem(text: String) {

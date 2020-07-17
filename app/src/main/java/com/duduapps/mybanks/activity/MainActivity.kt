@@ -49,6 +49,12 @@ class MainActivity : AppCompatActivity() {
 
         MobileAds.initialize(this) {}
 
+        val adMobId = Hawk.get(PREF_ADMOB_AD_MAIN_ID, "")
+        loadAdBanner(ll_banner, adMobId, AdSize.SMART_BANNER)
+
+        interstitialAd = createInterstitialAd()
+        interstitialAd?.loadAd(AdRequest.Builder().build())
+
         fab_copy_all.setOnClickListener {
             val text = getShareText()
 
@@ -57,7 +63,7 @@ class MainActivity : AppCompatActivity() {
                 toast(R.string.accounts_copied)
             }
 
-            showInterstitialAd()
+            interstitialAd?.show()
         }
 
         fab_share_all.setOnClickListener {
@@ -66,14 +72,8 @@ class MainActivity : AppCompatActivity() {
             if (text.isNotEmpty())
                 share(getShareText(), getString(R.string.my_bank_accounts))
 
-            showInterstitialAd()
+            interstitialAd?.show()
         }
-
-        val adMobId = Hawk.get(PREF_ADMOB_AD_MAIN_ID, "")
-        loadAdBanner(ll_banner, adMobId, AdSize.SMART_BANNER)
-
-        interstitialAd = createInterstitialAd()
-        interstitialAd?.loadAd(AdRequest.Builder().build())
 
         initViews()
         apiUpdateBanks()
@@ -315,7 +315,7 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.action_add_account -> {
                 startActivity(intentFor<CreateAccountActivity>())
-                showInterstitialAd()
+                interstitialAd?.show()
                 true
             }
             R.id.action_login -> {
@@ -432,12 +432,6 @@ class MainActivity : AppCompatActivity() {
             }
         } else {
             rl_progress.visibility = View.GONE
-        }
-    }
-
-    private fun showInterstitialAd() {
-        if (!havePlan() && interstitialAd != null && interstitialAd!!.isLoaded) {
-            interstitialAd!!.show()
         }
     }
 

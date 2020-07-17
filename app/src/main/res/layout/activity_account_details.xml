@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -9,7 +8,7 @@
     <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/ll_buttons">
+            android:layout_above="@+id/ll_banner">
 
         <LinearLayout
                 android:layout_width="match_parent"
@@ -17,6 +16,16 @@
                 android:orientation="vertical"
                 android:paddingTop="@dimen/activity_vertical_margin"
                 android:paddingBottom="@dimen/activity_vertical_margin">
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/activity_vertical_margin"
+                    android:layout_marginRight="@dimen/activity_vertical_margin"
+                    android:layout_marginBottom="8dp"
+                    android:gravity="center"
+                    android:text="@string/tip_touch_values"
+                    android:textSize="12sp" />
 
             <TextView
                     android:id="@+id/tv_bank_name"
@@ -53,42 +62,33 @@
                     style="@style/DetailsField"
                     tools:text="Document: 123.456.789-12" />
 
-            <TextView
-                    android:layout_width="match_parent"
+            <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/bt_copy"
+                    style="@style/ButtonLink"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/activity_vertical_margin"
-                    android:gravity="center"
-                    android:text="@string/tip_touch_values" />
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="8dp"
+                    android:drawableStart="@drawable/ic_content_copy_blue"
+                    android:drawablePadding="8dp"
+                    android:text="@string/copy_account" />
 
+            <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/bt_share"
+                    style="@style/ButtonLink"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:drawableStart="@drawable/ic_share_blue"
+                    android:drawablePadding="8dp"
+                    android:text="@string/share_account" />
         </LinearLayout>
     </ScrollView>
-
-    <LinearLayout
-            android:id="@+id/ll_buttons"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/ll_banner"
-            android:layout_alignParentEnd="true"
-            android:gravity="center"
-            android:orientation="vertical">
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/fab_copy"
-                style="@style/FloatingActionButton"
-                android:src="@drawable/ic_content_copy"
-                app:fabSize="mini" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/fab_share"
-                style="@style/FloatingActionButton"
-                android:src="@drawable/ic_share" />
-    </LinearLayout>
 
     <LinearLayout
             android:id="@+id/ll_banner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="@dimen/activity_vertical_margin"
             android:orientation="vertical" />
 </RelativeLayout>

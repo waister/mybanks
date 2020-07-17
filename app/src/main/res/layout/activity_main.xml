@@ -62,12 +62,14 @@
         <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fab_copy_all"
                 style="@style/FloatingActionButton"
+                android:contentDescription="@string/copy_accounts"
                 android:src="@drawable/ic_content_copy"
                 app:fabSize="mini" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fab_share_all"
                 style="@style/FloatingActionButton"
+                android:contentDescription="@string/share_accounts"
                 android:src="@drawable/ic_share" />
     </LinearLayout>
 
