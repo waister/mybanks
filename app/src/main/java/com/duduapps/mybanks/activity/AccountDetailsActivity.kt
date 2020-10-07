@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.duduapps.mybanks.R
 import com.duduapps.mybanks.model.Account
@@ -66,28 +67,27 @@ class AccountDetailsActivity : AppCompatActivity() {
     }
 
     private fun renderData() {
-        tv_bank_name.text = getString(R.string.label_bank, account.bank!!.name, account.bank!!.code)
-        tv_agency.text = getString(R.string.label_agency, account.agency)
-        tv_account.text = getString(R.string.label_account, account.account)
-        tv_operation.text = getString(R.string.label_account, account.account)
-        tv_type.text = getString(R.string.label_type, account.type)
-        tv_holder.text = getString(R.string.label_holder, account.holder)
+        tv_pix_code.printLine(getString(R.string.label_pix_code, account.pixCode), account.pixCode)
+        tv_bank_name.printLine(getString(R.string.label_bank, account.bankName()), account.bank!!.code)
+        tv_agency.printLine(getString(R.string.label_agency, account.agency), account.agency)
+        tv_account.printLine(getString(R.string.label_account, account.account), account.account)
+        tv_operation.printLine(getString(R.string.label_account, account.operation), account.operation)
+        tv_type.printLine(getString(R.string.label_type, account.type), account.type)
+        tv_holder.printLine(getString(R.string.label_holder, account.holder), account.holder)
 
         if (account.legalAccount)
-            tv_document.text = getString(R.string.label_cnpj, account.document)
+            tv_document.printLine(getString(R.string.label_cnpj, account.document), account.document)
         else
-            tv_document.text = getString(R.string.label_cpf, account.document)
+            tv_document.printLine(getString(R.string.label_cpf, account.document), account.document)
+    }
 
-        if (account.operation.isEmpty())
-            tv_operation.visibility = View.GONE
-
-        tv_bank_name.setOnClickListener { copyItem(account.bank!!.code) }
-        tv_agency.setOnClickListener { copyItem(account.agency) }
-        tv_account.setOnClickListener { copyItem(account.account) }
-        tv_operation.setOnClickListener { copyItem(account.operation) }
-        tv_type.setOnClickListener { copyItem(account.type) }
-        tv_holder.setOnClickListener { copyItem(account.holder) }
-        tv_document.setOnClickListener { copyItem(account.document) }
+    private fun TextView.printLine(label: String, value: String?) {
+        if (value != null && value.isNotEmpty()) {
+            this.text = label
+            this.setOnClickListener { copyItem(value) }
+        } else {
+            this.visibility = View.GONE
+        }
     }
 
     private fun copyItem(text: String) {
@@ -98,7 +98,8 @@ class AccountDetailsActivity : AppCompatActivity() {
     private fun getShareText(): String {
         var fullText = ""
 
-        fullText += getString(R.string.label_bank, account.bank!!.name, account.bank!!.code) + "\n"
+        fullText += getString(R.string.label_pix_code, account.pixCode) + "\n"
+        fullText += getString(R.string.label_bank, account.bankName()) + "\n"
         fullText += getString(R.string.label_agency, account.agency) + "\n"
         fullText += getString(R.string.label_account, account.account) + "\n"
         if (account.operation.isNotEmpty())

@@ -6,6 +6,7 @@ import io.realm.annotations.PrimaryKey
 open class Account : RealmObject() {
     @PrimaryKey
     var id: Long = 0
+    var pixCode: String = ""
     var bankId: Int = 0
     var label: String = ""
     var agency: String = ""
@@ -20,4 +21,8 @@ open class Account : RealmObject() {
     var deleted: String? = null
     var synced: Boolean = false
     var bank: Bank? = null
+
+    fun bankName(): String {
+        return "${this.bank!!.name} (${this.bank!!.code})"
+    }
 }

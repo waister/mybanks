@@ -121,6 +121,7 @@ class CreateAccountActivity : AppCompatActivity() {
 
         et_bank.setText(bankFullName)
         et_label.setText(item.label)
+        et_pix_code.setText(item.pixCode)
         et_agency.setText(item.agency)
         et_account.setText(item.account)
         et_operation.setText(item.operation)
@@ -153,6 +154,7 @@ class CreateAccountActivity : AppCompatActivity() {
         var bankId = 0
         val bankName = et_bank.text.toString()
         val label = et_label.text.toString()
+        val pixCode = et_pix_code.text.toString()
         val agency = et_agency.text.toString()
         val number = et_account.text.toString()
         val operation = et_operation.text.toString()
@@ -225,6 +227,7 @@ class CreateAccountActivity : AppCompatActivity() {
                     item.created = currentTimestamp()
                 }
 
+                item.pixCode = pixCode
                 item.bankId = bankId
                 item.label = label
                 item.agency = agency
@@ -253,6 +256,7 @@ class CreateAccountActivity : AppCompatActivity() {
 
                     et_bank.setText("")
                     et_label.setText("")
+                    et_pix_code.setText("")
                     et_agency.setText("")
                     et_account.setText("")
                     rb_checking.isChecked = true

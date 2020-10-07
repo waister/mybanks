@@ -207,11 +207,7 @@ class MainActivity : AppCompatActivity() {
                 if (fullText.isNotEmpty())
                     fullText += "\n--\n"
 
-                fullText += getString(
-                    R.string.label_bank,
-                    account.bank!!.name,
-                    account.bank!!.code
-                ) + "\n"
+                fullText += getString(R.string.label_bank, account.bankName()) + "\n"
                 fullText += getString(R.string.label_agency, account.agency) + "\n"
                 fullText += getString(R.string.label_account, account.account) + "\n"
                 if (account.operation.isNotEmpty())
@@ -373,6 +369,7 @@ class MainActivity : AppCompatActivity() {
 
             val params = listOf(
                 API_ID to account.id,
+                API_PIX_CODE to account.pixCode,
                 API_BANK_ID to account.bankId,
                 API_LABEL to account.label,
                 API_TYPE to account.type,

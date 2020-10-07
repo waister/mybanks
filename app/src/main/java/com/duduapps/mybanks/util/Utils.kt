@@ -254,6 +254,7 @@ fun Realm?.saveAccounts(result: Result<String, FuelError>): Boolean {
                     account.id = accountObj.getLongVal(API_ID)
                     account.bankId = accountObj.getIntVal(API_BANK_ID)
                     account.label = accountObj.getStringVal(API_LABEL)
+                    account.pixCode = accountObj.getStringVal(API_PIX_CODE)
                     account.agency = accountObj.getStringVal(API_AGENCY)
                     account.account = accountObj.getStringVal(API_ACCOUNT)
                     account.type = accountObj.getStringVal(API_TYPE)

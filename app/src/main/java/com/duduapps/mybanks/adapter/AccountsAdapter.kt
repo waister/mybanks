@@ -47,9 +47,11 @@ class AccountsAdapter(private val context: Context) :
         private var tvTitle = itemView.find<TextView>(R.id.tv_title)
         private var tvDetails = itemView.find<TextView>(R.id.tv_details)
 
-
         fun setData(account: Account) {
-            val details = "${account.bank!!.name} (${account.bank!!.code})"
+            var details = "${account.bank!!.name} (${account.bank!!.code})"
+
+            if (account.pixCode.isNotEmpty())
+                details += " | PIX: " + account.pixCode
 
             tvTitle.text = account.label
             tvDetails.text = details

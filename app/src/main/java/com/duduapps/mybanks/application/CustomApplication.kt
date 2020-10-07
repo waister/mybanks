@@ -2,6 +2,7 @@ package com.duduapps.mybanks.application
 
 import android.app.Application
 import com.duduapps.mybanks.BuildConfig
+import com.duduapps.mybanks.model.MyRealmMigration
 import com.duduapps.mybanks.util.*
 import com.github.kittinunf.fuel.core.FuelManager
 import com.orhanobut.hawk.Hawk
@@ -9,6 +10,10 @@ import io.realm.Realm
 import io.realm.RealmConfiguration
 
 class CustomApplication : Application() {
+
+    companion object {
+        const val REALM_VERSION: Long = 1
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -18,7 +23,9 @@ class CustomApplication : Application() {
         Realm.init(this)
         Realm.setDefaultConfiguration(
             RealmConfiguration.Builder()
-                .deleteRealmIfMigrationNeeded()
+                .schemaVersion(REALM_VERSION)
+                .migration(MyRealmMigration())
+//                .deleteRealmIfMigrationNeeded()
                 .build()
         )
 

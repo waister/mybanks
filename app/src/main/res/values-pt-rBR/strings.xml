@@ -5,8 +5,9 @@
     <string name="action_edit_account">Editar conta</string>
     <string name="action_delete_account">Excluir conta</string>
     <string name="account_details">Detalhes da conta</string>
-    <string name="label_bank">Banco: %1$s (%2$s)</string>
+    <string name="label_bank">Banco: %1$s</string>
     <string name="label_agency">Agência: %1$s</string>
+    <string name="label_pix_code">Código PIX: %1$s</string>
     <string name="label_account">Conta: %1$s</string>
     <string name="label_edit_account">Editando: %1$s</string>
     <string name="label_operation">Operação: %1$s</string>
@@ -70,6 +71,7 @@
     <string name="cancel">Cancelar</string>
     <string name="correct_code">Corrigir código</string>
     <string name="bank">Banco</string>
+    <string name="pix_code">Código PIX (opcional)</string>
     <string name="account_nickname">Apelido (Ex: Nubank)</string>
     <string name="type">Tipo</string>
     <string name="checking">Corrente</string>

@@ -5,8 +5,9 @@
     <string name="action_edit_account">Edit account</string>
     <string name="action_delete_account">Delete account</string>
     <string name="account_details">Account details</string>
-    <string name="label_bank">Bank: %1$s (%2$s)</string>
+    <string name="label_bank">Bank: %1$s</string>
     <string name="label_agency">Agency: %1$s</string>
+    <string name="label_pix_code">PIX Code: %1$s</string>
     <string name="label_account">Account: %1$s</string>
     <string name="label_edit_account">Editing: %1$s</string>
     <string name="label_operation">Operation: %1$s</string>
@@ -70,6 +71,7 @@
     <string name="cancel">Cancel</string>
     <string name="correct_code">Correct code</string>
     <string name="bank">Bank</string>
+    <string name="pix_code">PIX Code</string>
     <string name="account_nickname">Nickname (Ex: Nubank)</string>
     <string name="type">Type</string>
     <string name="checking">Chain</string>
