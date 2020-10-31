@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.MenuItem
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
@@ -61,24 +62,38 @@ class CreateAccountActivity : AppCompatActivity() {
 
     private fun initViews() {
         if (account == null) {
-            cb_legal_account.isChecked = Hawk.get(PREF_LAST_LEGAL_ACCOUNT, false)
+            val isLegalAccount = Hawk.get(PREF_LAST_LEGAL_ACCOUNT, false)
+            val document = Hawk.get(PREF_LAST_DOCUMENT, "")
+
+            cb_legal_account.isChecked = isLegalAccount
             et_holder.setText(Hawk.get(PREF_LAST_HOLDER, ""))
-            et_document.setText(Hawk.get(PREF_LAST_DOCUMENT, ""))
+
+            if (isLegalAccount)
+                et_cnpj.setText(document)
+            else
+                et_cpf.setText(document)
+
+            toggleDocument()
         }
+
 
         cb_legal_account.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                ly_document.hint = getString(R.string.cnpj)
-                et_document.mask = "##.###.###/####-##"
-            } else {
-                ly_document.hint = getString(R.string.cpf)
-                et_document.mask = "###.###.###-##"
-            }
+            toggleDocument()
 
-            et_document.setText("")
+            if (isChecked)
+                et_cnpj.requestFocus()
+            else
+                et_cpf.requestFocus()
         }
 
-        et_document.setOnEditorActionListener { _, actionId, _ ->
+        et_cpf.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                submitCreate()
+                true
+            } else false
+        }
+
+        et_cnpj.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 submitCreate()
                 true
@@ -110,6 +125,16 @@ class CreateAccountActivity : AppCompatActivity() {
         populateBanks()
     }
 
+    private fun toggleDocument() {
+        if (cb_legal_account.isChecked) {
+            ly_cpf.visibility = View.GONE
+            ly_cnpj.visibility = View.VISIBLE
+        } else {
+            ly_cpf.visibility = View.VISIBLE
+            ly_cnpj.visibility = View.GONE
+        }
+    }
+
     private fun renderEditData() {
         val item = account!!
 
@@ -119,6 +144,8 @@ class CreateAccountActivity : AppCompatActivity() {
 
         cb_legal_account.isChecked = item.legalAccount
 
+        toggleDocument()
+
         et_bank.setText(bankFullName)
         et_label.setText(item.label)
         et_pix_code.setText(item.pixCode)
@@ -126,7 +153,11 @@ class CreateAccountActivity : AppCompatActivity() {
         et_account.setText(item.account)
         et_operation.setText(item.operation)
         et_holder.setText(item.holder)
-        et_document.setText(item.document)
+
+        if (item.legalAccount)
+            et_cnpj.setText(item.document)
+        else
+            et_cpf.setText(item.document)
 
         when (item.type) {
             getString(R.string.checking) -> rb_checking.isChecked = true
@@ -149,7 +180,7 @@ class CreateAccountActivity : AppCompatActivity() {
     }
 
     private fun submitCreate() {
-        et_document.hideKeyboard()
+        et_label.hideKeyboard()
 
         var bankId = 0
         val bankName = et_bank.text.toString()
@@ -159,8 +190,8 @@ class CreateAccountActivity : AppCompatActivity() {
         val number = et_account.text.toString()
         val operation = et_operation.text.toString()
         val holder = et_holder.text.toString()
-        val document = et_document.text.toString()
         val legalAccount = cb_legal_account.isChecked
+        val document = if (legalAccount) et_cnpj.masked else et_cpf.masked
 
         val type = when (rg_type.checkedRadioButtonId) {
             R.id.rb_checking -> getString(R.string.checking)
@@ -206,7 +237,11 @@ class CreateAccountActivity : AppCompatActivity() {
         }
         if (document.isEmpty()) {
             errors++
-            et_document.error = getString(R.string.error_document)
+
+            if (legalAccount)
+                et_cnpj.error = getString(R.string.error_cnpj)
+            else
+                et_cpf.error = getString(R.string.error_cpf)
         }
 
         if (errors == 0) {

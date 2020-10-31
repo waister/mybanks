@@ -116,9 +116,7 @@ class LoginActivity : AppCompatActivity(), TextView.OnEditorActionListener {
     private fun confirmCode() {
         et_code.hideKeyboard()
 
-        val userCode = et_code.rawText.toString()
-
-        if (userCode == apiCode) {
+        if (et_code.unMasked == apiCode) {
 
             Hawk.put(PREF_IDENTIFIER, apiIdentifier)
             Hawk.put(PREF_LOGGED, true)

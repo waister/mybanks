@@ -24,7 +24,8 @@
     <string name="error_account">Enter account number</string>
     <string name="error_account_invalid">Account must contain 3 or more numbers</string>
     <string name="error_holder">Enter the name of the account holder</string>
-    <string name="error_document">Please inform the account holder\'s CPF or CNPJ</string>
+    <string name="error_cpf">Please inform the account holder\'s CPF</string>
+    <string name="error_cnpj">Please inform the account holder\'s CNPJ</string>
     <string name="error_account_not_found">Account not found, try closing app and reopening</string>
     <string name="error_load_video">Oops, the video did not load 😭</string>
     <string name="data_copied">Data copied</string>
@@ -122,4 +123,8 @@
     <string name="share_subject">Get to know the My Banks app</string>
     <string name="share_text">Easily organize your bank accounts, and easily copy everything in the palm of your hand:\n\n%1$s</string>
     <string name="tip_touch_values">TIP: Touch the information to copy the values.</string>
+    <string name="watch_to_by_success">Plan successfully activated 😍</string>
+    <string name="plan_success_title">Plan activated 😍</string>
+    <string name="plan_success_body">Your premium subscription has been successfully activated, now just restart the app to activate.</string>
+    <string name="restart_app">Restart app</string>
 </resources>

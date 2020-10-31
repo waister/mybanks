@@ -3,11 +3,11 @@ package com.duduapps.mybanks.activity
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.duduapps.mybanks.BuildConfig
 import com.duduapps.mybanks.R
 import com.duduapps.mybanks.application.CustomApplication
 import com.duduapps.mybanks.model.Bank
@@ -28,9 +28,9 @@ class SplashActivity : AppCompatActivity() {
     private val realm = Realm.getDefaultInstance()
     private var secondsWait: Long = 0
     private var runnableFreights: Runnable = Runnable { apiGetBanks() }
-    private var handlerFreights: Handler = Handler()
+    private var handlerFreights: Handler = Handler(Looper.getMainLooper())
     private var runnableAccounts: Runnable = Runnable { apiGetAccounts() }
-    private var handlerAccounts: Handler = Handler()
+    private var handlerAccounts: Handler = Handler(Looper.getMainLooper())
 
     @SuppressLint("HardwareIds")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,9 +38,6 @@ class SplashActivity : AppCompatActivity() {
         setContentView(R.layout.activity_splash)
 
         Log.w(TAG, "Token FCM: " + Hawk.get(PREF_FCM_TOKEN, ""))
-
-        if (BuildConfig.DEBUG)
-            Hawk.delete(PREF_PLAN_VIDEO_MILLIS)
 
         if (!isLogged()) {
             val androidId = Settings.Secure.ANDROID_ID

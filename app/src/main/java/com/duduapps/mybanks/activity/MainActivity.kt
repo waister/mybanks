@@ -22,9 +22,9 @@ import com.duduapps.mybanks.util.*
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.InterstitialAd
 import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.RequestConfiguration
 import com.orhanobut.hawk.Hawk
 import io.realm.Case
 import io.realm.Realm
@@ -47,38 +47,24 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        MobileAds.initialize(this) {}
-
-        val adMobId = Hawk.get(PREF_ADMOB_AD_MAIN_ID, "")
-        loadAdBanner(ll_banner, adMobId, AdSize.SMART_BANNER)
-
-        interstitialAd = createInterstitialAd()
-        interstitialAd?.loadAd(AdRequest.Builder().build())
-
-        fab_copy_all.setOnClickListener {
-            val text = getShareText()
-
-            if (text.isNotEmpty()) {
-                copyToClipboard(text)
-                toast(R.string.accounts_copied)
-            }
-
-            interstitialAd?.show()
-        }
-
-        fab_share_all.setOnClickListener {
-            val text = getShareText()
-
-            if (text.isNotEmpty())
-                share(getShareText(), getString(R.string.my_bank_accounts))
-
-            interstitialAd?.show()
-        }
-
+        initAdMob()
         initViews()
         apiUpdateBanks()
         apiSyncAccounts()
         checkVersion()
+    }
+
+    private fun initAdMob() {
+        MobileAds.initialize(this) {}
+
+        val deviceId = listOf(AdRequest.DEVICE_ID_EMULATOR)
+        val configuration = RequestConfiguration.Builder().setTestDeviceIds(deviceId).build()
+        MobileAds.setRequestConfiguration(configuration)
+
+        loadAdBanner(ll_banner, Hawk.get(PREF_ADMOB_AD_MAIN_ID, ""))
+
+        interstitialAd = createInterstitialAd()
+        interstitialAd?.loadAd(AdRequest.Builder().build())
     }
 
     private fun initViews() {
@@ -109,6 +95,26 @@ class MainActivity : AppCompatActivity() {
             if (realm.where(Account::class.java).isNull("deleted").count() > 0) {
                 startActivity(intentFor<AlertLoginActivity>())
             }
+        }
+
+        fab_copy_all.setOnClickListener {
+            val text = getShareText()
+
+            if (text.isNotEmpty()) {
+                copyToClipboard(text)
+                toast(R.string.accounts_copied)
+            }
+
+            interstitialAd?.show()
+        }
+
+        fab_share_all.setOnClickListener {
+            val text = getShareText()
+
+            if (text.isNotEmpty())
+                share(getShareText(), getString(R.string.my_bank_accounts))
+
+            interstitialAd?.show()
         }
     }
 

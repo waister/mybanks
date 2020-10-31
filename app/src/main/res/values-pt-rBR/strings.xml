@@ -24,7 +24,8 @@
     <string name="error_account">Digite o número da conta</string>
     <string name="error_account_invalid">A conta deve conter 3 ou mais números</string>
     <string name="error_holder">Informe o nome do titular da conta</string>
-    <string name="error_document">Informe o CPF ou o CNPJ do titular da conta</string>
+    <string name="error_cpf">Informe o CPF do titular da conta</string>
+    <string name="error_cnpj">Informe o CNPJ do titular da conta</string>
     <string name="error_account_not_found">Conta não encontrador, tente fechar o app e abrir novamente</string>
     <string name="error_load_video">Ops, o vídeo não carregou 😭</string>
     <string name="data_copied">Dados copiados</string>
@@ -122,4 +123,8 @@
     <string name="share_subject">Conheça o app Meus Bancos</string>
     <string name="share_text">Organize de forma simples suas contas em bancos, e ainda copie-as facilmente, tudo na palma da sua mão:\n\n%1$s</string>
     <string name="tip_touch_values">DICA: Toque nas informações para copiar os valores.</string>
+    <string name="watch_to_by_success">Plano ativado com sucesso 😍</string>
+    <string name="plan_success_title">Plano ativado 😍</string>
+    <string name="plan_success_body">Sua assinatura premium foi ativada com sucesso, agora basta reiniciar o app para ativar.</string>
+    <string name="restart_app">Reiniciar app</string>
 </resources>

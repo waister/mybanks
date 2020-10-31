@@ -24,6 +24,7 @@ import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.InterstitialAd
 import com.orhanobut.hawk.Hawk
 import io.realm.Realm
+import org.jetbrains.anko.displayMetrics
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -36,7 +37,6 @@ const val ONE_SECOND: Long = 1000
 const val ONE_MINUTE: Long = ONE_SECOND * 60
 const val ONE_HOUR: Long = ONE_MINUTE * 60
 const val ONE_DAY: Long = ONE_HOUR * 24
-const val FIVE_DAYS: Long = ONE_DAY * 5
 
 fun isLogged(): Boolean {
     return Hawk.get(PREF_LOGGED, false)
@@ -47,7 +47,7 @@ fun Context.storeAppLink(): String = "https://play.google.com/store/apps/details
 fun havePlan(): Boolean {
     val planVideoMillis = Hawk.get(PREF_PLAN_VIDEO_MILLIS, 0L)
     if (planVideoMillis != 0L) {
-        val panVideoDuration = Hawk.get(PREF_PLAN_VIDEO_DURATION, FIVE_DAYS)
+        val panVideoDuration = Hawk.get(PREF_PLAN_VIDEO_DURATION, ONE_DAY)
         val expiration = Hawk.get(PREF_PLAN_VIDEO_MILLIS, 0L) + panVideoDuration
         return expiration > System.currentTimeMillis()
     }
@@ -58,11 +58,10 @@ fun Activity?.createInterstitialAd(): InterstitialAd? {
     var interstitialAd: InterstitialAd? = null
 
     if (this != null && !havePlan()) {
-        val adUnitId = if (BuildConfig.DEBUG) {
+        val adUnitId = if (BuildConfig.DEBUG)
             "ca-app-pub-3940256099942544/1033173712"
-        } else {
+        else
             Hawk.get(PREF_ADMOB_INTERSTITIAL_ID, "")
-        }
 
         if (adUnitId.isNotEmpty()) {
             interstitialAd = InterstitialAd(this)
@@ -73,23 +72,30 @@ fun Activity?.createInterstitialAd(): InterstitialAd? {
     return interstitialAd
 }
 
-fun Activity?.loadAdBanner(root: LinearLayout?, adUnitId: String, adSize: AdSize?) {
-    if (this == null || root == null || havePlan()) return
+fun Activity?.loadAdBanner(adViewContainer: LinearLayout?, adUnitId: String, adSize: AdSize? = null) {
+    if (this == null || adViewContainer == null || havePlan()) return
+
+    val adView = AdView(this)
+    adViewContainer.addView(adView)
 
     val testAdUnitId = "ca-app-pub-3940256099942544/6300978111"
 
-    val adView = AdView(this)
-    adView.adSize = adSize ?: AdSize.SMART_BANNER
     adView.adUnitId = if (BuildConfig.DEBUG) testAdUnitId else adUnitId
 
-    root.addView(
-        adView, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-    )
+    adView.adSize = adSize ?: getAdSize(adViewContainer)
 
     adView.loadAd(AdRequest.Builder().build())
+}
+
+fun Activity.getAdSize(adViewContainer: LinearLayout): AdSize {
+    val density = displayMetrics.density
+
+    var adWidthPixels = adViewContainer.width.toFloat()
+    if (adWidthPixels == 0f)
+        adWidthPixels = displayMetrics.widthPixels.toFloat()
+
+    val adWidth = (adWidthPixels / density).toInt()
+    return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth)
 }
 
 fun Context.copyToClipboard(text: String) {

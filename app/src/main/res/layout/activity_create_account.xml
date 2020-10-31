@@ -155,20 +155,37 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/ly_document"
+                    android:id="@+id/ly_cpf"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/form_field_margin"
                     android:hint="@string/cpf">
 
-                <com.santalu.maskedittext.MaskEditText
-                        android:id="@+id/et_document"
+                <com.santalu.maskara.widget.MaskEditText
+                        android:id="@+id/et_cpf"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:digits="0123456789.-"
                         android:imeOptions="actionDone"
                         android:inputType="numberDecimal"
-                        app:met_mask="###.###.###-##" />
+                        app:mask="###.###.###-##" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/ly_cnpj"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/form_field_margin"
+                    android:hint="@string/cnpj">
+
+                <com.santalu.maskara.widget.MaskEditText
+                        android:id="@+id/et_cnpj"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:digits="0123456789.-"
+                        android:imeOptions="actionDone"
+                        android:inputType="numberDecimal"
+                        app:mask="##.###.###/####-##" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <CheckBox
