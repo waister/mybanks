@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.duduapps.mybanks.R
@@ -21,10 +20,6 @@ import org.jetbrains.anko.longToast
 
 class SplashActivity : AppCompatActivity() {
 
-    companion object {
-        const val TAG = "SplashActivity"
-    }
-
     private val realm = Realm.getDefaultInstance()
     private var secondsWait: Long = 0
     private var runnableFreights: Runnable = Runnable { apiGetBanks() }
@@ -37,7 +32,7 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        Log.w(TAG, "Token FCM: " + Hawk.get(PREF_FCM_TOKEN, ""))
+        appLog("SplashActivity :: Token FCM: " + Hawk.get(PREF_FCM_TOKEN, ""))
 
         if (!isLogged()) {
             val androidId = Settings.Secure.ANDROID_ID

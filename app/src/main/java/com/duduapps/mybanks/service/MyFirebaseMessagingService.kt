@@ -36,14 +36,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         const val IMAGE = "image"
         const val VERSION = "version"
         const val ITEM_ID = "item_id"
-
-        const val TAG = "MyFCM"
     }
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
 
-        Log.i(TAG, "New token: $token")
+        appLog("MyFCM :: New token: $token")
 
         Hawk.put(PREF_FCM_TOKEN, token)
 
@@ -57,11 +55,11 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
-        Log.i(TAG, "Firebase Cloud Messaging new message received!")
+        appLog("MyFCM :: Firebase Cloud Messaging new message received!")
 
         val data = remoteMessage.data
 
-        Log.i(TAG, "Push message data: $data")
+        appLog("MyFCM :: Push message data: $data")
 
         var type = ""
         var title = ""
@@ -85,13 +83,13 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             }
         }
 
-        Log.i(TAG, "Push type: $type")
-        Log.i(TAG, "Push title: $title")
-        Log.i(TAG, "Push body: $body")
-        Log.i(TAG, "Push link: $link")
-        Log.i(TAG, "Push image: $image")
-        Log.i(TAG, "Push version: $version")
-        Log.i(TAG, "Push itemId: $itemId")
+        appLog("MyFCM :: Push type: $type")
+        appLog("MyFCM :: Push title: $title")
+        appLog("MyFCM :: Push body: $body")
+        appLog("MyFCM :: Push link: $link")
+        appLog("MyFCM :: Push image: $image")
+        appLog("MyFCM :: Push version: $version")
+        appLog("MyFCM :: Push itemId: $itemId")
 
         if (type == API_BANKS || type == API_WAKEUP)
             Hawk.put(PREF_UPDATE_ON_SPLASH, true)
@@ -149,7 +147,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         if (image.isNotEmpty()) {
             val thumbUrl = getThumbUrl(image, 100, 100)
 
-            Log.i(TAG, "Push thumb url: $thumbUrl")
+            appLog("MyFCM :: Push thumb url: $thumbUrl")
 
             try {
                 val url = URL(thumbUrl)
@@ -176,7 +174,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         manager.notify(NOTIFICATION_DEFAULT_ID, builder.build())
 
-        Log.i(TAG, "Push notification displayed")
+        appLog("MyFCM :: Push notification displayed")
 
         val pattern = longArrayOf(0, 100, 0, 100)
         val vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator

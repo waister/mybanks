@@ -2,7 +2,6 @@ package com.duduapps.mybanks.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import androidx.annotation.NonNull
@@ -26,10 +25,6 @@ import org.jetbrains.anko.longToast
 import org.jetbrains.anko.okButton
 
 class RemoveAdsActivity : AppCompatActivity() {
-
-    companion object {
-        const val TAG = "RemoveAdsActivity"
-    }
 
     private var adMobRemoveAds: String = ""
     private var planVideoDuration: Long = 0
@@ -71,26 +66,26 @@ class RemoveAdsActivity : AppCompatActivity() {
 
                 val adCallback = object : RewardedAdCallback() {
                     override fun onRewardedAdOpened() {
-                        Log.w(TAG, "onRewardedAdOpened()")
+                        appLog("RemoveAdsActivity :: onRewardedAdOpened()")
 
                         rl_progress?.visibility = View.GONE
                     }
 
                     override fun onRewardedAdClosed() {
-                        Log.w(TAG, "onRewardedAdClosed()")
+                        appLog("RemoveAdsActivity :: onRewardedAdClosed()")
 
                         alertRestartApp()
                     }
 
                     override fun onUserEarnedReward(@NonNull reward: RewardItem) {
-                        Log.w(TAG, "onUserEarnedReward() reward item amount: ${reward.amount}")
-                        Log.w(TAG, "onUserEarnedReward() reward item type: ${reward.type}")
+                        appLog("RemoveAdsActivity :: onUserEarnedReward() reward item amount: ${reward.amount}")
+                        appLog("RemoveAdsActivity :: onUserEarnedReward() reward item type: ${reward.type}")
 
                         Hawk.put(PREF_PLAN_VIDEO_MILLIS, System.currentTimeMillis())
                     }
 
                     override fun onRewardedAdFailedToShow(adError: AdError) {
-                        Log.w(TAG, "onRewardedAdFailedToShow()")
+                        appLog("RemoveAdsActivity :: onRewardedAdFailedToShow()")
 
                         rl_progress?.visibility = View.GONE
 
@@ -99,7 +94,7 @@ class RemoveAdsActivity : AppCompatActivity() {
                 }
                 rewardedAd.show(this, adCallback)
             } else {
-                Log.d("TAG", "The rewarded ad wasn't loaded yet.")
+                appLog("RemoveAdsActivity :: The rewarded ad wasn't loaded yet.")
             }
         }
     }
@@ -113,7 +108,7 @@ class RemoveAdsActivity : AppCompatActivity() {
             override fun onRewardedAdLoaded() {
                 rl_progress?.visibility = View.GONE
 
-                Log.w(TAG, "onRewardedAdLoaded()")
+                appLog("RemoveAdsActivity :: onRewardedAdLoaded()")
             }
 
             override fun onRewardedAdFailedToLoad(adError: LoadAdError) {
@@ -125,7 +120,7 @@ class RemoveAdsActivity : AppCompatActivity() {
                     }
                 }.show()
 
-                Log.w(TAG, "onRewardedAdFailedToLoad()")
+                appLog("RemoveAdsActivity :: onRewardedAdFailedToLoad()")
             }
         }
         rewardedAd.loadAd(AdRequest.Builder().build(), adLoadCallback)

@@ -192,6 +192,7 @@
                     android:id="@+id/cb_legal_account"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:checked="false"
                     android:text="@string/is_legal_account" />
 
             <androidx.appcompat.widget.AppCompatButton

@@ -6,6 +6,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.*
 import android.util.Base64
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.webkit.URLUtil
@@ -72,7 +73,11 @@ fun Activity?.createInterstitialAd(): InterstitialAd? {
     return interstitialAd
 }
 
-fun Activity?.loadAdBanner(adViewContainer: LinearLayout?, adUnitId: String, adSize: AdSize? = null) {
+fun Activity?.loadAdBanner(
+    adViewContainer: LinearLayout?,
+    adUnitId: String,
+    adSize: AdSize? = null
+) {
     if (this == null || adViewContainer == null || havePlan()) return
 
     val adView = AdView(this)
@@ -106,18 +111,16 @@ fun Context.copyToClipboard(text: String) {
 
 fun printFuelLog(request: Request, response: Response, result: Result<String, FuelError>) {
     if (BuildConfig.DEBUG) {
-        println("\n---------- FUEL_REQUEST_START\n")
-        println(request)
-        println("\n---------- FUEL_REQUEST_END\n")
+        val path = response.url
 
-        println("\n---------- FUEL_RESPONSE_START\n")
-        println(response)
-        println("\n---------- FUEL_RESPONSE_END\n")
-
-        println("\n---------- FUEL_RESULT_START\n")
-        println(result)
-        println("\n---------- FUEL_RESULT_END\n")
+        appLog("FUEL_REQUEST ($path): $request")
+        appLog("FUEL_RESPONSE ($path): $response")
+        appLog("FUEL_RESULT ($path): $result")
     }
+}
+
+fun appLog(text: String) {
+    if (BuildConfig.DEBUG) Log.w("APP_LOG", "================> $text")
 }
 
 
@@ -275,7 +278,7 @@ fun Realm?.saveAccounts(result: Result<String, FuelError>): Boolean {
 
                     account.bank = where(Bank::class.java)
                         .equalTo("id", account.bankId)
-                        .findFirst()!!
+                        .findFirst()
 
                     executeTransaction {
                         copyToRealmOrUpdate(account)

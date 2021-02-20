@@ -62,20 +62,19 @@ class CreateAccountActivity : AppCompatActivity() {
 
     private fun initViews() {
         if (account == null) {
-            val isLegalAccount = Hawk.get(PREF_LAST_LEGAL_ACCOUNT, false)
-            val document = Hawk.get(PREF_LAST_DOCUMENT, "")
+            val isLegalAccount = Hawk.get(PREF_LAST_LEGAL_ACCOUNT, false) ?: false
+            val document = Hawk.get(PREF_LAST_DOCUMENT, "") ?: ""
 
             cb_legal_account.isChecked = isLegalAccount
             et_holder.setText(Hawk.get(PREF_LAST_HOLDER, ""))
+
+            toggleDocument()
 
             if (isLegalAccount)
                 et_cnpj.setText(document)
             else
                 et_cpf.setText(document)
-
-            toggleDocument()
         }
-
 
         cb_legal_account.setOnCheckedChangeListener { _, isChecked ->
             toggleDocument()
@@ -142,10 +141,6 @@ class CreateAccountActivity : AppCompatActivity() {
 
         val bankFullName = "${item.bank!!.code} - ${item.bank!!.name}"
 
-        cb_legal_account.isChecked = item.legalAccount
-
-        toggleDocument()
-
         et_bank.setText(bankFullName)
         et_label.setText(item.label)
         et_pix_code.setText(item.pixCode)
@@ -154,10 +149,14 @@ class CreateAccountActivity : AppCompatActivity() {
         et_operation.setText(item.operation)
         et_holder.setText(item.holder)
 
+        cb_legal_account.isChecked = item.legalAccount
+
         if (item.legalAccount)
             et_cnpj.setText(item.document)
         else
             et_cpf.setText(item.document)
+
+        toggleDocument()
 
         when (item.type) {
             getString(R.string.checking) -> rb_checking.isChecked = true
@@ -191,7 +190,7 @@ class CreateAccountActivity : AppCompatActivity() {
         val operation = et_operation.text.toString()
         val holder = et_holder.text.toString()
         val legalAccount = cb_legal_account.isChecked
-        val document = if (legalAccount) et_cnpj.masked else et_cpf.masked
+        val document = (if (legalAccount) et_cnpj.text else et_cpf.text).toString()
 
         val type = when (rg_type.checkedRadioButtonId) {
             R.id.rb_checking -> getString(R.string.checking)

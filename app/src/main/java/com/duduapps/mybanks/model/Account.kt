@@ -23,6 +23,6 @@ open class Account : RealmObject() {
     var bank: Bank? = null
 
     fun bankName(): String {
-        return "${this.bank!!.name} (${this.bank!!.code})"
+        return "${this.bank?.name} (${this.bank?.code})"
     }
 }

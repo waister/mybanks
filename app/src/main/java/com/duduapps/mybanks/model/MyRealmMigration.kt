@@ -1,6 +1,6 @@
 package com.duduapps.mybanks.model
 
-import android.util.Log
+import com.duduapps.mybanks.util.appLog
 import io.realm.DynamicRealm
 import io.realm.RealmMigration
 
@@ -11,7 +11,7 @@ class MyRealmMigration : RealmMigration {
     }
 
     override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
-        Log.i(TAG, "Realm scheme version changes from version '$oldVersion' to '$newVersion'")
+        appLog("RealmMigration :: Realm scheme version changes from version '$oldVersion' to '$newVersion'")
 
         var version = oldVersion
 
@@ -23,6 +23,6 @@ class MyRealmMigration : RealmMigration {
             version++
         }
 
-        Log.i(TAG, "Realm scheme migration finish with count version: '$version'")
+        appLog("RealmMigration :: Realm scheme migration finish with count version: '$version'")
     }
 }
