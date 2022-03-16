@@ -22,7 +22,6 @@ import com.github.kittinunf.result.Result
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
-import com.google.android.gms.ads.InterstitialAd
 import com.orhanobut.hawk.Hawk
 import io.realm.Realm
 import org.jetbrains.anko.displayMetrics
@@ -55,24 +54,6 @@ fun havePlan(): Boolean {
     return false
 }
 
-fun Activity?.createInterstitialAd(): InterstitialAd? {
-    var interstitialAd: InterstitialAd? = null
-
-    if (this != null && !havePlan()) {
-        val adUnitId = if (BuildConfig.DEBUG)
-            "ca-app-pub-3940256099942544/1033173712"
-        else
-            Hawk.get(PREF_ADMOB_INTERSTITIAL_ID, "")
-
-        if (adUnitId.isNotEmpty()) {
-            interstitialAd = InterstitialAd(this)
-            interstitialAd.adUnitId = adUnitId
-        }
-    }
-
-    return interstitialAd
-}
-
 fun Activity?.loadAdBanner(
     adViewContainer: LinearLayout?,
     adUnitId: String,
@@ -83,9 +64,7 @@ fun Activity?.loadAdBanner(
     val adView = AdView(this)
     adViewContainer.addView(adView)
 
-    val testAdUnitId = "ca-app-pub-3940256099942544/6300978111"
-
-    adView.adUnitId = if (BuildConfig.DEBUG) testAdUnitId else adUnitId
+    adView.adUnitId = adUnitId
 
     adView.adSize = adSize ?: getAdSize(adViewContainer)
 
@@ -111,18 +90,22 @@ fun Context.copyToClipboard(text: String) {
 
 fun printFuelLog(request: Request, response: Response, result: Result<String, FuelError>) {
     if (BuildConfig.DEBUG) {
-        val path = response.url
-
-        appLog("FUEL_REQUEST ($path): $request")
-        appLog("FUEL_RESPONSE ($path): $response")
-        appLog("FUEL_RESULT ($path): $result")
+        println("\n--------------- REQUEST_REQUEST_START - ${request.url}\n")
+        println(request)
+        println("\n--------------- REQUEST_REQUEST_END - ${request.url}\n")
+        println("\n--------------- RESPONSE_RESPONSE_START - ${request.url}\n")
+        println(response)
+        println("\n--------------- RESPONSE_RESPONSE_END - ${request.url}\n")
+        println("\n--------------- RESULT_RESULT_START - ${request.url}\n")
+        println(result)
+        println("\n--------------- RESULT_RESULT_END - ${request.url}\n")
     }
 }
 
-fun appLog(text: String) {
-    if (BuildConfig.DEBUG) Log.w("APP_LOG", "================> $text")
+fun appLog(tag: String, msg: String) {
+    if (BuildConfig.DEBUG)
+        Log.i("MAGGAPPS_LOG", "➡➡➡ $tag: $msg")
 }
-
 
 fun String?.stringToInt(): Int {
     if (this != null && this != "null") {
@@ -215,6 +198,7 @@ fun Realm?.saveBanks(result: Result<String, FuelError>): Boolean {
             Hawk.put(PREF_ADMOB_ID, apiObj.getStringVal(API_ADMOB_ID))
             Hawk.put(PREF_ADMOB_AD_MAIN_ID, apiObj.getStringVal(API_ADMOB_AD_MAIN_ID))
             Hawk.put(PREF_ADMOB_INTERSTITIAL_ID, apiObj.getStringVal(API_ADMOB_INTERSTITIAL_ID))
+            Hawk.put(PREF_ADMOB_OPEN_APP_ID, apiObj.getStringVal(API_ADMOB_OPEN_APP_ID))
             Hawk.put(PREF_ADMOB_REMOVE_ADS, apiObj.getStringVal(API_ADMOB_REMOVE_ADS))
             Hawk.put(PREF_PLAN_VIDEO_DURATION, apiObj.getLongVal(API_PLAN_VIDEO_DURATION))
 

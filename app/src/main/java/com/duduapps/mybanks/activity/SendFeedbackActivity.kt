@@ -56,7 +56,7 @@ class SendFeedbackActivity : AppCompatActivity() {
 
         } else {
 
-            rl_progress.visibility = View.VISIBLE
+            rl_progress_light.visibility = View.VISIBLE
             tv_progress_message.setText(R.string.sending_feedback)
 
             val params = listOf(
@@ -68,7 +68,7 @@ class SendFeedbackActivity : AppCompatActivity() {
             API_ROUTE_FEEDBACK_SEND.httpPost(params).responseString { request, response, result ->
                 printFuelLog(request, response, result)
 
-                rl_progress.visibility = View.GONE
+                rl_progress_light.visibility = View.GONE
 
                 val (data, error) = result
 

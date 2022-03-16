@@ -18,6 +18,7 @@ import kotlinx.android.synthetic.main.activity_splash.*
 import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.longToast
 
+@SuppressLint("CustomSplashScreen")
 class SplashActivity : AppCompatActivity() {
 
     private val realm = Realm.getDefaultInstance()
@@ -27,12 +28,16 @@ class SplashActivity : AppCompatActivity() {
     private var runnableAccounts: Runnable = Runnable { apiGetAccounts() }
     private var handlerAccounts: Handler = Handler(Looper.getMainLooper())
 
+    companion object {
+        private const val LOG_TAG = "SplashActivity"
+    }
+
     @SuppressLint("HardwareIds")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        appLog("SplashActivity :: Token FCM: " + Hawk.get(PREF_FCM_TOKEN, ""))
+        appLog(LOG_TAG, "Token FCM: " + Hawk.get(PREF_FCM_TOKEN, ""))
 
         if (!isLogged()) {
             val androidId = Settings.Secure.ANDROID_ID

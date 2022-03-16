@@ -46,7 +46,7 @@ class LoginActivity : AppCompatActivity(), TextView.OnEditorActionListener {
             finish()
         }
 
-        rl_progress.visibility = View.GONE
+        rl_progress_light.visibility = View.GONE
         tv_progress_message.setText(R.string.sending)
     }
 
@@ -63,8 +63,8 @@ class LoginActivity : AppCompatActivity(), TextView.OnEditorActionListener {
     private fun sendCode() {
         userEmail = et_email.text.toString()
 
-        rl_progress.visibility = View.VISIBLE
-        rl_progress.hideKeyboard()
+        rl_progress_light.visibility = View.VISIBLE
+        rl_progress_light.hideKeyboard()
 
         val params = listOf(API_EMAIL to userEmail)
         val t = 1000 * 60
@@ -73,7 +73,7 @@ class LoginActivity : AppCompatActivity(), TextView.OnEditorActionListener {
             .responseString { request, response, result ->
                 printFuelLog(request, response, result)
 
-                rl_progress.visibility = View.GONE
+                rl_progress_light.visibility = View.GONE
 
                 val (data, error) = result
                 var success = false

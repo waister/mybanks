@@ -4,32 +4,28 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import androidx.annotation.NonNull
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.duduapps.mybanks.BuildConfig
 import com.duduapps.mybanks.R
 import com.duduapps.mybanks.util.*
-import com.google.android.gms.ads.AdError
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.*
 import com.google.android.gms.ads.rewarded.RewardItem
 import com.google.android.gms.ads.rewarded.RewardedAd
-import com.google.android.gms.ads.rewarded.RewardedAdCallback
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.orhanobut.hawk.Hawk
 import kotlinx.android.synthetic.main.activity_remove_ads.*
 import kotlinx.android.synthetic.main.inc_progress_dark.*
-import org.jetbrains.anko.alert
 import org.jetbrains.anko.longToast
-import org.jetbrains.anko.okButton
 
-class RemoveAdsActivity : AppCompatActivity() {
+class RemoveAdsActivity : AppCompatActivity(), OnUserEarnedRewardListener {
 
     private var adMobRemoveAds: String = ""
-    private var planVideoDuration: Long = 0
-    private lateinit var rewardedAd: RewardedAd
     private var isRewardedAlertShown: Boolean = false
+    private var rewardedAd: RewardedAd? = null
+
+    companion object {
+        private const val TAG = "RemoveAdsActivity"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,10 +35,8 @@ class RemoveAdsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayShowTitleEnabled(false)
         supportActionBar?.elevation = 0f
 
-        adMobRemoveAds = if (BuildConfig.DEBUG)
-            "ca-app-pub-3940256099942544/5224354917"
-        else
-            Hawk.get(PREF_ADMOB_REMOVE_ADS, "")
+        adMobRemoveAds = Hawk.get(PREF_ADMOB_REMOVE_ADS, "")
+        appLog(TAG, "Ad unit id: $adMobRemoveAds")
 
         if (adMobRemoveAds.isEmpty()) {
 
@@ -53,77 +47,97 @@ class RemoveAdsActivity : AppCompatActivity() {
 
             initViews()
             checkPlan()
-            createAndLoadRewardedAd()
         }
     }
 
     private fun initViews() {
-        rl_progress?.visibility = View.VISIBLE
+        rl_progress_dark?.visibility = View.VISIBLE
+
+        MobileAds.initialize(this) {
+            appLog(TAG, "Mobile ads initialized")
+
+            val deviceId = listOf(AdRequest.DEVICE_ID_EMULATOR)
+            val configuration =
+                RequestConfiguration.Builder().setTestDeviceIds(deviceId).build()
+            MobileAds.setRequestConfiguration(configuration)
+
+            val request = AdRequest.Builder().build()
+
+            RewardedAd.load(
+                this,
+                adMobRemoveAds,
+                request,
+                object : RewardedAdLoadCallback() {
+                    override fun onAdFailedToLoad(adError: LoadAdError) {
+                        appLog(TAG, "Filed to load ad: ${adError.message}")
+
+                        alertErrorLoad()
+
+                        rewardedAd = null
+                    }
+
+                    override fun onAdLoaded(ad: RewardedAd) {
+                        appLog(TAG, "Ad was loaded")
+
+                        rl_progress_dark?.visibility = View.GONE
+
+                        rewardedAd = ad
+
+                        rewardedAd?.fullScreenContentCallback =
+                            object : FullScreenContentCallback() {
+                                override fun onAdDismissedFullScreenContent() {
+                                    appLog(TAG, "Ad was dismissed")
+
+                                    alertRestartApp()
+                                }
+
+                                override fun onAdFailedToShowFullScreenContent(adError: AdError?) {
+                                    appLog(TAG, "Ad failed to show: ${adError?.message}")
+
+                                    alertErrorLoad()
+                                }
+
+                                override fun onAdShowedFullScreenContent() {
+                                    appLog(TAG, "Ad showed fullscreen content")
+
+                                    rewardedAd = null
+                                }
+                            }
+                    }
+                })
+        }
 
         bt_watch.setOnClickListener {
-            if (rewardedAd.isLoaded) {
-                rl_progress?.visibility = View.VISIBLE
+            val canShow = rewardedAd != null
+            appLog(TAG, "Subscribe button clicked - can show: $canShow")
 
-                val adCallback = object : RewardedAdCallback() {
-                    override fun onRewardedAdOpened() {
-                        appLog("RemoveAdsActivity :: onRewardedAdOpened()")
-
-                        rl_progress?.visibility = View.GONE
-                    }
-
-                    override fun onRewardedAdClosed() {
-                        appLog("RemoveAdsActivity :: onRewardedAdClosed()")
-
-                        alertRestartApp()
-                    }
-
-                    override fun onUserEarnedReward(@NonNull reward: RewardItem) {
-                        appLog("RemoveAdsActivity :: onUserEarnedReward() reward item amount: ${reward.amount}")
-                        appLog("RemoveAdsActivity :: onUserEarnedReward() reward item type: ${reward.type}")
-
-                        Hawk.put(PREF_PLAN_VIDEO_MILLIS, System.currentTimeMillis())
-                    }
-
-                    override fun onRewardedAdFailedToShow(adError: AdError) {
-                        appLog("RemoveAdsActivity :: onRewardedAdFailedToShow()")
-
-                        rl_progress?.visibility = View.GONE
-
-                        alert(R.string.error_load_video, R.string.ops) { okButton {} }.show()
-                    }
-                }
-                rewardedAd.show(this, adCallback)
+            if (canShow) {
+                rewardedAd?.show(this, this)
             } else {
-                appLog("RemoveAdsActivity :: The rewarded ad wasn't loaded yet.")
+                appLog(TAG, "The rewarded ad wasn't ready yet")
             }
         }
     }
 
-    private fun createAndLoadRewardedAd() {
-        planVideoDuration = Hawk.get(PREF_PLAN_VIDEO_DURATION, ONE_DAY)
+    override fun onUserEarnedReward(rewardedAd: RewardItem) {
+        val amount = rewardedAd.amount
+        val type = rewardedAd.type
+        appLog(TAG, "User earned the reward amount: $amount")
+        appLog(TAG, "User earned the reward type: $type")
 
-        rewardedAd = RewardedAd(this, adMobRemoveAds)
+        Hawk.put(PREF_PLAN_VIDEO_MILLIS, System.currentTimeMillis())
+    }
 
-        val adLoadCallback = object : RewardedAdLoadCallback() {
-            override fun onRewardedAdLoaded() {
-                rl_progress?.visibility = View.GONE
-
-                appLog("RemoveAdsActivity :: onRewardedAdLoaded()")
+    private fun alertErrorLoad() {
+        AlertDialog.Builder(this)
+            .setCancelable(false)
+            .setTitle(R.string.ops)
+            .setMessage(R.string.error_load_video)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                restartApp()
             }
-
-            override fun onRewardedAdFailedToLoad(adError: LoadAdError) {
-                rl_progress?.visibility = View.GONE
-
-                alert(R.string.error_load_video, R.string.ops) {
-                    okButton {
-                        finish()
-                    }
-                }.show()
-
-                appLog("RemoveAdsActivity :: onRewardedAdFailedToLoad()")
-            }
-        }
-        rewardedAd.loadAd(AdRequest.Builder().build(), adLoadCallback)
+            .create()
+            .show()
     }
 
     private fun alertRestartApp() {
@@ -151,6 +165,8 @@ class RemoveAdsActivity : AppCompatActivity() {
     }
 
     private fun checkPlan(): Long {
+        val planVideoDuration = Hawk.get(PREF_PLAN_VIDEO_DURATION, ONE_DAY)
+
         if (havePlan()) {
 
             val expiration = Hawk.get(PREF_PLAN_VIDEO_MILLIS, 0L) + planVideoDuration

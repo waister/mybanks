@@ -2,9 +2,9 @@ package com.duduapps.mybanks.application
 
 import android.app.Application
 import com.duduapps.mybanks.BuildConfig
-import com.duduapps.mybanks.model.MyRealmMigration
 import com.duduapps.mybanks.util.*
 import com.github.kittinunf.fuel.core.FuelManager
+import com.google.android.gms.ads.MobileAds
 import com.orhanobut.hawk.Hawk
 import io.realm.Realm
 import io.realm.RealmConfiguration
@@ -19,6 +19,10 @@ class CustomApplication : Application() {
         super.onCreate()
 
         Hawk.init(this).build()
+
+        MobileAds.initialize(this) {}
+
+        AppOpenManager(this)
 
         Realm.init(this)
         Realm.setDefaultConfiguration(
@@ -40,7 +44,7 @@ class CustomApplication : Application() {
             API_VERSION to BuildConfig.VERSION_CODE,
             API_PLATFORM to API_ANDROID,
             API_DEBUG to (if (BuildConfig.DEBUG) "1" else "0"),
-            API_V to 5
+            API_V to 8
         )
     }
 }

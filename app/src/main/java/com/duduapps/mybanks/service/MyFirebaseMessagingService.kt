@@ -11,7 +11,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
-import android.util.Log
+import android.os.VibratorManager
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.duduapps.mybanks.BuildConfig
@@ -36,12 +36,15 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         const val IMAGE = "image"
         const val VERSION = "version"
         const val ITEM_ID = "item_id"
+        const val VIBRATE = "vibrate"
+
+        private const val TAG = "MyFCM"
     }
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
 
-        appLog("MyFCM :: New token: $token")
+        appLog(TAG, "New token: $token")
 
         Hawk.put(PREF_FCM_TOKEN, token)
 
@@ -55,11 +58,11 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
-        appLog("MyFCM :: Firebase Cloud Messaging new message received!")
+        appLog(TAG, "Firebase Cloud Messaging new message received!")
 
         val data = remoteMessage.data
 
-        appLog("MyFCM :: Push message data: $data")
+        appLog(TAG, "Push message data: $data")
 
         var type = ""
         var title = ""
@@ -68,6 +71,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         var image = ""
         var version = ""
         var itemId = ""
+        var vibrate = ""
 
         for (entry in data.entries) {
             val value = entry.value
@@ -80,16 +84,18 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 IMAGE -> image = value
                 VERSION -> version = value
                 ITEM_ID -> itemId = value
+                VIBRATE -> vibrate = value
             }
         }
 
-        appLog("MyFCM :: Push type: $type")
-        appLog("MyFCM :: Push title: $title")
-        appLog("MyFCM :: Push body: $body")
-        appLog("MyFCM :: Push link: $link")
-        appLog("MyFCM :: Push image: $image")
-        appLog("MyFCM :: Push version: $version")
-        appLog("MyFCM :: Push itemId: $itemId")
+        appLog(TAG, "Push type: $type")
+        appLog(TAG, "Push title: $title")
+        appLog(TAG, "Push body: $body")
+        appLog(TAG, "Push link: $link")
+        appLog(TAG, "Push image: $image")
+        appLog(TAG, "Push version: $version")
+        appLog(TAG, "Push itemId: $itemId")
+        appLog(TAG, "Push vibrate: $vibrate")
 
         if (type == API_BANKS || type == API_WAKEUP)
             Hawk.put(PREF_UPDATE_ON_SPLASH, true)
@@ -147,7 +153,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         if (image.isNotEmpty()) {
             val thumbUrl = getThumbUrl(image, 100, 100)
 
-            appLog("MyFCM :: Push thumb url: $thumbUrl")
+            appLog(TAG, "Push thumb url: $thumbUrl")
 
             try {
                 val url = URL(thumbUrl)
@@ -174,20 +180,31 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         manager.notify(NOTIFICATION_DEFAULT_ID, builder.build())
 
-        appLog("MyFCM :: Push notification displayed")
+        appLog(TAG, "Push notification displayed")
 
-        val pattern = longArrayOf(0, 100, 0, 100)
-        val vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(
-                VibrationEffect.createWaveform(
-                    pattern,
-                    VibrationEffect.DEFAULT_AMPLITUDE
+        appLog(TAG, "Push notification displayed - vibrate: $vibrate")
+
+        if (vibrate.isNotEmpty()) {
+            val pattern = longArrayOf(0, 100, 0, 100)
+            val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val vm = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                vm.defaultVibrator
+            } else {
+                @Suppress("DEPRECATION")
+                getSystemService(VIBRATOR_SERVICE) as Vibrator
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(
+                    VibrationEffect.createWaveform(
+                        pattern,
+                        VibrationEffect.DEFAULT_AMPLITUDE
+                    )
                 )
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            vibrator.vibrate(pattern, -1)
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(pattern, -1)
+            }
         }
     }
 

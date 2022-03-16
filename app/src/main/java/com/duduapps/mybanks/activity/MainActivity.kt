@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
@@ -22,14 +23,17 @@ import com.duduapps.mybanks.util.*
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.InterstitialAd
+import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.orhanobut.hawk.Hawk
 import io.realm.Case
 import io.realm.Realm
+import io.realm.Sort
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.inc_progress_dark.*
+import kotlinx.android.synthetic.main.inc_progress_light.*
 import org.jetbrains.anko.*
 
 class MainActivity : AppCompatActivity() {
@@ -42,6 +46,12 @@ class MainActivity : AppCompatActivity() {
     private var searchView: SearchView? = null
     private var interstitialAd: InterstitialAd? = null
     private var lastTerms: String = ""
+    private val registerListener =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == Activity.RESULT_OK) {
+                rl_progress_light.visibility = View.VISIBLE
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,8 +73,7 @@ class MainActivity : AppCompatActivity() {
 
         loadAdBanner(ll_banner, Hawk.get(PREF_ADMOB_AD_MAIN_ID, ""))
 
-        interstitialAd = createInterstitialAd()
-        interstitialAd?.loadAd(AdRequest.Builder().build())
+        loadInterstitialAd()
     }
 
     private fun initViews() {
@@ -105,7 +114,7 @@ class MainActivity : AppCompatActivity() {
                 toast(R.string.accounts_copied)
             }
 
-            interstitialAd?.show()
+            interstitialAd?.show(this)
         }
 
         fab_share_all.setOnClickListener {
@@ -114,7 +123,7 @@ class MainActivity : AppCompatActivity() {
             if (text.isNotEmpty())
                 share(getShareText(), getString(R.string.my_bank_accounts))
 
-            interstitialAd?.show()
+            interstitialAd?.show(this)
         }
     }
 
@@ -137,6 +146,8 @@ class MainActivity : AppCompatActivity() {
 
             if (terms.isNotEmpty())
                 query.contains("label", terms, Case.INSENSITIVE)
+
+            query.sort("label", Sort.ASCENDING)
 
             items = query.findAll()
         }
@@ -174,10 +185,8 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     bt_login.visibility = View.VISIBLE
                     bt_login.setOnClickListener {
-                        startActivityForResult(
-                            intentFor<LoginActivity>(),
-                            REQUEST_CODE_FORCE_REFRESH
-                        )
+                        val intent = Intent(this, LoginActivity::class.java)
+                        registerListener.launch(intent)
                     }
                 }
 
@@ -194,14 +203,6 @@ class MainActivity : AppCompatActivity() {
 
             showHideButtons(true)
 
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == REQUEST_CODE_FORCE_REFRESH && resultCode == Activity.RESULT_OK) {
-            rl_progress.visibility = View.VISIBLE
         }
     }
 
@@ -317,7 +318,7 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.action_add_account -> {
                 startActivity(intentFor<CreateAccountActivity>())
-                interstitialAd?.show()
+                interstitialAd?.show(this)
                 true
             }
             R.id.action_login -> {
@@ -431,10 +432,10 @@ class MainActivity : AppCompatActivity() {
                 if (success)
                     renderData()
 
-                rl_progress.visibility = View.GONE
+                rl_progress_light.visibility = View.GONE
             }
         } else {
-            rl_progress.visibility = View.GONE
+            rl_progress_light.visibility = View.GONE
         }
     }
 
@@ -450,6 +451,27 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
 
         realm?.close()
+    }
+
+    private fun loadInterstitialAd() {
+        val logTag = "InterstitialAd"
+        val adUnitId = Hawk.get(PREF_ADMOB_INTERSTITIAL_ID, "")
+
+        if (adUnitId.isNotEmpty() && !havePlan()) {
+            val adRequest = AdRequest.Builder().build()
+
+            InterstitialAd.load(this, adUnitId, adRequest, object : InterstitialAdLoadCallback() {
+                override fun onAdFailedToLoad(adError: LoadAdError) {
+                    appLog(logTag, "onAdFailedToLoad(): ${adError.message}")
+                    interstitialAd = null
+                }
+
+                override fun onAdLoaded(ad: InterstitialAd) {
+                    appLog(logTag, "Ad was loaded")
+                    interstitialAd = ad
+                }
+            })
+        }
     }
 
 }

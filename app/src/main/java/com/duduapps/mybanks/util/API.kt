@@ -6,8 +6,8 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
-const val APP_HOST = "https://duduapps.com/"
-const val API_ROOT = "https://duduapps.com/api/mybanks"
+const val APP_HOST = "https://maggapps.com/"
+const val API_ROOT = "https://maggapps.com/api/mybanks"
 
 const val API_ROUTE_BANKS = "/banks"
 const val API_ROUTE_ACCOUNTS = "/accounts"
@@ -55,6 +55,7 @@ const val API_ADMOB_ID = "admob_id"
 const val API_ADMOB_AD_MAIN_ID = "admob_ad_main_id"
 const val API_ADMOB_INTERSTITIAL_ID = "admob_interstitial_id"
 const val API_ADMOB_REMOVE_ADS = "admob_remove_ads"
+const val API_ADMOB_OPEN_APP_ID = "admob_open_app_id"
 const val API_EMAIL = "email"
 const val API_COMMENTS = "comments"
 const val API_PLAN_VIDEO_DURATION = "plan_video_duration"

@@ -11,7 +11,7 @@ class MyRealmMigration : RealmMigration {
     }
 
     override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
-        appLog("RealmMigration :: Realm scheme version changes from version '$oldVersion' to '$newVersion'")
+        appLog(TAG, "Realm scheme version changes from version '$oldVersion' to '$newVersion'")
 
         var version = oldVersion
 
@@ -23,6 +23,6 @@ class MyRealmMigration : RealmMigration {
             version++
         }
 
-        appLog("RealmMigration :: Realm scheme migration finish with count version: '$version'")
+        appLog(TAG, "Realm scheme migration finish with count version: '$version'")
     }
 }
