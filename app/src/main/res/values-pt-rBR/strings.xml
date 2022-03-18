@@ -38,12 +38,14 @@
     <string name="my_bank_account">Minha conta bancária</string>
     <string name="my_bank_accounts">Minhas contas bancárias</string>
     <string name="updated_title">Atualização disponível</string>
+    <string name="confirm_logout_account">Realmente deseja sair dessa conta?</string>
     <string name="updated_positive">Atualizar agora</string>
     <string name="updated_negative">Mais tarde</string>
     <string name="updated_logout">Sair do app</string>
     <string name="update_available">Lançamos uma nova versão do aplicativo, atualize para receber as novidades e correções.</string>
     <string name="update_needed">Lançamos uma nova atualização crítica, você PRECISA atualizar para continuar usando.</string>
-    <string name="no_accounts_found">Nenhum conta encontrada.\nSe você já tinha conta, ative o backup.</string>
+    <string name="no_accounts_found">Nenhum conta encontrada.</string>
+    <string name="alert_backup">Se você já tinha conta, ative o backup.</string>
     <string name="search_no_accounts_found">Nenhum conta encontrada.</string>
     <string name="error_unknown">Não foi possível conectar ao servidor, verifique sua conexão.</string>
     <string name="loading_settings">Carregando configurações…</string>
@@ -98,6 +100,7 @@
     <string name="confirm_code">Confirmar código</string>
     <string name="code_sent_to_email">Código enviado por email</string>
     <string name="active_auto_backup">Ativar o backup automático</string>
+    <string name="logout_account">Sair dessa conta</string>
     <string name="remove_adas">Remover anúncios</string>
     <string name="search">Pesquisar</string>
     <string name="wait_settings">Aguarde as configurações carregarem</string>

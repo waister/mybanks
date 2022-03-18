@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity() {
     private var accounts: MutableList<Account> = mutableListOf()
     private var accountsAdapter: AccountsAdapter? = null
     private var menuLogin: MenuItem? = null
+    private var menuLogout: MenuItem? = null
     private var menuSearch: MenuItem? = null
     private var searchView: SearchView? = null
     private var interstitialAd: InterstitialAd? = null
@@ -52,6 +53,10 @@ class MainActivity : AppCompatActivity() {
                 rl_progress_light.visibility = View.VISIBLE
             }
         }
+
+    companion object {
+        private const val TAG = "MainActivity"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,6 +105,10 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+
+        appLog(TAG, "isLogged(): ${isLogged()}")
+        appLog(TAG, "PREF_SHOW_ALERT_LOGIN: ${Hawk.put(PREF_SHOW_ALERT_LOGIN, true)}")
+
         if (!isLogged() && Hawk.put(PREF_SHOW_ALERT_LOGIN, true)) {
             if (realm.where(Account::class.java).isNull("deleted").count() > 0) {
                 startActivity(intentFor<AlertLoginActivity>())
@@ -135,6 +144,7 @@ class MainActivity : AppCompatActivity() {
         searchVisibility()
 
         menuLogin?.isVisible = !isLogged()
+        menuLogout?.isVisible = isLogged()
     }
 
     private fun getAccounts(terms: String = ""): MutableList<Account> {
@@ -168,14 +178,9 @@ class MainActivity : AppCompatActivity() {
             rv_accounts.visibility = View.GONE
             ll_empty.visibility = View.VISIBLE
 
-            if (lastTerms.isNotEmpty()) {
+            tv_alert_backup.visibility = if (isLogged()) View.GONE else View.VISIBLE
 
-                tv_alert.setText(R.string.search_no_accounts_found)
-
-            } else {
-
-                tv_alert.setText(R.string.no_accounts_found)
-
+            if (lastTerms.isEmpty()) {
                 bt_add_account.setOnClickListener {
                     startActivity(intentFor<CreateAccountActivity>())
                 }
@@ -279,9 +284,11 @@ class MainActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.menu_main, menu)
 
         menuLogin = menu?.findItem(R.id.action_login)
+        menuLogout = menu?.findItem(R.id.action_logout)
         menuSearch = menu?.findItem(R.id.action_search)
 
         menuLogin?.isVisible = !isLogged()
+        menuLogout?.isVisible = isLogged()
 
         searchView = menuSearch?.actionView as SearchView
         val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
@@ -323,6 +330,10 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.action_login -> {
                 startActivity(intentFor<LoginActivity>())
+                true
+            }
+            R.id.action_logout -> {
+                logout()
                 true
             }
             R.id.action_remove_ads -> {

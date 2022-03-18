@@ -34,6 +34,15 @@
                     android:text="@string/no_accounts_found"
                     android:textSize="15sp" />
 
+            <TextView
+                    android:id="@+id/tv_alert_backup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/fab_margin"
+                    android:gravity="center"
+                    android:text="@string/alert_backup"
+                    android:textSize="15sp" />
+
             <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/bt_add_account"
                     style="@style/ButtonLink"

@@ -28,7 +28,6 @@ class CustomApplication : Application() {
         Realm.setDefaultConfiguration(
             RealmConfiguration.Builder()
                 .schemaVersion(REALM_VERSION)
-//                .migration(MyRealmMigration())
                 .deleteRealmIfMigrationNeeded()
                 .build()
         )

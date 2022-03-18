@@ -19,6 +19,11 @@
           android:icon="@drawable/ic_cloud_upload"
           app:showAsAction="never"/>
 
+    <item android:id="@+id/action_logout"
+          android:title="@string/logout_account"
+          android:icon="@drawable/ic_logout"
+          app:showAsAction="never"/>
+
     <item android:id="@+id/action_remove_ads"
           android:title="@string/remove_adas"
           android:icon="@drawable/ic_tag_remove"

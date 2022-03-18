@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.graphics.*
 import android.util.Base64
 import android.util.Log
@@ -13,6 +14,8 @@ import android.webkit.URLUtil
 import android.widget.LinearLayout
 import com.duduapps.mybanks.BuildConfig
 import com.duduapps.mybanks.R
+import com.duduapps.mybanks.activity.MainActivity
+import com.duduapps.mybanks.activity.SplashActivity
 import com.duduapps.mybanks.model.Account
 import com.duduapps.mybanks.model.Bank
 import com.github.kittinunf.fuel.core.FuelError
@@ -24,7 +27,10 @@ import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.orhanobut.hawk.Hawk
 import io.realm.Realm
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.browse
 import org.jetbrains.anko.displayMetrics
+import org.jetbrains.anko.intentFor
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -40,6 +46,26 @@ const val ONE_DAY: Long = ONE_HOUR * 24
 
 fun isLogged(): Boolean {
     return Hawk.get(PREF_LOGGED, false)
+}
+
+fun Activity.logout() {
+    val context = this
+
+    alert(
+        getString(R.string.confirm_logout_account),
+        getString(R.string.logout_account)
+    ) {
+        positiveButton(R.string.confirm) {
+            Hawk.delete(PREF_LOGGED)
+
+            val intent = Intent(context, SplashActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            startActivity(intent)
+
+            finish()
+        }
+        negativeButton(R.string.cancel) {}
+    }.show()
 }
 
 fun Context.storeAppLink(): String = "https://play.google.com/store/apps/details?id=$packageName"

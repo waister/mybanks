@@ -3,7 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Projetos/AndroidStudioProjects/MyBanks/app/src/main/res/layout/activity_main.xml" value="0.16576086956521738" />
+        <entry key="..\:/Projetos/AndroidStudioProjects/MyBanks/app/src/main/res/drawable/ic_cloud_upload.xml" value="0.196" />
+        <entry key="..\:/Projetos/AndroidStudioProjects/MyBanks/app/src/main/res/drawable/ic_logout.xml" value="0.196" />
+        <entry key="..\:/Projetos/AndroidStudioProjects/MyBanks/app/src/main/res/layout/activity_login.xml" value="0.27853260869565216" />
+        <entry key="..\:/Projetos/AndroidStudioProjects/MyBanks/app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="..\:/Projetos/AndroidStudioProjects/MyBanks/app/src/main/res/layout/activity_remove_ads.xml" value="0.36666666666666664" />
         <entry key="..\:/Projetos/AndroidStudioProjects/MyBanks/app/src/main/res/layout/inc_progress_dark.xml" value="0.18802083333333333" />
         <entry key="..\:/Projetos/AndroidStudioProjects/MyBanks/app/src/main/res/layout/inc_progress_light.xml" value="0.17831813576494426" />

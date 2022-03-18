@@ -43,7 +43,8 @@
     <string name="updated_logout">Exit app</string>
     <string name="update_available">We\'ve released a new version of the app, upgrade to get the news and fixes.</string>
     <string name="update_needed">We\'ve released a new critical update, you NEED to upgrade to continue using.</string>
-    <string name="no_accounts_found">No account found.\nIf you already had an account, activate the backup.</string>
+    <string name="no_accounts_found">No account found.</string>
+    <string name="alert_backup">If you already had an account, activate the backup.</string>
     <string name="search_no_accounts_found">No account found.</string>
     <string name="error_unknown">Could not connect to server, check your connection.</string>
     <string name="loading_settings">Loading settings…</string>
@@ -98,6 +99,8 @@
     <string name="confirm_code">Confirm code</string>
     <string name="code_sent_to_email">Code sent by email</string>
     <string name="active_auto_backup">Enable automatic backup</string>
+    <string name="logout_account">Logout this account</string>
+    <string name="confirm_logout_account">Do you really want to log out of this account?</string>
     <string name="remove_adas">Remove ads</string>
     <string name="search">Search</string>
     <string name="wait_settings">Wait for the settings to load</string>
