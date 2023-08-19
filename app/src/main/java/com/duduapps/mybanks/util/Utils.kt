@@ -14,7 +14,6 @@ import android.webkit.URLUtil
 import android.widget.LinearLayout
 import com.duduapps.mybanks.BuildConfig
 import com.duduapps.mybanks.R
-import com.duduapps.mybanks.activity.MainActivity
 import com.duduapps.mybanks.activity.SplashActivity
 import com.duduapps.mybanks.model.Account
 import com.duduapps.mybanks.model.Bank
@@ -28,9 +27,7 @@ import com.google.android.gms.ads.AdView
 import com.orhanobut.hawk.Hawk
 import io.realm.Realm
 import org.jetbrains.anko.alert
-import org.jetbrains.anko.browse
 import org.jetbrains.anko.displayMetrics
-import org.jetbrains.anko.intentFor
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -92,7 +89,7 @@ fun Activity?.loadAdBanner(
 
     adView.adUnitId = adUnitId
 
-    adView.adSize = adSize ?: getAdSize(adViewContainer)
+    adView.setAdSize(adSize ?: getAdSize(adViewContainer))
 
     adView.loadAd(AdRequest.Builder().build())
 }
@@ -143,7 +140,7 @@ fun String?.stringToInt(): Int {
 }
 
 fun String?.isValidUrl(): Boolean {
-    return this != null && this.isNotEmpty() && URLUtil.isValidUrl(this)
+    return !this.isNullOrEmpty() && URLUtil.isValidUrl(this)
 }
 
 fun String?.getApiImage(): String {

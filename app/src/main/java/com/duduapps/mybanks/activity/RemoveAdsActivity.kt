@@ -91,8 +91,8 @@ class RemoveAdsActivity : AppCompatActivity(), OnUserEarnedRewardListener {
                                     alertRestartApp()
                                 }
 
-                                override fun onAdFailedToShowFullScreenContent(adError: AdError?) {
-                                    appLog(TAG, "Ad failed to show: ${adError?.message}")
+                                override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                                    appLog(TAG, "Ad failed to show: ${adError.message}")
 
                                     alertErrorLoad()
                                 }
