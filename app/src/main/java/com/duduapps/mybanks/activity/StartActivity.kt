@@ -87,10 +87,6 @@ class StartActivity : AppCompatActivity() {
             }
         }
 
-    companion object {
-        private const val LOG_TAG = "SplashActivity"
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -343,6 +339,10 @@ class StartActivity : AppCompatActivity() {
                 } else
                     initApp()
             }
+    }
+
+    companion object {
+        private const val LOG_TAG = "SplashActivity"
     }
 
 }
