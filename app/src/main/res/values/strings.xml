@@ -130,4 +130,8 @@
     <string name="plan_success_title">Plan activated 😍</string>
     <string name="plan_success_body">Your premium subscription has been successfully activated, now just restart the app to activate.</string>
     <string name="restart_app">Restart app</string>
+    <string name="error_on_update">Not updated</string>
+    <string name="error_on_update_message">You have not completed the app update process.</string>
+    <string name="try_again">Try again</string>
+    <string name="update_later">Update later</string>
 </resources>

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/rl_progress_dark"
         android:layout_width="match_parent"
@@ -9,9 +8,9 @@
         android:layout_alignParentTop="true"
         android:background="@color/colorPrimaryOpaque"
         android:clickable="true"
+        android:elevation="10dp"
         android:focusable="true"
         android:gravity="center"
-        android:elevation="10dp"
         android:orientation="vertical"
         android:visibility="gone"
         tools:ignore="UnusedAttribute">
@@ -19,7 +18,7 @@
     <ProgressBar
             style="@style/MyProgressBarWhite"
             android:clickable="true"
-            android:focusable="true"/>
+            android:focusable="true" />
 
     <TextView
             android:id="@+id/tv_progress_message"
@@ -28,5 +27,5 @@
             android:layout_marginTop="5dp"
             android:textColor="@color/white"
             android:textSize="13sp"
-            tools:text="@string/loading"/>
+            tools:text="@string/loading" />
 </LinearLayout>

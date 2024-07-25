@@ -7,15 +7,25 @@ import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.duduapps.mybanks.R
+import com.duduapps.mybanks.databinding.ActivityAccountDetailsBinding
 import com.duduapps.mybanks.model.Account
-import com.duduapps.mybanks.util.*
+import com.duduapps.mybanks.util.PARAM_ID
+import com.duduapps.mybanks.util.PREF_ADMOB_AD_MAIN_ID
+import com.duduapps.mybanks.util.copyToClipboard
+import com.duduapps.mybanks.util.currentTimestamp
+import com.duduapps.mybanks.util.loadAdMobBanner
 import com.google.android.gms.ads.AdSize
 import com.orhanobut.hawk.Hawk
 import io.realm.Realm
-import kotlinx.android.synthetic.main.activity_account_details.*
-import org.jetbrains.anko.*
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.intentFor
+import org.jetbrains.anko.longToast
+import org.jetbrains.anko.share
+import org.jetbrains.anko.toast
 
 class AccountDetailsActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityAccountDetailsBinding
 
     private val realm = Realm.getDefaultInstance()
     private lateinit var account: Account
@@ -23,14 +33,16 @@ class AccountDetailsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_account_details)
+
+        binding = ActivityAccountDetailsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         accountId = intent.getLongExtra(PARAM_ID, 0L)
 
         val adMobId = Hawk.get(PREF_ADMOB_AD_MAIN_ID, "")
-        loadAdBanner(ll_banner, adMobId, AdSize.MEDIUM_RECTANGLE)
+        loadAdMobBanner(binding.llBanner, adMobId, AdSize.MEDIUM_RECTANGLE)
     }
 
     override fun onResume() {
@@ -49,12 +61,12 @@ class AccountDetailsActivity : AppCompatActivity() {
 
             renderData()
 
-            bt_copy.setOnClickListener {
+            binding.btCopy.setOnClickListener {
                 copyToClipboard(getShareText())
                 toast(R.string.account_copied)
             }
 
-            bt_share.setOnClickListener {
+            binding.btShare.setOnClickListener {
                 share(getShareText(), getString(R.string.my_bank_account))
             }
 
@@ -66,23 +78,29 @@ class AccountDetailsActivity : AppCompatActivity() {
         }
     }
 
-    private fun renderData() {
-        tv_pix_code.printLine(getString(R.string.label_pix_code, account.pixCode), account.pixCode)
-        tv_bank_name.printLine(getString(R.string.label_bank, account.bankName()), account.bank!!.code)
-        tv_agency.printLine(getString(R.string.label_agency, account.agency), account.agency)
-        tv_account.printLine(getString(R.string.label_account, account.account), account.account)
-        tv_operation.printLine(getString(R.string.label_account, account.operation), account.operation)
-        tv_type.printLine(getString(R.string.label_type, account.type), account.type)
-        tv_holder.printLine(getString(R.string.label_holder, account.holder), account.holder)
+    private fun renderData() = with(binding) {
+        tvPixCode.printLine(getString(R.string.label_pix_code, account.pixCode), account.pixCode)
+        tvBankName.printLine(
+            getString(R.string.label_bank, account.bankName()),
+            account.bank!!.code
+        )
+        tvAgency.printLine(getString(R.string.label_agency, account.agency), account.agency)
+        tvAccount.printLine(getString(R.string.label_account, account.account), account.account)
+        tvOperation.printLine(
+            getString(R.string.label_account, account.operation),
+            account.operation
+        )
+        tvType.printLine(getString(R.string.label_type, account.type), account.type)
+        tvHolder.printLine(getString(R.string.label_holder, account.holder), account.holder)
 
         if (account.legalAccount)
-            tv_document.printLine(getString(R.string.label_cnpj, account.document), account.document)
+            tvDocument.printLine(getString(R.string.label_cnpj, account.document), account.document)
         else
-            tv_document.printLine(getString(R.string.label_cpf, account.document), account.document)
+            tvDocument.printLine(getString(R.string.label_cpf, account.document), account.document)
     }
 
     private fun TextView.printLine(label: String, value: String?) {
-        if (value != null && value.isNotEmpty()) {
+        if (!value.isNullOrEmpty()) {
             this.text = label
             this.setOnClickListener { copyItem(value) }
         } else {
@@ -122,6 +140,7 @@ class AccountDetailsActivity : AppCompatActivity() {
                 startActivity(intentFor<CreateAccountActivity>(PARAM_ID to account.id))
                 true
             }
+
             R.id.action_delete -> {
                 alert(R.string.confirm_deleted_account, R.string.confirmation) {
                     positiveButton(R.string.confirm) {
@@ -141,12 +160,14 @@ class AccountDetailsActivity : AppCompatActivity() {
                 }.show()
                 true
             }
+
             R.id.action_remove_ads -> {
                 startActivity(intentFor<RemoveAdsActivity>())
                 true
             }
+
             else -> {
-                onBackPressed()
+                onBackPressedDispatcher.onBackPressed()
                 super.onOptionsItemSelected(item)
             }
         }

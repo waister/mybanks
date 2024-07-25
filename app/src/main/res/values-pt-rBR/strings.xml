@@ -130,4 +130,8 @@
     <string name="plan_success_title">Plano ativado 😍</string>
     <string name="plan_success_body">Sua assinatura premium foi ativada com sucesso, agora basta reiniciar o app para ativar.</string>
     <string name="restart_app">Reiniciar app</string>
+    <string name="error_on_update">Não atualizado</string>
+    <string name="error_on_update_message">Você não completou o processo de atualização do app.</string>
+    <string name="try_again">Tentar novamente</string>
+    <string name="update_later">Atualizar depois</string>
 </resources>

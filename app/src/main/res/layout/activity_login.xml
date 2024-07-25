@@ -90,5 +90,5 @@
         </LinearLayout>
     </ScrollView>
 
-    <include layout="@layout/inc_progress_dark" />
+    <include android:id="@+id/progress" layout="@layout/inc_progress_dark" />
 </RelativeLayout>

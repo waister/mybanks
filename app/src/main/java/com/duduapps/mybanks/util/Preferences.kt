@@ -1,6 +1,7 @@
 package com.duduapps.mybanks.util
 
-const val PREF_IDENTIFIER = "PrefIdentifier"
+const val PREF_DEVICE_ID = "PrefDeviceId"
+const val PREF_DEVICE_ID_OLD = "PrefIdentifier"
 const val PREF_LOGGED = "PrefLogged"
 const val PREF_FCM_TOKEN = "PrefFcmToken"
 const val PREF_SHARE_LINK = "PrefStoreLink"

@@ -7,41 +7,57 @@ import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.duduapps.mybanks.R
-import com.duduapps.mybanks.util.*
+import com.duduapps.mybanks.databinding.ActivitySendFeedbackBinding
+import com.duduapps.mybanks.util.API_COMMENTS
+import com.duduapps.mybanks.util.API_EMAIL
+import com.duduapps.mybanks.util.API_MESSAGE
+import com.duduapps.mybanks.util.API_NAME
+import com.duduapps.mybanks.util.API_ROUTE_FEEDBACK_SEND
+import com.duduapps.mybanks.util.API_SUCCESS
+import com.duduapps.mybanks.util.PREF_COMMENTS
+import com.duduapps.mybanks.util.PREF_EMAIL
+import com.duduapps.mybanks.util.PREF_NAME
+import com.duduapps.mybanks.util.getBooleanVal
+import com.duduapps.mybanks.util.getStringVal
+import com.duduapps.mybanks.util.getValidJSONObject
+import com.duduapps.mybanks.util.printFuelLog
+import com.duduapps.mybanks.util.setEmpty
 import com.github.kittinunf.fuel.httpPost
 import com.orhanobut.hawk.Hawk
-import kotlinx.android.synthetic.main.activity_send_feedback.*
-import kotlinx.android.synthetic.main.inc_progress_light.*
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.okButton
 
 class SendFeedbackActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivitySendFeedbackBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_send_feedback)
+
+        binding = ActivitySendFeedbackBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        et_name.setText(Hawk.get(PREF_NAME, ""))
-        et_email.setText(Hawk.get(PREF_EMAIL, ""))
-        et_comments.setText(Hawk.get(PREF_COMMENTS, ""))
+        binding.etName.setText(Hawk.get(PREF_NAME, ""))
+        binding.etEmail.setText(Hawk.get(PREF_EMAIL, ""))
+        binding.etComments.setText(Hawk.get(PREF_COMMENTS, ""))
 
-        et_comments.requestFocus()
-        et_comments.setOnEditorActionListener(TextView.OnEditorActionListener { _, action, _ ->
+        binding.etComments.requestFocus()
+        binding.etComments.setOnEditorActionListener(TextView.OnEditorActionListener { _, action, _ ->
             if (action == EditorInfo.IME_ACTION_SEND) {
                 sendOpinion()
                 return@OnEditorActionListener true
             }
             false
         })
-        bt_send_feedback.setOnClickListener { sendOpinion() }
+        binding.btSendFeedback.setOnClickListener { sendOpinion() }
     }
 
-    private fun sendOpinion() {
-        val name = et_name.text.toString()
-        val email = et_email.text.toString()
-        val comments = et_comments.text.toString()
+    private fun sendOpinion() = with(binding) {
+        val name = etName.text.toString()
+        val email = etEmail.text.toString()
+        val comments = etComments.text.toString()
 
         val errorRes = when {
             name.isEmpty() -> R.string.error_name
@@ -56,8 +72,8 @@ class SendFeedbackActivity : AppCompatActivity() {
 
         } else {
 
-            rl_progress_light.visibility = View.VISIBLE
-            tv_progress_message.setText(R.string.sending_feedback)
+            progress.rlProgressLight.visibility = View.VISIBLE
+            progress.tvProgressMessage.setText(R.string.sending_feedback)
 
             val params = listOf(
                 API_NAME to name,
@@ -68,7 +84,7 @@ class SendFeedbackActivity : AppCompatActivity() {
             API_ROUTE_FEEDBACK_SEND.httpPost(params).responseString { request, response, result ->
                 printFuelLog(request, response, result)
 
-                rl_progress_light.visibility = View.GONE
+                progress.rlProgressLight.visibility = View.GONE
 
                 val (data, error) = result
 
@@ -86,7 +102,7 @@ class SendFeedbackActivity : AppCompatActivity() {
                         Hawk.delete(PREF_EMAIL)
                         Hawk.delete(PREF_COMMENTS)
 
-                        et_comments.setText("")
+                        etComments.setEmpty()
 
                         alert(message, getString(R.string.success)) {
                             okButton { finish() }
@@ -108,13 +124,13 @@ class SendFeedbackActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
 
-        Hawk.put(PREF_NAME, et_name.text.toString())
-        Hawk.put(PREF_EMAIL, et_email.text.toString())
-        Hawk.put(PREF_COMMENTS, et_comments.text.toString())
+        Hawk.put(PREF_NAME, binding.etName.text.toString())
+        Hawk.put(PREF_EMAIL, binding.etEmail.text.toString())
+        Hawk.put(PREF_COMMENTS, binding.etComments.text.toString())
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        onBackPressed()
+        onBackPressedDispatcher.onBackPressed()
         return super.onOptionsItemSelected(item)
     }
 }

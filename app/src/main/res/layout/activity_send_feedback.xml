@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/rl_feedback"
         android:layout_width="match_parent"
@@ -25,9 +24,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/activity_vertical_margin"
-                    android:textSize="16sp"
+                    android:text="@string/feedback_instructions"
                     android:textColor="@color/colorText"
-                    android:text="@string/feedback_instructions"/>
+                    android:textSize="16sp" />
 
             <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
@@ -39,7 +38,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:imeOptions="actionNext"
-                        android:inputType="textPersonName|textCapWords"/>
+                        android:inputType="textPersonName|textCapWords" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -53,7 +52,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:imeOptions="actionDone"
-                        android:inputType="textEmailAddress"/>
+                        android:inputType="textEmailAddress" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -67,18 +66,20 @@
                         android:layout_height="wrap_content"
                         android:imeOptions="actionSend"
                         android:inputType="textCapSentences|textMultiLine"
-                        android:maxLength="2048"/>
+                        android:maxLength="2048" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/bt_send_feedback"
+                    style="@style/Button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="7dp"
-                    android:text="@string/send_feedback"
-                    style="@style/Button"/>
+                    android:text="@string/send_feedback" />
         </LinearLayout>
     </ScrollView>
 
-    <include layout="@layout/inc_progress_light"/>
+    <include
+            android:id="@+id/progress"
+            layout="@layout/inc_progress_light" />
 </RelativeLayout>

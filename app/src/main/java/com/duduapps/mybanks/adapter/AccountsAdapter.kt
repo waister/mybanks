@@ -1,5 +1,6 @@
 package com.duduapps.mybanks.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -18,6 +19,7 @@ class AccountsAdapter(private val context: Context) :
 
     private var accounts: MutableList<Account>? = null
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setData(accounts: MutableList<Account>?) {
         this.accounts = accounts
         notifyDataSetChanged()

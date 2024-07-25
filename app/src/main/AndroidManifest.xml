@@ -22,9 +22,8 @@
                 android:value="ca-app-pub-6521704558504566~2400373493" />
 
         <activity
-                android:name=".activity.SplashActivity"
+                android:name=".activity.StartActivity"
                 android:exported="true"
-                android:screenOrientation="portrait"
                 android:theme="@style/SplashTheme"
                 android:windowSoftInputMode="stateHidden"
                 tools:ignore="LockedOrientationActivity">

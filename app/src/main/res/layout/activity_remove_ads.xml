@@ -58,6 +58,6 @@
             android:text="@string/watch_to_by_button"
             android:textColor="@color/colorPrimary"/>
 
-    <include layout="@layout/inc_progress_dark" />
+    <include android:id="@+id/progress" layout="@layout/inc_progress_dark" />
 
 </RelativeLayout>

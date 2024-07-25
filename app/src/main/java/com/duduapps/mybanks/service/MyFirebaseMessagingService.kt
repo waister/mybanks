@@ -16,7 +16,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.duduapps.mybanks.BuildConfig
 import com.duduapps.mybanks.R
-import com.duduapps.mybanks.activity.SplashActivity
+import com.duduapps.mybanks.activity.StartActivity
 import com.duduapps.mybanks.util.*
 import com.github.kittinunf.fuel.httpGet
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -105,7 +105,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         val channelId = "${type}_channel"
 
-        var notifyIntent = Intent(applicationContext, SplashActivity::class.java)
+        var notifyIntent = Intent(applicationContext, StartActivity::class.java)
 
         if (version.isNotEmpty()) {
             val versionCode = version.stringToInt()

@@ -9,15 +9,32 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.duduapps.mybanks.R
 import com.duduapps.mybanks.application.CustomApplication
-import com.duduapps.mybanks.util.*
+import com.duduapps.mybanks.databinding.ActivityLoginBinding
+import com.duduapps.mybanks.util.API_EMAIL
+import com.duduapps.mybanks.util.API_IDENTIFIER
+import com.duduapps.mybanks.util.API_MESSAGE
+import com.duduapps.mybanks.util.API_ROUTE_EMAIL_SEND_CODE
+import com.duduapps.mybanks.util.API_SUCCESS
+import com.duduapps.mybanks.util.API_VERIFIER
+import com.duduapps.mybanks.util.PREF_DEVICE_ID_OLD
+import com.duduapps.mybanks.util.PREF_LOGGED
+import com.duduapps.mybanks.util.decode64
+import com.duduapps.mybanks.util.getBooleanVal
+import com.duduapps.mybanks.util.getStringVal
+import com.duduapps.mybanks.util.getValidJSONObject
+import com.duduapps.mybanks.util.hide
+import com.duduapps.mybanks.util.hideKeyboard
+import com.duduapps.mybanks.util.printFuelLog
+import com.duduapps.mybanks.util.show
+import com.duduapps.mybanks.util.showKeyboard
 import com.github.kittinunf.fuel.httpPost
 import com.orhanobut.hawk.Hawk
-import kotlinx.android.synthetic.main.activity_login.*
-import kotlinx.android.synthetic.main.inc_progress_dark.*
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.okButton
 
 class LoginActivity : AppCompatActivity(), TextView.OnEditorActionListener {
+
+    private lateinit var binding: ActivityLoginBinding
 
     private var userEmail: String = ""
     private var apiCode: String = ""
@@ -25,29 +42,14 @@ class LoginActivity : AppCompatActivity(), TextView.OnEditorActionListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
 
-        et_email.visibility = View.VISIBLE
-        et_code.visibility = View.GONE
+        binding = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        et_email.setOnEditorActionListener(this)
-        et_code.setOnEditorActionListener(this)
+        binding.etEmail.setOnEditorActionListener(this)
+        binding.etCode.setOnEditorActionListener(this)
 
-        bt_positive.setText(R.string.receive_code)
-
-        bt_positive.setOnClickListener {
-            if (et_email.visibility == View.VISIBLE)
-                sendCode()
-            else
-                confirmCode()
-        }
-
-        bt_negative.setOnClickListener {
-            finish()
-        }
-
-        rl_progress_dark.visibility = View.GONE
-        tv_progress_message.setText(R.string.sending)
+        setupViews()
     }
 
     override fun onEditorAction(view: TextView?, actionId: Int, event: KeyEvent?): Boolean {
@@ -56,15 +58,37 @@ class LoginActivity : AppCompatActivity(), TextView.OnEditorActionListener {
                 sendCode()
                 true
             }
+
             else -> false
         }
     }
 
-    private fun sendCode() {
-        userEmail = et_email.text.toString()
+    private fun setupViews() = with(binding) {
+        etEmail.show()
+        etCode.hide()
 
-        rl_progress_dark.visibility = View.VISIBLE
-        rl_progress_dark.hideKeyboard()
+        btPositive.setText(R.string.receive_code)
+
+        btPositive.setOnClickListener {
+            if (etEmail.visibility == View.VISIBLE)
+                sendCode()
+            else
+                confirmCode()
+        }
+
+        btNegative.setOnClickListener {
+            finish()
+        }
+
+        progress.rlProgressDark.hide()
+        progress.tvProgressMessage.setText(R.string.sending)
+    }
+
+    private fun sendCode() = with(binding) {
+        userEmail = etEmail.text.toString()
+
+        progress.rlProgressDark.show()
+        progress.rlProgressDark.hideKeyboard()
 
         val params = listOf(API_EMAIL to userEmail)
         val t = 1000 * 60
@@ -73,7 +97,7 @@ class LoginActivity : AppCompatActivity(), TextView.OnEditorActionListener {
             .responseString { request, response, result ->
                 printFuelLog(request, response, result)
 
-                rl_progress_dark.visibility = View.GONE
+                progress.rlProgressDark.hide()
 
                 val (data, error) = result
                 var success = false
@@ -91,15 +115,15 @@ class LoginActivity : AppCompatActivity(), TextView.OnEditorActionListener {
 
                         alert(message, getString(R.string.success)) {
                             okButton {
-                                et_code.requestFocus()
-                                et_code.showKeyboard()
+                                etCode.requestFocus()
+                                etCode.showKeyboard()
                             }
                         }.show()
 
-                        et_email.visibility = View.GONE
-                        et_code.visibility = View.VISIBLE
+                        etEmail.visibility = View.GONE
+                        etCode.visibility = View.VISIBLE
 
-                        bt_positive.setText(R.string.confirm_code)
+                        btPositive.setText(R.string.confirm_code)
 
                     }
                 }
@@ -113,12 +137,12 @@ class LoginActivity : AppCompatActivity(), TextView.OnEditorActionListener {
             }
     }
 
-    private fun confirmCode() {
-        et_code.hideKeyboard()
+    private fun confirmCode() = with(binding) {
+        etCode.hideKeyboard()
 
-        if (et_code.unMasked == apiCode) {
+        if (etCode.unMasked == apiCode) {
 
-            Hawk.put(PREF_IDENTIFIER, apiIdentifier)
+            Hawk.put(PREF_DEVICE_ID_OLD, apiIdentifier)
             Hawk.put(PREF_LOGGED, true)
 
             CustomApplication().updateFuelParams()
@@ -135,8 +159,8 @@ class LoginActivity : AppCompatActivity(), TextView.OnEditorActionListener {
 
             alert(message, title) {
                 positiveButton(R.string.correct_code) {
-                    et_code.requestFocus()
-                    et_code.showKeyboard()
+                    etCode.requestFocus()
+                    etCode.showKeyboard()
                 }
             }.show()
 

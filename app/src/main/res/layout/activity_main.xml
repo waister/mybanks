@@ -14,8 +14,7 @@
         <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_accounts"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_above="@+id/ll_banner" />
+                android:layout_height="match_parent" />
 
         <LinearLayout
                 android:id="@+id/ll_empty"
@@ -56,7 +55,9 @@
                     android:text="@string/active_auto_backup" />
         </LinearLayout>
 
-        <include layout="@layout/inc_progress_light" />
+        <include
+                android:id="@+id/progress"
+                layout="@layout/inc_progress_light" />
     </RelativeLayout>
 
     <LinearLayout

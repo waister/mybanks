@@ -3,21 +3,34 @@ package com.duduapps.mybanks.activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
-import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.duduapps.mybanks.R
-import com.duduapps.mybanks.util.*
-import com.google.android.gms.ads.*
+import com.duduapps.mybanks.databinding.ActivityRemoveAdsBinding
+import com.duduapps.mybanks.util.ONE_DAY
+import com.duduapps.mybanks.util.PREF_ADMOB_REMOVE_ADS
+import com.duduapps.mybanks.util.PREF_PLAN_VIDEO_DURATION
+import com.duduapps.mybanks.util.PREF_PLAN_VIDEO_MILLIS
+import com.duduapps.mybanks.util.appLog
+import com.duduapps.mybanks.util.havePlan
+import com.duduapps.mybanks.util.hide
+import com.duduapps.mybanks.util.show
+import com.google.android.gms.ads.AdError
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.OnUserEarnedRewardListener
+import com.google.android.gms.ads.RequestConfiguration
 import com.google.android.gms.ads.rewarded.RewardItem
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.orhanobut.hawk.Hawk
-import kotlinx.android.synthetic.main.activity_remove_ads.*
-import kotlinx.android.synthetic.main.inc_progress_dark.*
 import org.jetbrains.anko.longToast
 
 class RemoveAdsActivity : AppCompatActivity(), OnUserEarnedRewardListener {
+
+    private lateinit var binding: ActivityRemoveAdsBinding
 
     private var adMobRemoveAds: String = ""
     private var isRewardedAlertShown: Boolean = false
@@ -29,7 +42,9 @@ class RemoveAdsActivity : AppCompatActivity(), OnUserEarnedRewardListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_remove_ads)
+
+        binding = ActivityRemoveAdsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
@@ -51,7 +66,7 @@ class RemoveAdsActivity : AppCompatActivity(), OnUserEarnedRewardListener {
     }
 
     private fun initViews() {
-        rl_progress_dark?.visibility = View.VISIBLE
+        binding.progress.rlProgressDark.show()
 
         MobileAds.initialize(this) {
             appLog(TAG, "Mobile ads initialized")
@@ -79,7 +94,7 @@ class RemoveAdsActivity : AppCompatActivity(), OnUserEarnedRewardListener {
                     override fun onAdLoaded(ad: RewardedAd) {
                         appLog(TAG, "Ad was loaded")
 
-                        rl_progress_dark?.visibility = View.GONE
+                        binding.progress.rlProgressDark.hide()
 
                         rewardedAd = ad
 
@@ -107,7 +122,7 @@ class RemoveAdsActivity : AppCompatActivity(), OnUserEarnedRewardListener {
                 })
         }
 
-        bt_watch.setOnClickListener {
+        binding.btWatch.setOnClickListener {
             val canShow = rewardedAd != null
             appLog(TAG, "Subscribe button clicked - can show: $canShow")
 
@@ -157,30 +172,30 @@ class RemoveAdsActivity : AppCompatActivity(), OnUserEarnedRewardListener {
     }
 
     private fun restartApp() {
-        val intent = Intent(this, SplashActivity::class.java)
+        val intent = Intent(this, StartActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         startActivity(intent)
 
         finish()
     }
 
-    private fun checkPlan(): Long {
+    private fun checkPlan(): Long = with(binding) {
         val planVideoDuration = Hawk.get(PREF_PLAN_VIDEO_DURATION, ONE_DAY)
 
         if (havePlan()) {
 
             val expiration = Hawk.get(PREF_PLAN_VIDEO_MILLIS, 0L) + planVideoDuration
             val days = ((expiration - System.currentTimeMillis()) / ONE_DAY) + 1
-            tv_body.text = getString(R.string.watch_to_by_body_paid, days)
+            tvBody.text = getString(R.string.watch_to_by_body_paid, days)
 
-            bt_watch.setText(R.string.watch_to_by_button_again)
+            btWatch.setText(R.string.watch_to_by_button_again)
 
             return days
 
         } else {
 
             val days = planVideoDuration / ONE_DAY
-            tv_body.text = getString(R.string.watch_to_by_body, days)
+            tvBody.text = getString(R.string.watch_to_by_body, days)
 
         }
 
@@ -188,7 +203,7 @@ class RemoveAdsActivity : AppCompatActivity(), OnUserEarnedRewardListener {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        onBackPressed()
+        onBackPressedDispatcher.onBackPressed()
         return super.onOptionsItemSelected(item)
     }
 

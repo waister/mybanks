@@ -18,6 +18,7 @@ const val API_ROUTE_FEEDBACK_SEND = "/message/send"
 
 const val API_ANDROID = "android"
 const val API_IDENTIFIER = "identifier"
+const val API_IDENTIFIER_OLD = "identifier_old"
 const val API_VERSION = "version"
 const val API_PLATFORM = "platform"
 const val API_DEBUG = "debug"
@@ -62,7 +63,7 @@ const val API_PLAN_VIDEO_DURATION = "plan_video_duration"
 const val API_INTERSTITIAL_MIN_INTERVAL = "interstitial_min_interval"
 
 fun String?.getValidJSONObject(): JSONObject? {
-    if (this != null && this.isNotEmpty() && this != "null") {
+    if (!this.isNullOrEmpty() && this != "null") {
         try {
             return JSONObject(this)
         } catch (e: JSONException) {
@@ -73,7 +74,7 @@ fun String?.getValidJSONObject(): JSONObject? {
 }
 
 fun String?.getValidJSONArray(): JSONArray? {
-    if (this != null && this.isNotEmpty() && this != "null") {
+    if (!this.isNullOrEmpty() && this != "null") {
         try {
             return JSONArray(this)
         } catch (e: JSONException) {
@@ -106,7 +107,7 @@ fun JSONObject?.getJSONArrayVal(tag: String): JSONArray? {
 }
 
 fun String?.getStringValid(): String {
-    if (this != null && this.isNotEmpty() && this != "null" && this != "[null]") {
+    if (!this.isNullOrEmpty() && this != "null" && this != "[null]") {
         return this
     }
     return ""
@@ -116,7 +117,7 @@ fun JSONObject?.getArrayValid(tag: String): JSONArray? {
     if (this != null) {
         try {
             return getJSONArray(tag)
-        } catch (e: JSONException) {
+        } catch (_: JSONException) {
         }
     }
     return null
@@ -126,7 +127,7 @@ fun JSONObject?.getObjectValid(tag: String): JSONObject? {
     if (this != null) {
         try {
             return getJSONObject(tag)
-        } catch (e: JSONException) {
+        } catch (_: JSONException) {
         }
     }
     return null
@@ -136,7 +137,7 @@ fun JSONObject?.getStringVal(tag: String, default: String = ""): String {
     if (this != null && has(tag)) {
         try {
             return getString(tag).getStringValid()
-        } catch (e: JSONException) {
+        } catch (_: JSONException) {
         }
     }
     return default
@@ -144,14 +145,14 @@ fun JSONObject?.getStringVal(tag: String, default: String = ""): String {
 
 fun JSONObject?.getStringNullable(tag: String): String? {
     val value = getStringVal(tag)
-    return if (value.isNotEmpty()) value else null
+    return value.ifEmpty { null }
 }
 
 fun JSONObject?.getIntVal(tag: String, default: Int = 0): Int {
     if (this != null && has(tag)) {
         try {
             return getInt(tag)
-        } catch (e: JSONException) {
+        } catch (_: JSONException) {
         }
     }
     return default
@@ -161,7 +162,7 @@ fun JSONObject?.getLongVal(tag: String, default: Long = 0): Long {
     if (this != null && has(tag)) {
         try {
             return getLong(tag)
-        } catch (e: JSONException) {
+        } catch (_: JSONException) {
         }
     }
     return default
@@ -171,7 +172,7 @@ fun JSONObject?.getDoubleVal(tag: String, default: Double = 0.0): Double {
     if (this != null && has(tag)) {
         try {
             return getDouble(tag)
-        } catch (e: JSONException) {
+        } catch (_: JSONException) {
         }
     }
     return default
@@ -181,7 +182,7 @@ fun JSONObject?.getBooleanVal(tag: String, default: Boolean = false): Boolean {
     if (this != null && has(tag)) {
         try {
             return getBoolean(tag)
-        } catch (e: JSONException) {
+        } catch (_: JSONException) {
         }
     }
     return default

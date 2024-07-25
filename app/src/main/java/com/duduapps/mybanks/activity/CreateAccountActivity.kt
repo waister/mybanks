@@ -4,22 +4,31 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.MenuItem
-import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.duduapps.mybanks.R
+import com.duduapps.mybanks.databinding.ActivityCreateAccountBinding
 import com.duduapps.mybanks.model.Account
 import com.duduapps.mybanks.model.Bank
-import com.duduapps.mybanks.util.*
+import com.duduapps.mybanks.util.PARAM_ID
+import com.duduapps.mybanks.util.PREF_LAST_DOCUMENT
+import com.duduapps.mybanks.util.PREF_LAST_HOLDER
+import com.duduapps.mybanks.util.PREF_LAST_LEGAL_ACCOUNT
+import com.duduapps.mybanks.util.currentTimestamp
+import com.duduapps.mybanks.util.getNumbers
+import com.duduapps.mybanks.util.hideKeyboard
+import com.duduapps.mybanks.util.isVisible
+import com.duduapps.mybanks.util.setEmpty
 import com.orhanobut.hawk.Hawk
 import io.realm.Realm
-import kotlinx.android.synthetic.main.activity_create_account.*
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.longToast
 import org.jetbrains.anko.okButton
 
 class CreateAccountActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityCreateAccountBinding
 
     private val realm = Realm.getDefaultInstance()
     private var banks: MutableList<Bank> = mutableListOf()
@@ -27,7 +36,9 @@ class CreateAccountActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_create_account)
+
+        binding = ActivityCreateAccountBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         val accountId = intent.getLongExtra(PARAM_ID, 0L)
 
@@ -55,51 +66,51 @@ class CreateAccountActivity : AppCompatActivity() {
 
         banks = realm.where(Bank::class.java).findAll()
 
-        bt_submit.setOnClickListener { submitCreate() }
+        binding.btSubmit.setOnClickListener { submitCreate() }
 
         initViews()
     }
 
-    private fun initViews() {
+    private fun initViews() = with(binding) {
         if (account == null) {
             val isLegalAccount = Hawk.get(PREF_LAST_LEGAL_ACCOUNT, false) ?: false
             val document = Hawk.get(PREF_LAST_DOCUMENT, "") ?: ""
 
-            cb_legal_account.isChecked = isLegalAccount
-            et_holder.setText(Hawk.get(PREF_LAST_HOLDER, ""))
+            cbLegalAccount.isChecked = isLegalAccount
+            etHolder.setText(Hawk.get(PREF_LAST_HOLDER, ""))
 
             toggleDocument()
 
             if (isLegalAccount)
-                et_cnpj.setText(document)
+                etCnpj.setText(document)
             else
-                et_cpf.setText(document)
+                etCpf.setText(document)
         }
 
-        cb_legal_account.setOnCheckedChangeListener { _, isChecked ->
+        cbLegalAccount.setOnCheckedChangeListener { _, isChecked ->
             toggleDocument()
 
             if (isChecked)
-                et_cnpj.requestFocus()
+                etCnpj.requestFocus()
             else
-                et_cpf.requestFocus()
+                etCpf.requestFocus()
         }
 
-        et_cpf.setOnEditorActionListener { _, actionId, _ ->
+        etCpf.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 submitCreate()
                 true
             } else false
         }
 
-        et_cnpj.setOnEditorActionListener { _, actionId, _ ->
+        etCnpj.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 submitCreate()
                 true
             } else false
         }
 
-        et_account.addTextChangedListener(object : TextWatcher {
+        etAccount.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(text: Editable?) {
                 if (text != null) {
                     val numbers = text.toString().getNumbers()
@@ -109,9 +120,9 @@ class CreateAccountActivity : AppCompatActivity() {
                         val account = numbers.take(length - 1)
                         val digit = numbers.takeLast(1)
 
-                        et_account.removeTextChangedListener(this)
+                        etAccount.removeTextChangedListener(this)
                         text.replace(0, text.length, "$account-$digit")
-                        et_account.addTextChangedListener(this)
+                        etAccount.addTextChangedListener(this)
                     }
                 }
             }
@@ -124,46 +135,41 @@ class CreateAccountActivity : AppCompatActivity() {
         populateBanks()
     }
 
-    private fun toggleDocument() {
-        if (cb_legal_account.isChecked) {
-            ly_cpf.visibility = View.GONE
-            ly_cnpj.visibility = View.VISIBLE
-        } else {
-            ly_cpf.visibility = View.VISIBLE
-            ly_cnpj.visibility = View.GONE
-        }
+    private fun toggleDocument() = with(binding) {
+        lyCpf.isVisible(!cbLegalAccount.isChecked)
+        lyCnpj.isVisible(cbLegalAccount.isChecked)
     }
 
-    private fun renderEditData() {
+    private fun renderEditData() = with(binding) {
         val item = account!!
 
         supportActionBar?.title = getString(R.string.label_edit_account, item.label)
 
         val bankFullName = "${item.bank!!.code} - ${item.bank!!.name}"
 
-        et_bank.setText(bankFullName)
-        et_label.setText(item.label)
-        et_pix_code.setText(item.pixCode)
-        et_agency.setText(item.agency)
-        et_account.setText(item.account)
-        et_operation.setText(item.operation)
-        et_holder.setText(item.holder)
+        etBank.setText(bankFullName)
+        etLabel.setText(item.label)
+        etPixCode.setText(item.pixCode)
+        etAgency.setText(item.agency)
+        etAccount.setText(item.account)
+        etOperation.setText(item.operation)
+        etHolder.setText(item.holder)
 
-        cb_legal_account.isChecked = item.legalAccount
+        cbLegalAccount.isChecked = item.legalAccount
 
         if (item.legalAccount)
-            et_cnpj.setText(item.document)
+            etCnpj.setText(item.document)
         else
-            et_cpf.setText(item.document)
+            etCpf.setText(item.document)
 
         toggleDocument()
 
         when (item.type) {
-            getString(R.string.checking) -> rb_checking.isChecked = true
-            getString(R.string.savings) -> rb_savings.isChecked = true
+            getString(R.string.checking) -> rbChecking.isChecked = true
+            getString(R.string.savings) -> rbSavings.isChecked = true
         }
 
-        bt_submit.setText(R.string.save_changes)
+        btSubmit.setText(R.string.save_changes)
     }
 
     private fun populateBanks() {
@@ -174,25 +180,25 @@ class CreateAccountActivity : AppCompatActivity() {
         }
 
         val adapter = ArrayAdapter(this, R.layout.item_spinner_list, banksList)
-        et_bank.threshold = 1
-        et_bank.setAdapter(adapter)
+        binding.etBank.threshold = 1
+        binding.etBank.setAdapter(adapter)
     }
 
-    private fun submitCreate() {
-        et_label.hideKeyboard()
+    private fun submitCreate() = with(binding) {
+        etLabel.hideKeyboard()
 
         var bankId = 0
-        val bankName = et_bank.text.toString()
-        val label = et_label.text.toString()
-        val pixCode = et_pix_code.text.toString()
-        val agency = et_agency.text.toString()
-        val number = et_account.text.toString()
-        val operation = et_operation.text.toString()
-        val holder = et_holder.text.toString()
-        val legalAccount = cb_legal_account.isChecked
-        val document = (if (legalAccount) et_cnpj.text else et_cpf.text).toString()
+        val bankName = etBank.text.toString()
+        val label = etLabel.text.toString()
+        val pixCode = etPixCode.text.toString()
+        val agency = etAgency.text.toString()
+        val number = etAccount.text.toString()
+        val operation = etOperation.text.toString()
+        val holder = etHolder.text.toString()
+        val legalAccount = cbLegalAccount.isChecked
+        val document = (if (legalAccount) etCnpj.text else etCpf.text).toString()
 
-        val type = when (rg_type.checkedRadioButtonId) {
+        val type = when (rgType.checkedRadioButtonId) {
             R.id.rb_checking -> getString(R.string.checking)
             R.id.rb_savings -> getString(R.string.savings)
             else -> ""
@@ -210,37 +216,37 @@ class CreateAccountActivity : AppCompatActivity() {
 
         if (label.isEmpty()) {
             errors++
-            et_label.error = getString(R.string.error_label)
+            etLabel.error = getString(R.string.error_label)
         }
         if (bankId == 0) {
             errors++
-            et_bank.error = getString(R.string.error_bank)
+            etBank.error = getString(R.string.error_bank)
         }
         if (agency.isEmpty()) {
             errors++
-            et_agency.error = getString(R.string.error_agency)
+            etAgency.error = getString(R.string.error_agency)
         } else if (agency.length < 4) {
             errors++
-            et_agency.error = getString(R.string.error_agency_invalid)
+            etAgency.error = getString(R.string.error_agency_invalid)
         }
         if (number.isEmpty()) {
             errors++
-            et_account.error = getString(R.string.error_account)
+            etAccount.error = getString(R.string.error_account)
         } else if (number.length < 3) {
             errors++
-            et_account.error = getString(R.string.error_account_invalid)
+            etAccount.error = getString(R.string.error_account_invalid)
         }
         if (holder.isEmpty()) {
             errors++
-            et_holder.error = getString(R.string.error_holder)
+            etHolder.error = getString(R.string.error_holder)
         }
         if (document.isEmpty()) {
             errors++
 
             if (legalAccount)
-                et_cnpj.error = getString(R.string.error_cnpj)
+                etCnpj.error = getString(R.string.error_cnpj)
             else
-                et_cpf.error = getString(R.string.error_cpf)
+                etCpf.error = getString(R.string.error_cpf)
         }
 
         if (errors == 0) {
@@ -250,7 +256,7 @@ class CreateAccountActivity : AppCompatActivity() {
 
                 Hawk.put(PREF_LAST_HOLDER, holder)
                 Hawk.put(PREF_LAST_DOCUMENT, document)
-                Hawk.put(PREF_LAST_LEGAL_ACCOUNT, cb_legal_account.isChecked)
+                Hawk.put(PREF_LAST_LEGAL_ACCOUNT, cbLegalAccount.isChecked)
 
                 val item = Account()
 
@@ -281,20 +287,20 @@ class CreateAccountActivity : AppCompatActivity() {
                     realm.copyToRealmOrUpdate(item)
                 }
 
-                if (this.account != null) {
+                if (account != null) {
 
                     longToast(R.string.success_account_edited)
                     finish()
 
                 } else {
 
-                    et_bank.setText("")
-                    et_label.setText("")
-                    et_pix_code.setText("")
-                    et_agency.setText("")
-                    et_account.setText("")
-                    rb_checking.isChecked = true
-                    rb_savings.isChecked = false
+                    etBank.setEmpty()
+                    etLabel.setEmpty()
+                    etPixCode.setEmpty()
+                    etAgency.setEmpty()
+                    etAccount.setEmpty()
+                    rbChecking.isChecked = true
+                    rbSavings.isChecked = false
 
                     alert(R.string.success_account_added, R.string.success) {
                         positiveButton(R.string.finish) { finish() }
@@ -308,7 +314,7 @@ class CreateAccountActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        onBackPressed()
+        onBackPressedDispatcher.onBackPressed()
         return super.onOptionsItemSelected(item)
     }
 

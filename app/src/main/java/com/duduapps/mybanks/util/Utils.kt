@@ -5,31 +5,42 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
+import android.graphics.Rect
+import android.os.Bundle
 import android.util.Base64
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.webkit.URLUtil
+import android.widget.AutoCompleteTextView
 import android.widget.LinearLayout
+import androidx.appcompat.widget.AppCompatEditText
 import com.duduapps.mybanks.BuildConfig
 import com.duduapps.mybanks.R
-import com.duduapps.mybanks.activity.SplashActivity
+import com.duduapps.mybanks.activity.StartActivity
 import com.duduapps.mybanks.model.Account
 import com.duduapps.mybanks.model.Bank
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.result.Result
+import com.google.ads.mediation.admob.AdMobAdapter
+import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.LoadAdError
 import com.orhanobut.hawk.Hawk
 import io.realm.Realm
 import org.jetbrains.anko.alert
-import org.jetbrains.anko.displayMetrics
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.UUID
 
 
 const val PARAM_ID = "ParamId"
@@ -55,7 +66,7 @@ fun Activity.logout() {
         positiveButton(R.string.confirm) {
             Hawk.delete(PREF_LOGGED)
 
-            val intent = Intent(context, SplashActivity::class.java)
+            val intent = Intent(context, StartActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             startActivity(intent)
 
@@ -77,32 +88,77 @@ fun havePlan(): Boolean {
     return false
 }
 
-fun Activity?.loadAdBanner(
+fun Context?.loadAdMobBanner(
     adViewContainer: LinearLayout?,
     adUnitId: String,
-    adSize: AdSize? = null
+    adSize: AdSize? = null,
+    collapsible: Boolean = false
 ) {
-    if (this == null || adViewContainer == null || havePlan()) return
+    val logTag = "LOAD_ADMOB_BANNER"
+
+    if (this == null || adUnitId.isEmpty() || adViewContainer == null || havePlan()) {
+        appLog(logTag, "loadAdMobBanner() falied | $this | $adUnitId | ${havePlan()}")
+        return
+    }
+
+    appLog(logTag, "adUnitId: $adUnitId")
 
     val adView = AdView(this)
     adViewContainer.addView(adView)
 
-    adView.adUnitId = adUnitId
+    adView.adUnitId = if (isDebug()) "ca-app-pub-3940256099942544/6300978111" else adUnitId
 
     adView.setAdSize(adSize ?: getAdSize(adViewContainer))
 
-    adView.loadAd(AdRequest.Builder().build())
+    val extras = Bundle()
+    if (collapsible) {
+        extras.putString("collapsible", "bottom")
+        extras.putString("collapsible_request_id", UUID.randomUUID().toString())
+    }
+
+    val adRequest = AdRequest.Builder()
+        .addNetworkExtrasBundle(AdMobAdapter::class.java, extras)
+        .build()
+
+    adView.loadAd(adRequest)
+
+    adView.adListener = object : AdListener() {
+        override fun onAdLoaded() {
+            super.onAdLoaded()
+            appLog(logTag, "onAdLoaded()")
+        }
+
+        override fun onAdFailedToLoad(error: LoadAdError) {
+            super.onAdFailedToLoad(error)
+            appLog(logTag, "onAdFailedToLoad(): ${error.message}")
+        }
+
+        override fun onAdOpened() {
+            super.onAdOpened()
+            appLog(logTag, "onAdOpened()")
+        }
+
+        override fun onAdClosed() {
+            super.onAdClosed()
+            appLog(logTag, "onAdClosed()")
+        }
+    }
+
+    appLog(logTag, "ENDS")
 }
 
-fun Activity.getAdSize(adViewContainer: LinearLayout): AdSize {
-    val density = displayMetrics.density
-
+fun Context.getAdSize(adViewContainer: LinearLayout): AdSize {
     var adWidthPixels = adViewContainer.width.toFloat()
     if (adWidthPixels == 0f)
-        adWidthPixels = displayMetrics.widthPixels.toFloat()
+        adWidthPixels = displayWidth().toFloat()
 
+    val density = resources.displayMetrics.density
     val adWidth = (adWidthPixels / density).toInt()
     return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth)
+}
+
+fun Context?.displayWidth(): Int {
+    return if (this != null) resources.displayMetrics.widthPixels else 0
 }
 
 fun Context.copyToClipboard(text: String) {
@@ -132,7 +188,7 @@ fun appLog(tag: String, msg: String) {
 
 fun String?.stringToInt(): Int {
     if (this != null && this != "null") {
-        val number = this.replace("[^\\d]".toRegex(), "")
+        val number = this.replace("\\D".toRegex(), "")
         if (number.isNotEmpty())
             return number.toInt()
     }
@@ -179,7 +235,7 @@ fun Bitmap?.getCircleCroppedBitmap(): Bitmap? {
     if (bitmap != null) {
         try {
             output = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
-            val canvas = Canvas(output!!)
+            val canvas = Canvas(output)
 
             val color = -0xbdbdbe
             val paint = Paint()
@@ -316,7 +372,7 @@ fun View.showKeyboard() {
 
 fun String?.getNumbers(): String {
     if (this != null && this != "null") {
-        return this.replace("[^\\d]".toRegex(), "")
+        return this.replace("\\D".toRegex(), "")
     }
     return ""
 }
@@ -341,3 +397,29 @@ fun decode64(base64: String): String {
     val data = Base64.decode(base64, Base64.DEFAULT)
     return String(data, Charsets.UTF_8)
 }
+
+fun View.isVisible(isVisible: Boolean) {
+    if (isVisible) show() else hide()
+}
+
+fun View.show() {
+    visibility = View.VISIBLE
+}
+
+fun View.hide() {
+    visibility = View.GONE
+}
+
+fun String?.isNumeric(): Boolean {
+    if (this == null) return false
+    val regex = "-?[0-9]+(\\.[0-9]+)?".toRegex()
+    return this.matches(regex)
+}
+
+fun String?.isNotNumeric(): Boolean = !this.isNumeric()
+
+fun AutoCompleteTextView.setEmpty() = this.text?.clear()
+
+fun AppCompatEditText.setEmpty() = this.text?.clear()
+
+fun isDebug() = BuildConfig.DEBUG

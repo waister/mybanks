@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
-        tools:context=".activity.SplashActivity">
+        tools:context=".activity.StartActivity">
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -17,10 +16,10 @@
             tools:ignore="UselessParent">
 
         <ProgressBar
-                style="@style/MyProgressBarWhite"
                 android:id="@+id/pb_loading"
+                style="@style/MyProgressBarWhite"
                 android:layout_width="32dp"
-                android:layout_height="32dp"/>
+                android:layout_height="32dp" />
 
         <TextView
                 android:id="@+id/tv_label"
@@ -29,7 +28,7 @@
                 android:layout_marginStart="10dp"
                 android:text="@string/loading_settings"
                 android:textColor="@color/white"
-                android:textSize="12sp"/>
+                android:textSize="12sp" />
 
     </LinearLayout>
 
