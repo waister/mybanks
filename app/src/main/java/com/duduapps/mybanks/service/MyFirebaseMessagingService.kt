@@ -97,9 +97,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         appLog(TAG, "Push itemId: $itemId")
         appLog(TAG, "Push vibrate: $vibrate")
 
-        if (type == API_BANKS || type == API_WAKEUP)
-            Hawk.put(PREF_UPDATE_ON_SPLASH, true)
-
         if (title.isEmpty() || type == API_WAKEUP)
             return
 

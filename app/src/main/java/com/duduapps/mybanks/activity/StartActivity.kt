@@ -1,10 +1,10 @@
 package com.duduapps.mybanks.activity
 
-import android.app.AlertDialog
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.duduapps.mybanks.R
 import com.duduapps.mybanks.application.CustomApplication
@@ -17,8 +17,6 @@ import com.duduapps.mybanks.util.API_SUCCESS
 import com.duduapps.mybanks.util.PREF_DEVICE_ID
 import com.duduapps.mybanks.util.PREF_DEVICE_ID_OLD
 import com.duduapps.mybanks.util.PREF_FCM_TOKEN
-import com.duduapps.mybanks.util.PREF_PLAN_VIDEO_DURATION
-import com.duduapps.mybanks.util.PREF_UPDATE_ON_SPLASH
 import com.duduapps.mybanks.util.appLog
 import com.duduapps.mybanks.util.getBooleanVal
 import com.duduapps.mybanks.util.getStringVal
@@ -97,22 +95,15 @@ class StartActivity : AppCompatActivity() {
 
         createDeviceID()
 
-        var updateOnSplash = Hawk.get(PREF_UPDATE_ON_SPLASH, true)
-
-        if (Hawk.get(PREF_PLAN_VIDEO_DURATION, 0L) == 0L)
-            updateOnSplash = true
-
-        val banks = realm.where(Bank::class.java).count()
-
-        if (updateOnSplash || banks == 0L) {
-
+        if (realm.where(Bank::class.java).count() == 0L)
             apiGetBanks()
+        else
+            if ((application as CustomApplication).isCheckUpdatesNeeded) {
+                (application as CustomApplication).isCheckUpdatesNeeded = false
 
-        } else {
-
-            initApp()
-
-        }
+                checkAppVersion()
+            } else
+                initApp()
     }
 
     override fun onResume() {
@@ -137,14 +128,8 @@ class StartActivity : AppCompatActivity() {
     }
 
     private fun initApp() {
-        if ((application as CustomApplication).isCheckUpdatesNeeded) {
-            (application as CustomApplication).isCheckUpdatesNeeded = false
-
-            checkAppVersion()
-        } else {
-            startActivity(intentFor<MainActivity>())
-            finish()
-        }
+        startActivity(intentFor<MainActivity>())
+        finish()
     }
 
     private fun apiGetBanks() = with(binding) {
@@ -174,17 +159,11 @@ class StartActivity : AppCompatActivity() {
                     message = apiObj.getStringVal(API_MESSAGE)
 
                     if (success) {
-                        Hawk.put(PREF_UPDATE_ON_SPLASH, false)
-
                         success = realm.saveBanks(result)
 
                         if (success) {
 
                             apiGetAccounts()
-
-                        } else {
-
-                            success = false
 
                         }
                     }
