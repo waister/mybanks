@@ -3,7 +3,6 @@ package com.duduapps.mybanks.activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.duduapps.mybanks.R
 import com.duduapps.mybanks.databinding.ActivityRemoveAdsBinding
@@ -14,6 +13,7 @@ import com.duduapps.mybanks.util.PREF_PLAN_VIDEO_MILLIS
 import com.duduapps.mybanks.util.appLog
 import com.duduapps.mybanks.util.havePlan
 import com.duduapps.mybanks.util.hide
+import com.duduapps.mybanks.util.longToast
 import com.duduapps.mybanks.util.show
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
@@ -25,8 +25,8 @@ import com.google.android.gms.ads.RequestConfiguration
 import com.google.android.gms.ads.rewarded.RewardItem
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.orhanobut.hawk.Hawk
-import org.jetbrains.anko.longToast
 
 class RemoveAdsActivity : AppCompatActivity(), OnUserEarnedRewardListener {
 
@@ -144,7 +144,7 @@ class RemoveAdsActivity : AppCompatActivity(), OnUserEarnedRewardListener {
     }
 
     private fun alertErrorLoad() {
-        AlertDialog.Builder(this)
+        MaterialAlertDialogBuilder(applicationContext)
             .setCancelable(false)
             .setTitle(R.string.ops)
             .setMessage(R.string.error_load_video)
@@ -159,7 +159,7 @@ class RemoveAdsActivity : AppCompatActivity(), OnUserEarnedRewardListener {
         if (!isRewardedAlertShown && havePlan()) {
             isRewardedAlertShown = true
 
-            AlertDialog.Builder(this)
+            MaterialAlertDialogBuilder(applicationContext)
                 .setCancelable(false)
                 .setTitle(R.string.plan_success_title)
                 .setMessage(R.string.plan_success_body)

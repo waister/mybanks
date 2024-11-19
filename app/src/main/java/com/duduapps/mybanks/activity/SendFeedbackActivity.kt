@@ -23,9 +23,8 @@ import com.duduapps.mybanks.util.getValidJSONObject
 import com.duduapps.mybanks.util.printFuelLog
 import com.duduapps.mybanks.util.setEmpty
 import com.github.kittinunf.fuel.httpPost
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.orhanobut.hawk.Hawk
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.okButton
 
 class SendFeedbackActivity : AppCompatActivity() {
 
@@ -68,7 +67,15 @@ class SendFeedbackActivity : AppCompatActivity() {
 
         if (errorRes > 0) {
 
-            alert(errorRes, R.string.ops) { okButton {} }.show()
+            MaterialAlertDialogBuilder(applicationContext)
+                .setTitle(R.string.ops)
+                .setMessage(errorRes)
+                .setCancelable(false)
+                .setPositiveButton(R.string.ok) { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .create()
+                .show()
 
         } else {
 
@@ -104,10 +111,15 @@ class SendFeedbackActivity : AppCompatActivity() {
 
                         etComments.setEmpty()
 
-                        alert(message, getString(R.string.success)) {
-                            okButton { finish() }
-                            onCancelled { finish() }
-                        }.show()
+                        MaterialAlertDialogBuilder(applicationContext)
+                            .setTitle(R.string.success)
+                            .setMessage(message)
+                            .setCancelable(false)
+                            .setPositiveButton(R.string.ok) { _, _ ->
+                                finish()
+                            }
+                            .create()
+                            .show()
                     }
                 }
 
@@ -115,7 +127,15 @@ class SendFeedbackActivity : AppCompatActivity() {
                     if (message.isEmpty())
                         message = getString(R.string.error_connection)
 
-                    alert(message, getString(R.string.ops)) { okButton {} }.show()
+                    MaterialAlertDialogBuilder(applicationContext)
+                        .setTitle(R.string.ops)
+                        .setMessage(message)
+                        .setCancelable(false)
+                        .setPositiveButton(R.string.ok) { _, _ ->
+                            finish()
+                        }
+                        .create()
+                        .show()
                 }
             }
         }

@@ -47,7 +47,9 @@ import com.duduapps.mybanks.util.PREF_FCM_TOKEN
 import com.duduapps.mybanks.util.PREF_SHARE_LINK
 import com.duduapps.mybanks.util.PREF_SHOW_ALERT_LOGIN
 import com.duduapps.mybanks.util.appLog
+import com.duduapps.mybanks.util.browse
 import com.duduapps.mybanks.util.copyToClipboard
+import com.duduapps.mybanks.util.getAccounts
 import com.duduapps.mybanks.util.getBooleanVal
 import com.duduapps.mybanks.util.getIntVal
 import com.duduapps.mybanks.util.getValidJSONObject
@@ -59,8 +61,11 @@ import com.duduapps.mybanks.util.logout
 import com.duduapps.mybanks.util.printFuelLog
 import com.duduapps.mybanks.util.saveAccounts
 import com.duduapps.mybanks.util.saveBanks
+import com.duduapps.mybanks.util.share
+import com.duduapps.mybanks.util.shortToast
 import com.duduapps.mybanks.util.show
 import com.duduapps.mybanks.util.storeAppLink
+import com.duduapps.mybanks.util.unsentAccounts
 import com.duduapps.mybanks.util.unsentAccountsCount
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
@@ -70,21 +75,13 @@ import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.orhanobut.hawk.Hawk
-import io.realm.Case
-import io.realm.Realm
-import io.realm.Sort
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.browse
-import org.jetbrains.anko.intentFor
-import org.jetbrains.anko.share
-import org.jetbrains.anko.toast
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private val realm = Realm.getDefaultInstance()
     private var accounts: MutableList<Account> = mutableListOf()
     private var accountsAdapter: AccountsAdapter? = null
     private var menuLogin: MenuItem? = null
@@ -167,8 +164,8 @@ class MainActivity : AppCompatActivity() {
         appLog(TAG, "PREF_SHOW_ALERT_LOGIN: ${Hawk.put(PREF_SHOW_ALERT_LOGIN, true)}")
 
         if (!isLogged() && Hawk.put(PREF_SHOW_ALERT_LOGIN, true)) {
-            if (realm.where(Account::class.java).isNull("deleted").count() > 0) {
-                startActivity(intentFor<AlertLoginActivity>())
+            if (searchAccounts().isNotEmpty()) {
+                startActivity(Intent(this, AlertLoginActivity::class.java))
             }
         }
 
@@ -177,7 +174,7 @@ class MainActivity : AppCompatActivity() {
 
             if (text.isNotEmpty()) {
                 copyToClipboard(text)
-                toast(R.string.accounts_copied)
+                shortToast(R.string.accounts_copied)
             }
 
             interstitialAd?.show(this)
@@ -204,33 +201,26 @@ class MainActivity : AppCompatActivity() {
         menuLogout?.isVisible = isLogged()
     }
 
-    private fun getAccounts(terms: String = ""): MutableList<Account> {
-        var items: MutableList<Account>? = null
+    private fun searchAccounts(terms: String = ""): MutableList<Account> {
+        val accounts = getAccounts().toMutableList()
 
-        if (!realm.isClosed) {
-            val query = realm.where(Account::class.java)
-                .isNull("deleted")
+        if (terms.isNotEmpty())
+            accounts.filter { it.label.contains(terms) }
 
-            if (terms.isNotEmpty())
-                query.contains("label", terms, Case.INSENSITIVE)
+        accounts.sortBy { it.label }
 
-            query.sort("label", Sort.ASCENDING)
-
-            items = query.findAll()
-        }
-
-        return items ?: mutableListOf()
+        return accounts
     }
 
     private fun searchVisibility() {
-        val size = getAccounts("").size
+        val size = searchAccounts("").size
         menuSearch?.isVisible = size > 3
     }
 
     private fun renderData() {
-        accounts = getAccounts(lastTerms)
+        accounts = searchAccounts(lastTerms)
 
-        if (accounts.size == 0) {
+        if (accounts.isEmpty()) {
 
             binding.rvAccounts.visibility = View.GONE
             binding.llEmpty.visibility = View.VISIBLE
@@ -239,7 +229,7 @@ class MainActivity : AppCompatActivity() {
 
             if (lastTerms.isEmpty()) {
                 binding.btAddAccount.setOnClickListener {
-                    startActivity(intentFor<CreateAccountActivity>())
+                    startActivity(Intent(this, CreateAccountActivity::class.java))
                 }
 
                 if (isLogged()) {
@@ -271,7 +261,7 @@ class MainActivity : AppCompatActivity() {
     private fun getShareText(): String {
         var fullText = ""
 
-        if (accounts.size > 0) {
+        if (accounts.isNotEmpty()) {
             accounts.forEach { account ->
                 if (fullText.isNotEmpty())
                     fullText += "\n--\n"
@@ -309,26 +299,31 @@ class MainActivity : AppCompatActivity() {
                         val versionMin = apiObj.getIntVal(API_VERSION_MIN)
 
                         if (BuildConfig.VERSION_CODE < versionMin) {
-                            alert(
-                                getString(R.string.update_needed),
-                                getString(R.string.updated_title)
-                            ) {
-                                positiveButton(R.string.updated_positive) {
+                            MaterialAlertDialogBuilder(applicationContext)
+                                .setTitle(R.string.updated_title)
+                                .setMessage(R.string.update_needed)
+                                .setCancelable(false)
+                                .setPositiveButton(R.string.updated_positive) { _, _ ->
                                     browse(storeAppLink())
                                 }
-                                negativeButton(R.string.updated_logout) { finish() }
-                                onCancelled { finish() }
-                            }.show()
+                                .setNegativeButton(R.string.updated_logout) { _, _ ->
+                                    finish()
+                                }
+                                .create()
+                                .show()
                         } else if (BuildConfig.VERSION_CODE < versionLast) {
-                            alert(
-                                getString(R.string.update_available),
-                                getString(R.string.updated_title)
-                            ) {
-                                positiveButton(R.string.updated_positive) {
+                            MaterialAlertDialogBuilder(applicationContext)
+                                .setTitle(R.string.updated_title)
+                                .setMessage(R.string.update_available)
+                                .setCancelable(false)
+                                .setPositiveButton(R.string.updated_positive) { _, _ ->
                                     browse(storeAppLink())
                                 }
-                                negativeButton(R.string.updated_negative) {}
-                            }.show()
+                                .setNegativeButton(R.string.updated_negative) { _, _ ->
+                                    finish()
+                                }
+                                .create()
+                                .show()
                         }
                     }
                 }
@@ -381,13 +376,13 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_add_account -> {
-                startActivity(intentFor<CreateAccountActivity>())
+                startActivity(Intent(this, CreateAccountActivity::class.java))
                 interstitialAd?.show(this)
                 true
             }
 
             R.id.action_login -> {
-                startActivity(intentFor<LoginActivity>())
+                startActivity(Intent(this, LoginActivity::class.java))
                 true
             }
 
@@ -397,7 +392,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             R.id.action_remove_ads -> {
-                startActivity(intentFor<RemoveAdsActivity>())
+                startActivity(Intent(this, RemoveAdsActivity::class.java))
                 true
             }
 
@@ -415,7 +410,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             R.id.action_send_feedback -> {
-                startActivity(intentFor<SendFeedbackActivity>())
+                startActivity(Intent(this, SendFeedbackActivity::class.java))
                 true
             }
 
@@ -437,18 +432,14 @@ class MainActivity : AppCompatActivity() {
         API_ROUTE_BANKS.httpGet().responseString { request, response, result ->
             printFuelLog(request, response, result)
 
-            realm.saveBanks(result)
+            saveBanks(result)
         }
     }
 
     private fun apiSyncAccounts() {
-
-        val account = realm.where(Account::class.java)
-            .equalTo("synced", false)
-            .findFirst()
+        val account = unsentAccounts().firstOrNull()
 
         if (account != null) {
-
             val params = listOf(
                 API_ID to account.id,
                 API_PIX_CODE to account.pixCode,
@@ -468,17 +459,11 @@ class MainActivity : AppCompatActivity() {
                 .responseString { request, response, result ->
                     printFuelLog(request, response, result)
 
-                    val success = realm.saveAccounts(result)
-
-                    if (success) {
-
-                        realm.executeTransaction {
-                            account.deleteFromRealm()
-                        }
+                    if (saveAccounts(result)) {
 
                         renderData()
 
-                        if (realm.unsentAccountsCount() > 0)
+                        if (unsentAccountsCount() > 0)
                             apiSyncAccounts()
                         else
                             apiUpdateAccounts()
@@ -500,13 +485,11 @@ class MainActivity : AppCompatActivity() {
     private fun apiUpdateAccounts() {
         binding.progress.rlProgressLight.show()
 
-        if (isLogged() && realm.unsentAccountsCount() == 0L) {
+        if (isLogged() && unsentAccountsCount() == 0) {
             API_ROUTE_ACCOUNTS.httpGet().responseString { request, response, result ->
                 printFuelLog(request, response, result)
 
-                val success = realm.saveAccounts(result)
-
-                if (success)
+                if (saveAccounts(result))
                     renderData()
 
                 binding.progress.rlProgressLight.hide()
@@ -514,12 +497,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             binding.progress.rlProgressLight.hide()
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        realm?.close()
     }
 
     private fun loadInterstitialAd() {

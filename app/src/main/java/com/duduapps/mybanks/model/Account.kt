@@ -1,10 +1,6 @@
 package com.duduapps.mybanks.model
 
-import io.realm.RealmObject
-import io.realm.annotations.PrimaryKey
-
-open class Account : RealmObject() {
-    @PrimaryKey
+open class Account {
     var id: Long = 0
     var pixCode: String = ""
     var bankId: Int = 0

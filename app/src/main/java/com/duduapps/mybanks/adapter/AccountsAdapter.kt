@@ -2,6 +2,7 @@ package com.duduapps.mybanks.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,16 +12,15 @@ import com.duduapps.mybanks.R
 import com.duduapps.mybanks.activity.AccountDetailsActivity
 import com.duduapps.mybanks.model.Account
 import com.duduapps.mybanks.util.PARAM_ID
-import org.jetbrains.anko.find
-import org.jetbrains.anko.intentFor
+
 
 class AccountsAdapter(private val context: Context) :
     RecyclerView.Adapter<AccountsAdapter.ViewHolder>() {
 
-    private var accounts: MutableList<Account>? = null
+    private var accounts: List<Account>? = null
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setData(accounts: MutableList<Account>?) {
+    fun setData(accounts: List<Account>?) {
         this.accounts = accounts
         notifyDataSetChanged()
     }
@@ -46,8 +46,8 @@ class AccountsAdapter(private val context: Context) :
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private var tvTitle = itemView.find<TextView>(R.id.tv_title)
-        private var tvDetails = itemView.find<TextView>(R.id.tv_details)
+        private var tvTitle = itemView.findViewById<TextView>(R.id.tv_title)
+        private var tvDetails = itemView.findViewById<TextView>(R.id.tv_details)
 
         fun setData(account: Account) {
             var details = "${account.bank!!.name} (${account.bank!!.code})"
@@ -59,7 +59,9 @@ class AccountsAdapter(private val context: Context) :
             tvDetails.text = details
 
             itemView.setOnClickListener {
-                context.startActivity(context.intentFor<AccountDetailsActivity>(PARAM_ID to account.id))
+                val myIntent = Intent(context, AccountDetailsActivity::class.java)
+                myIntent.putExtra(PARAM_ID, account.id)
+                context.startActivity(myIntent)
             }
         }
     }

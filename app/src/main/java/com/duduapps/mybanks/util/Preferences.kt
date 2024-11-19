@@ -22,3 +22,6 @@ const val PREF_ADMOB_AD_MAIN_ID = "PrefAdMobAdMainId"
 const val PREF_ADMOB_INTERSTITIAL_ID = "PrefAdMobInterstitialId"
 const val PREF_ADMOB_REMOVE_ADS = "PrefAdMobRemoveAds"
 const val PREF_ADMOB_OPEN_APP_ID = "PrefAdMobOpenAppId"
+
+const val PREF_BASE_BANKS_LIST = "PrefBaseBanksList"
+const val PREF_BASE_ACCOUNTS_LIST = "PrefBaseAccountsList"

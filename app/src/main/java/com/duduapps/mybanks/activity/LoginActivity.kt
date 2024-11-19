@@ -28,9 +28,8 @@ import com.duduapps.mybanks.util.printFuelLog
 import com.duduapps.mybanks.util.show
 import com.duduapps.mybanks.util.showKeyboard
 import com.github.kittinunf.fuel.httpPost
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.orhanobut.hawk.Hawk
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.okButton
 
 class LoginActivity : AppCompatActivity(), TextView.OnEditorActionListener {
 
@@ -112,13 +111,16 @@ class LoginActivity : AppCompatActivity(), TextView.OnEditorActionListener {
                     apiCode = decode64(apiObj.getStringVal(API_VERIFIER))
 
                     if (success) {
-
-                        alert(message, getString(R.string.success)) {
-                            okButton {
+                        MaterialAlertDialogBuilder(applicationContext)
+                            .setTitle(R.string.success)
+                            .setMessage(message)
+                            .setCancelable(false)
+                            .setPositiveButton(R.string.ok) { _, _ ->
                                 etCode.requestFocus()
                                 etCode.showKeyboard()
                             }
-                        }.show()
+                            .create()
+                            .show()
 
                         etEmail.visibility = View.GONE
                         etCode.visibility = View.VISIBLE
@@ -132,7 +134,15 @@ class LoginActivity : AppCompatActivity(), TextView.OnEditorActionListener {
                     if (message.isEmpty())
                         message = getString(R.string.error_unknown)
 
-                    alert(message, getString(R.string.ops)) { okButton {} }.show()
+                    MaterialAlertDialogBuilder(applicationContext)
+                        .setTitle(R.string.ops)
+                        .setMessage(message)
+                        .setCancelable(false)
+                        .setPositiveButton(R.string.ok) { dialog, _ ->
+                            dialog.dismiss()
+                        }
+                        .create()
+                        .show()
                 }
             }
     }
@@ -147,22 +157,28 @@ class LoginActivity : AppCompatActivity(), TextView.OnEditorActionListener {
 
             CustomApplication().updateFuelParams()
 
-            alert(R.string.success_email_verified, R.string.congratulations) {
-                okButton { sendSuccess() }
-                onCancelled { sendSuccess() }
-            }.show()
+            MaterialAlertDialogBuilder(applicationContext)
+                .setTitle(R.string.congratulations)
+                .setMessage(R.string.success_email_verified)
+                .setCancelable(false)
+                .setPositiveButton(R.string.ok) { _, _ ->
+                    sendSuccess()
+                }
+                .create()
+                .show()
 
         } else {
 
-            val title = getString(R.string.ops)
-            val message = getString(R.string.error_validate_email, userEmail)
-
-            alert(message, title) {
-                positiveButton(R.string.correct_code) {
+            MaterialAlertDialogBuilder(applicationContext)
+                .setTitle(R.string.ops)
+                .setMessage(getString(R.string.error_validate_email, userEmail))
+                .setCancelable(false)
+                .setPositiveButton(R.string.ok) { _, _ ->
                     etCode.requestFocus()
                     etCode.showKeyboard()
                 }
-            }.show()
+                .create()
+                .show()
 
         }
     }

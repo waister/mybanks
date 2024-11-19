@@ -1,11 +1,11 @@
 package com.duduapps.mybanks.activity
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.duduapps.mybanks.databinding.ActivityAlertLoginBinding
 import com.duduapps.mybanks.util.PREF_SHOW_ALERT_LOGIN
 import com.orhanobut.hawk.Hawk
-import org.jetbrains.anko.intentFor
 
 class AlertLoginActivity : AppCompatActivity() {
 
@@ -18,7 +18,7 @@ class AlertLoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.btPositive.setOnClickListener {
-            startActivity(intentFor<LoginActivity>())
+            startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }
 

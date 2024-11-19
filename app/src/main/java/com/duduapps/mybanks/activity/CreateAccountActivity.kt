@@ -16,22 +16,23 @@ import com.duduapps.mybanks.util.PREF_LAST_DOCUMENT
 import com.duduapps.mybanks.util.PREF_LAST_HOLDER
 import com.duduapps.mybanks.util.PREF_LAST_LEGAL_ACCOUNT
 import com.duduapps.mybanks.util.currentTimestamp
+import com.duduapps.mybanks.util.getAccountById
+import com.duduapps.mybanks.util.getBankById
+import com.duduapps.mybanks.util.getBanks
 import com.duduapps.mybanks.util.getNumbers
 import com.duduapps.mybanks.util.hideKeyboard
 import com.duduapps.mybanks.util.isVisible
+import com.duduapps.mybanks.util.longToast
+import com.duduapps.mybanks.util.saveAccount
 import com.duduapps.mybanks.util.setEmpty
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.orhanobut.hawk.Hawk
-import io.realm.Realm
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.longToast
-import org.jetbrains.anko.okButton
 
 class CreateAccountActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCreateAccountBinding
 
-    private val realm = Realm.getDefaultInstance()
-    private var banks: MutableList<Bank> = mutableListOf()
+    private var banks: List<Bank> = mutableListOf()
     private var account: Account? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,10 +47,7 @@ class CreateAccountActivity : AppCompatActivity() {
 
         if (accountId > 0) {
 
-            account = realm.where(Account::class.java)
-                .isNull("deleted")
-                .equalTo("id", accountId)
-                .findFirst()
+            account = getAccountById(accountId)
 
             if (account != null) {
 
@@ -64,7 +62,7 @@ class CreateAccountActivity : AppCompatActivity() {
 
         }
 
-        banks = realm.where(Bank::class.java).findAll()
+        banks = getBanks()
 
         binding.btSubmit.setOnClickListener { submitCreate() }
 
@@ -111,6 +109,10 @@ class CreateAccountActivity : AppCompatActivity() {
         }
 
         etAccount.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) = Unit
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) = Unit
+
             override fun afterTextChanged(text: Editable?) {
                 if (text != null) {
                     val numbers = text.toString().getNumbers()
@@ -126,10 +128,6 @@ class CreateAccountActivity : AppCompatActivity() {
                     }
                 }
             }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
         populateBanks()
@@ -251,7 +249,15 @@ class CreateAccountActivity : AppCompatActivity() {
 
         if (errors == 0) {
             if (type.isEmpty()) {
-                alert(R.string.error_type, R.string.ops) { okButton {} }.show()
+                MaterialAlertDialogBuilder(applicationContext)
+                    .setTitle(R.string.ops)
+                    .setMessage(R.string.error_type)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.ok) { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .create()
+                    .show()
             } else {
 
                 Hawk.put(PREF_LAST_HOLDER, holder)
@@ -281,11 +287,9 @@ class CreateAccountActivity : AppCompatActivity() {
                 item.deleted = null
                 item.synced = false
 
-                item.bank = realm.where(Bank::class.java).equalTo("id", bankId).findFirst()!!
+                item.bank = getBankById(bankId)
 
-                realm.executeTransaction {
-                    realm.copyToRealmOrUpdate(item)
-                }
+                saveAccount(item)
 
                 if (account != null) {
 
@@ -302,12 +306,21 @@ class CreateAccountActivity : AppCompatActivity() {
                     rbChecking.isChecked = true
                     rbSavings.isChecked = false
 
-                    alert(R.string.success_account_added, R.string.success) {
-                        positiveButton(R.string.finish) { finish() }
-                        negativeButton(R.string.register_new) {}
-                        onCancelled { finish() }
-                    }.show()
-
+                    MaterialAlertDialogBuilder(applicationContext)
+                        .setTitle(R.string.success)
+                        .setMessage(R.string.success_account_added)
+                        .setCancelable(false)
+                        .setPositiveButton(R.string.finish) { _, _ ->
+                            finish()
+                        }
+                        .setNegativeButton(R.string.register_new) { dialog, _ ->
+                            dialog.dismiss()
+                        }
+                        .setOnCancelListener {
+                            finish()
+                        }
+                        .create()
+                        .show()
                 }
             }
         }
@@ -316,12 +329,6 @@ class CreateAccountActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         onBackPressedDispatcher.onBackPressed()
         return super.onOptionsItemSelected(item)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        realm?.close()
     }
 
 }

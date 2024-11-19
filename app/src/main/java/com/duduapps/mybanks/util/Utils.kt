@@ -11,6 +11,7 @@ import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
+import android.net.Uri
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
@@ -19,6 +20,8 @@ import android.view.inputmethod.InputMethodManager
 import android.webkit.URLUtil
 import android.widget.AutoCompleteTextView
 import android.widget.LinearLayout
+import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.appcompat.widget.AppCompatEditText
 import com.duduapps.mybanks.BuildConfig
 import com.duduapps.mybanks.R
@@ -35,9 +38,8 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.orhanobut.hawk.Hawk
-import io.realm.Realm
-import org.jetbrains.anko.alert
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.UUID
@@ -58,12 +60,11 @@ fun isLogged(): Boolean {
 
 fun Activity.logout() {
     val context = this
-
-    alert(
-        getString(R.string.confirm_logout_account),
-        getString(R.string.logout_account)
-    ) {
-        positiveButton(R.string.confirm) {
+    MaterialAlertDialogBuilder(this)
+        .setTitle(R.string.logout_account)
+        .setMessage(R.string.confirm_logout_account)
+        .setCancelable(false)
+        .setPositiveButton(R.string.confirm) { _, _ ->
             Hawk.delete(PREF_LOGGED)
 
             val intent = Intent(context, StartActivity::class.java)
@@ -72,8 +73,9 @@ fun Activity.logout() {
 
             finish()
         }
-        negativeButton(R.string.cancel) {}
-    }.show()
+        .setNegativeButton(R.string.cancel, null)
+        .create()
+        .show()
 }
 
 fun Context.storeAppLink(): String = "https://play.google.com/store/apps/details?id=$packageName"
@@ -265,10 +267,14 @@ fun Bitmap?.getCircleCroppedBitmap(): Bitmap? {
     return output
 }
 
-fun Realm?.saveBanks(result: Result<String, FuelError>): Boolean {
+fun getBanks() = Hawk.get<List<Bank>>(PREF_BASE_BANKS_LIST, listOf())
+
+fun getBankById(bankId: Int) = getBanks().findLast { it.id == bankId }
+
+fun saveBanks(result: Result<String, FuelError>): Boolean {
     val (data, error) = result
 
-    if (this != null && !this.isClosed && error == null) {
+    if (error == null) {
         val apiObj = data.getValidJSONObject()
 
         if (apiObj.getBooleanVal(API_SUCCESS)) {
@@ -284,6 +290,7 @@ fun Realm?.saveBanks(result: Result<String, FuelError>): Boolean {
             val banksArr = apiObj.getJSONArrayVal(API_BANKS)
 
             if (banksArr != null && banksArr.length() > 0) {
+                val banks = mutableListOf<Bank>()
 
                 for (i in 0 until banksArr.length()) {
                     val accountObj = banksArr.getJSONObject(i)
@@ -293,10 +300,10 @@ fun Realm?.saveBanks(result: Result<String, FuelError>): Boolean {
                     bank.name = accountObj.getStringVal(API_NAME)
                     bank.code = accountObj.getStringVal(API_CODE)
 
-                    executeTransaction {
-                        copyToRealmOrUpdate(bank)
-                    }
+                    banks.add(bank)
                 }
+
+                Hawk.put(PREF_BASE_BANKS_LIST, banks)
 
                 return true
             }
@@ -306,10 +313,23 @@ fun Realm?.saveBanks(result: Result<String, FuelError>): Boolean {
     return false
 }
 
-fun Realm?.saveAccounts(result: Result<String, FuelError>): Boolean {
+fun unsentAccounts(): List<Account> = getAccounts().filter { !it.synced }
+
+fun unsentAccountsCount() = unsentAccounts().size
+
+fun getAccounts(): List<Account> =
+    Hawk.get<List<Account>?>(PREF_BASE_ACCOUNTS_LIST, listOf()).filter { it.deleted == null }
+
+fun getAccountById(accountId: Long) =
+    getAccounts().findLast { it.id == accountId && it.deleted == null }
+
+fun deleteAccount(accountId: Long) =
+    Hawk.put(PREF_BASE_ACCOUNTS_LIST, getAccounts().map { it.id != accountId })
+
+fun saveAccounts(result: Result<String, FuelError>): Boolean {
     val (data, error) = result
 
-    if (this != null && !this.isClosed && error == null) {
+    if (error == null) {
         val apiObj = data.getValidJSONObject()
 
         if (apiObj.getBooleanVal(API_SUCCESS)) {
@@ -317,6 +337,7 @@ fun Realm?.saveAccounts(result: Result<String, FuelError>): Boolean {
             val accountsArr = apiObj.getJSONArrayVal(API_ACCOUNTS)
 
             if (accountsArr != null && accountsArr.length() > 0) {
+                val accounts = mutableListOf<Account>()
 
                 for (i in 0 until accountsArr.length()) {
                     val accountObj = accountsArr.getJSONObject(i)
@@ -339,15 +360,12 @@ fun Realm?.saveAccounts(result: Result<String, FuelError>): Boolean {
                     account.deleted = accountObj.getStringNullable(API_DELETED)
                     account.synced = true
 
-                    account.bank = where(Bank::class.java)
-                        .equalTo("id", account.bankId)
-                        .findFirst()
+                    account.bank = getBankById(account.bankId)
 
-                    executeTransaction {
-                        copyToRealmOrUpdate(account)
-                    }
+                    accounts.add(account)
                 }
 
+                Hawk.put(PREF_BASE_ACCOUNTS_LIST, accounts)
                 Hawk.put(PREF_LOGGED, true)
             }
 
@@ -357,6 +375,9 @@ fun Realm?.saveAccounts(result: Result<String, FuelError>): Boolean {
 
     return false
 }
+
+fun saveAccount(account: Account) =
+    Hawk.put(PREF_BASE_ACCOUNTS_LIST, getAccounts().toMutableList().add(account))
 
 fun View.hideKeyboard() {
     val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -379,12 +400,6 @@ fun String?.getNumbers(): String {
 
 fun currentTimestamp(): String {
     return SimpleDateFormat(FORMAT_DATETIME_API, BRAZIL).format(Date())
-}
-
-fun Realm.unsentAccountsCount(): Long {
-    return this.where(Account::class.java)
-        .equalTo("synced", false)
-        .count()
 }
 
 @Suppress("unused")
@@ -423,3 +438,28 @@ fun AutoCompleteTextView.setEmpty() = this.text?.clear()
 fun AppCompatEditText.setEmpty() = this.text?.clear()
 
 fun isDebug() = BuildConfig.DEBUG
+
+fun Context.shortToast(@StringRes text: Int) = shortToast(getString(text))
+
+fun Context.shortToast(text: String) = Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
+
+fun Context.longToast(@StringRes text: Int) = longToast(getString(text))
+
+fun Context.longToast(text: String) = Toast.makeText(this, text, Toast.LENGTH_LONG).show()
+
+fun Context.share(text: String, label: String) {
+    val intent = Intent()
+    intent.action = Intent.ACTION_SEND
+    intent.type = "text/plain"
+    intent.putExtra(Intent.EXTRA_TEXT, text)
+    startActivity(Intent.createChooser(intent, label))
+}
+
+fun Context.browse(url: String) {
+    val validUrl = if (!url.startsWith("http://") && !url.startsWith("https://"))
+        "http://$url"
+    else
+        url
+    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(validUrl))
+    startActivity(browserIntent)
+}

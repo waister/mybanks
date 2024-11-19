@@ -1,15 +1,14 @@
 package com.duduapps.mybanks.activity
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.duduapps.mybanks.R
 import com.duduapps.mybanks.application.CustomApplication
 import com.duduapps.mybanks.databinding.ActivityStartBinding
-import com.duduapps.mybanks.model.Bank
 import com.duduapps.mybanks.util.API_MESSAGE
 import com.duduapps.mybanks.util.API_ROUTE_ACCOUNTS
 import com.duduapps.mybanks.util.API_ROUTE_BANKS
@@ -24,21 +23,20 @@ import com.duduapps.mybanks.util.getValidJSONObject
 import com.duduapps.mybanks.util.hide
 import com.duduapps.mybanks.util.isLogged
 import com.duduapps.mybanks.util.isNotNumeric
+import com.duduapps.mybanks.util.longToast
 import com.duduapps.mybanks.util.printFuelLog
 import com.duduapps.mybanks.util.saveAccounts
 import com.duduapps.mybanks.util.saveBanks
 import com.duduapps.mybanks.util.show
 import com.duduapps.mybanks.util.unsentAccountsCount
 import com.github.kittinunf.fuel.httpGet
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.orhanobut.hawk.Hawk
-import io.realm.Realm
-import org.jetbrains.anko.intentFor
-import org.jetbrains.anko.longToast
 import java.util.Calendar
 import kotlin.random.Random
 
@@ -46,7 +44,6 @@ class StartActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityStartBinding
 
-    private val realm = Realm.getDefaultInstance()
     private var secondsWait: Long = 0
     private var runnableBanks: Runnable = Runnable { apiGetBanks() }
     private var handlerBanks: Handler = Handler(Looper.getMainLooper())
@@ -66,7 +63,7 @@ class StartActivity : AppCompatActivity() {
             } else {
                 binding.pbLoading.hide()
 
-                AlertDialog.Builder(this)
+                MaterialAlertDialogBuilder(applicationContext)
                     .setTitle(R.string.error_on_update)
                     .setMessage(R.string.error_on_update_message)
                     .setCancelable(false)
@@ -95,15 +92,12 @@ class StartActivity : AppCompatActivity() {
 
         createDeviceID()
 
-        if (realm.where(Bank::class.java).count() == 0L)
-            apiGetBanks()
-        else
-            if ((application as CustomApplication).isCheckUpdatesNeeded) {
-                (application as CustomApplication).isCheckUpdatesNeeded = false
+        if ((application as CustomApplication).isCheckUpdatesNeeded) {
+            (application as CustomApplication).isCheckUpdatesNeeded = false
 
-                checkAppVersion()
-            } else
-                initApp()
+            checkAppVersion()
+        } else
+            initApp()
     }
 
     override fun onResume() {
@@ -128,7 +122,7 @@ class StartActivity : AppCompatActivity() {
     }
 
     private fun initApp() {
-        startActivity(intentFor<MainActivity>())
+        startActivity(Intent(this, MainActivity::class.java))
         finish()
     }
 
@@ -159,7 +153,7 @@ class StartActivity : AppCompatActivity() {
                     message = apiObj.getStringVal(API_MESSAGE)
 
                     if (success) {
-                        success = realm.saveBanks(result)
+                        success = saveBanks(result)
 
                         if (success) {
 
@@ -169,9 +163,8 @@ class StartActivity : AppCompatActivity() {
                     }
                 }
 
-                if (message.isNotEmpty()) {
+                if (message.isNotEmpty())
                     longToast(message)
-                }
 
                 if (!success) {
                     secondsWait = 30
@@ -182,7 +175,7 @@ class StartActivity : AppCompatActivity() {
     }
 
     private fun apiGetAccounts() = with(binding) {
-        if (!isLogged() || realm.unsentAccountsCount() > 0) {
+        if (!isLogged() || unsentAccountsCount() > 0) {
             initApp()
             return@with
         }
@@ -211,7 +204,7 @@ class StartActivity : AppCompatActivity() {
 
                     message = apiObj.getStringVal(API_MESSAGE)
 
-                    realm.saveAccounts(result)
+                    saveAccounts(result)
 
                     initApp()
 
@@ -250,7 +243,6 @@ class StartActivity : AppCompatActivity() {
             removeCallbacks(runnableBanks)
             removeCallbacks(runnableAccounts)
         }
-        realm?.close()
 
         updateFlowResultLauncher.unregister()
     }

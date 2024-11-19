@@ -16,8 +16,6 @@ import com.duduapps.mybanks.util.PREF_DEVICE_ID_OLD
 import com.github.kittinunf.fuel.core.FuelManager
 import com.google.android.gms.ads.MobileAds
 import com.orhanobut.hawk.Hawk
-import io.realm.Realm
-import io.realm.RealmConfiguration
 
 class CustomApplication : Application() {
 
@@ -31,14 +29,6 @@ class CustomApplication : Application() {
         MobileAds.initialize(this) {}
 
         AppOpenManager(this)
-
-        Realm.init(this)
-        Realm.setDefaultConfiguration(
-            RealmConfiguration.Builder()
-                .schemaVersion(REALM_VERSION)
-                .deleteRealmIfMigrationNeeded()
-                .build()
-        )
 
         FuelManager.instance.basePath = API_ROOT
 
@@ -56,7 +46,4 @@ class CustomApplication : Application() {
         )
     }
 
-    companion object {
-        const val REALM_VERSION: Long = 1
-    }
 }

@@ -134,4 +134,5 @@
     <string name="error_on_update_message">You have not completed the app update process.</string>
     <string name="try_again">Try again</string>
     <string name="update_later">Update later</string>
+    <string name="share_with">Share with:</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.duduapps.mybanks.activity
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -12,22 +13,20 @@ import com.duduapps.mybanks.model.Account
 import com.duduapps.mybanks.util.PARAM_ID
 import com.duduapps.mybanks.util.PREF_ADMOB_AD_MAIN_ID
 import com.duduapps.mybanks.util.copyToClipboard
-import com.duduapps.mybanks.util.currentTimestamp
+import com.duduapps.mybanks.util.deleteAccount
+import com.duduapps.mybanks.util.getAccountById
 import com.duduapps.mybanks.util.loadAdMobBanner
+import com.duduapps.mybanks.util.longToast
+import com.duduapps.mybanks.util.share
+import com.duduapps.mybanks.util.shortToast
 import com.google.android.gms.ads.AdSize
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.orhanobut.hawk.Hawk
-import io.realm.Realm
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.intentFor
-import org.jetbrains.anko.longToast
-import org.jetbrains.anko.share
-import org.jetbrains.anko.toast
 
 class AccountDetailsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAccountDetailsBinding
 
-    private val realm = Realm.getDefaultInstance()
     private lateinit var account: Account
     private var accountId: Long = 0
 
@@ -48,10 +47,7 @@ class AccountDetailsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        val firstAccount = realm.where(Account::class.java)
-            .isNull("deleted")
-            .equalTo("id", accountId)
-            .findFirst()
+        val firstAccount = getAccountById(accountId)
 
         if (firstAccount != null) {
 
@@ -63,7 +59,7 @@ class AccountDetailsActivity : AppCompatActivity() {
 
             binding.btCopy.setOnClickListener {
                 copyToClipboard(getShareText())
-                toast(R.string.account_copied)
+                shortToast(R.string.account_copied)
             }
 
             binding.btShare.setOnClickListener {
@@ -110,7 +106,7 @@ class AccountDetailsActivity : AppCompatActivity() {
 
     private fun copyItem(text: String) {
         copyToClipboard(text)
-        toast(R.string.data_copied)
+        shortToast(R.string.data_copied)
     }
 
     private fun getShareText(): String {
@@ -137,32 +133,28 @@ class AccountDetailsActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_edit -> {
-                startActivity(intentFor<CreateAccountActivity>(PARAM_ID to account.id))
+                val intent = Intent(this, CreateAccountActivity::class.java)
+                intent.putExtra(PARAM_ID, account.id)
+                startActivity(intent)
                 true
             }
 
             R.id.action_delete -> {
-                alert(R.string.confirm_deleted_account, R.string.confirmation) {
-                    positiveButton(R.string.confirm) {
-                        realm.executeTransaction {
-                            account.updated = currentTimestamp()
-                            account.deleted = currentTimestamp()
-                            account.synced = false
-
-                            realm.copyToRealmOrUpdate(account)
-
-                            longToast(R.string.success_account_deleted)
-
-                            finish()
-                        }
+                MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.confirmation)
+                    .setMessage(R.string.confirm_deleted_account)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.confirm) { dialog, _ ->
+                        deleteAccount(account.id) // TODO: precisa testar
+                        dialog.dismiss()
                     }
-                    negativeButton(R.string.cancel) {}
-                }.show()
+                    .setNegativeButton(R.string.cancel, null)
+                    .create()
                 true
             }
 
             R.id.action_remove_ads -> {
-                startActivity(intentFor<RemoveAdsActivity>())
+                startActivity(Intent(this, RemoveAdsActivity::class.java))
                 true
             }
 
@@ -171,12 +163,6 @@ class AccountDetailsActivity : AppCompatActivity() {
                 super.onOptionsItemSelected(item)
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        realm?.close()
     }
 
 }
