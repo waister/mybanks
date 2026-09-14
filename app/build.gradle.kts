@@ -70,6 +70,9 @@ tasks.withType<Test>().configureEach {
 }
 
 dependencies {
+    // Ktlint Rules
+    ktlintRuleset(libs.ktlint.compose.rules)
+
     // Implementation
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

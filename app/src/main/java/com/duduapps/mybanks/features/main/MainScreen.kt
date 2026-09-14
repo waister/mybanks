@@ -116,10 +116,10 @@ fun MainScreen(
         onNavigateToLogin = onNavigateToLogin,
         onNavigateToRemoveAds = onNavigateToRemoveAds,
         onNavigateToFeedback = onNavigateToFeedback,
-        onSearchQueryChanged = viewModel::onSearchQueryChanged,
+        onSearchQueryChange = viewModel::onSearchQueryChanged,
         onToggleSearch = viewModel::toggleSearch,
-        onCopyAllClicked = viewModel::onCopyAllClicked,
-        onShareAllClicked = viewModel::onShareAllClicked,
+        onCopyAllClick = viewModel::onCopyAllClicked,
+        onShareAllClick = viewModel::onShareAllClicked,
         onLogout = viewModel::onLogout,
         onDismissLoginAlert = viewModel::onDismissLoginAlert,
         onDismissUpdateDialog = viewModel::dismissUpdateDialog,
@@ -141,10 +141,10 @@ internal fun MainScreenContent(
     onNavigateToLogin: () -> Unit,
     onNavigateToRemoveAds: () -> Unit,
     onNavigateToFeedback: () -> Unit,
-    onSearchQueryChanged: (String) -> Unit,
+    onSearchQueryChange: (String) -> Unit,
     onToggleSearch: (Boolean) -> Unit,
-    onCopyAllClicked: () -> Unit,
-    onShareAllClicked: () -> Unit,
+    onCopyAllClick: () -> Unit,
+    onShareAllClick: () -> Unit,
     onLogout: () -> Unit,
     onDismissLoginAlert: (Boolean) -> Unit,
     onDismissUpdateDialog: () -> Unit,
@@ -164,7 +164,7 @@ internal fun MainScreenContent(
                     inputField = {
                         SearchBarDefaults.InputField(
                             query = uiState.searchQuery,
-                            onQueryChange = onSearchQueryChanged,
+                            onQueryChange = onSearchQueryChange,
                             onSearch = {},
                             expanded = false,
                             onExpandedChange = {},
@@ -262,7 +262,7 @@ internal fun MainScreenContent(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     FloatingActionButton(
-                        onClick = onCopyAllClicked,
+                        onClick = onCopyAllClick,
                         containerColor = MaterialTheme.colorScheme.secondary,
                         contentColor = MaterialTheme.colorScheme.onSecondary,
                     ) {
@@ -270,7 +270,7 @@ internal fun MainScreenContent(
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     ExtendedFloatingActionButton(
-                        onClick = onShareAllClicked,
+                        onClick = onShareAllClick,
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary,
                         icon = { Icon(Icons.Default.Share, contentDescription = null) },
@@ -314,13 +314,13 @@ internal fun MainScreenContent(
         ConfirmDialog(
             title = stringResource(R.string.logout_account),
             message = stringResource(R.string.confirm_logout_account),
-            confirmText = stringResource(R.string.confirm),
-            dismissText = stringResource(R.string.cancel),
             onConfirm = {
                 showLogoutDialog = false
                 onLogout()
             },
             onDismiss = { showLogoutDialog = false },
+            confirmText = stringResource(R.string.confirm),
+            dismissText = stringResource(R.string.cancel),
         )
     }
 
@@ -409,10 +409,10 @@ private fun MainScreenPopulatedPreview() {
             onNavigateToLogin = {},
             onNavigateToRemoveAds = {},
             onNavigateToFeedback = {},
-            onSearchQueryChanged = {},
+            onSearchQueryChange = {},
             onToggleSearch = {},
-            onCopyAllClicked = {},
-            onShareAllClicked = {},
+            onCopyAllClick = {},
+            onShareAllClick = {},
             onLogout = {},
             onDismissLoginAlert = {},
             onDismissUpdateDialog = {},
@@ -434,10 +434,10 @@ private fun MainScreenEmptyPreview() {
             onNavigateToLogin = {},
             onNavigateToRemoveAds = {},
             onNavigateToFeedback = {},
-            onSearchQueryChanged = {},
+            onSearchQueryChange = {},
             onToggleSearch = {},
-            onCopyAllClicked = {},
-            onShareAllClicked = {},
+            onCopyAllClick = {},
+            onShareAllClick = {},
             onLogout = {},
             onDismissLoginAlert = {},
             onDismissUpdateDialog = {},
@@ -459,10 +459,10 @@ private fun MainScreenSearchingPreview() {
             onNavigateToLogin = {},
             onNavigateToRemoveAds = {},
             onNavigateToFeedback = {},
-            onSearchQueryChanged = {},
+            onSearchQueryChange = {},
             onToggleSearch = {},
-            onCopyAllClicked = {},
-            onShareAllClicked = {},
+            onCopyAllClick = {},
+            onShareAllClick = {},
             onLogout = {},
             onDismissLoginAlert = {},
             onDismissUpdateDialog = {},

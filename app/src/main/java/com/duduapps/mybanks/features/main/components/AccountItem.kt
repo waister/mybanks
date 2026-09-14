@@ -22,43 +22,45 @@ fun AccountItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-    ) {
-        Text(
-            text = account.label,
-            style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-            ),
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        val details = buildString {
-            if (account.bank != null) {
-                append("${account.bank.name} (${account.bank.code})")
-            }
-            if (account.pixCode.isNotEmpty()) {
-                if (isNotEmpty()) append(" | ")
-                append("PIX: ${account.pixCode}")
-            }
-        }
-
-        if (details.isNotEmpty()) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+        ) {
             Text(
-                text = details,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = account.label,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
             )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            val details = buildString {
+                if (account.bank != null) {
+                    append("${account.bank.name} (${account.bank.code})")
+                }
+                if (account.pixCode.isNotEmpty()) {
+                    if (isNotEmpty()) append(" | ")
+                    append("PIX: ${account.pixCode}")
+                }
+            }
+
+            if (details.isNotEmpty()) {
+                Text(
+                    text = details,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+            thickness = 0.5.dp,
+        )
     }
-    HorizontalDivider(
-        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-        thickness = 0.5.dp,
-    )
 }

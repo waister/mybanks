@@ -23,6 +23,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -46,6 +47,8 @@ fun LoginScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val currentOnNavigateBack by rememberUpdatedState(onNavigateBack)
+    val currentOnLoginSuccess by rememberUpdatedState(onLoginSuccess)
 
     var dialogMessage by remember { mutableStateOf<String?>(null) }
     var dialogTitle by remember { mutableStateOf<String?>(null) }
@@ -64,8 +67,8 @@ fun LoginScreen(
                     dialogTitle = context.getString(R.string.ops)
                     dialogMessage = event.message
                 }
-                is LoginEvent.LoginSuccess -> onLoginSuccess()
-                is LoginEvent.NavigateBack -> onNavigateBack()
+                is LoginEvent.LoginSuccess -> currentOnLoginSuccess()
+                is LoginEvent.NavigateBack -> currentOnNavigateBack()
             }
         }
     }
@@ -73,8 +76,8 @@ fun LoginScreen(
     LoginScreenContent(
         uiState = uiState,
         onNavigateBack = onNavigateBack,
-        onEmailChanged = viewModel::onEmailChanged,
-        onCodeChanged = viewModel::onCodeChanged,
+        onEmailChange = viewModel::onEmailChanged,
+        onCodeChange = viewModel::onCodeChanged,
         onPositiveAction = viewModel::onPositiveAction,
         dialogTitle = dialogTitle,
         dialogMessage = dialogMessage,
@@ -86,8 +89,8 @@ fun LoginScreen(
 internal fun LoginScreenContent(
     uiState: LoginUiState,
     onNavigateBack: () -> Unit,
-    onEmailChanged: (String) -> Unit,
-    onCodeChanged: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onCodeChange: (String) -> Unit,
     onPositiveAction: () -> Unit,
     dialogTitle: String? = null,
     dialogMessage: String? = null,
@@ -129,7 +132,7 @@ internal fun LoginScreenContent(
             if (!uiState.isCodeStep) {
                 OutlinedTextField(
                     value = uiState.email,
-                    onValueChange = onEmailChanged,
+                    onValueChange = onEmailChange,
                     label = { Text(stringResource(R.string.email)) },
                     placeholder = { Text(stringResource(R.string.write_your_email)) },
                     isError = uiState.emailError != null,
@@ -144,7 +147,7 @@ internal fun LoginScreenContent(
             } else {
                 OutlinedTextField(
                     value = uiState.code,
-                    onValueChange = onCodeChanged,
+                    onValueChange = onCodeChange,
                     label = { Text(stringResource(R.string.code_sent_to_email)) },
                     placeholder = { Text("0000") },
                     isError = uiState.codeError != null,
@@ -209,8 +212,8 @@ private fun LoginEmailStepPreview() {
         LoginScreenContent(
             uiState = LoginPreviewsData.emailStepState,
             onNavigateBack = {},
-            onEmailChanged = {},
-            onCodeChanged = {},
+            onEmailChange = {},
+            onCodeChange = {},
             onPositiveAction = {},
         )
     }
@@ -223,8 +226,8 @@ private fun LoginCodeStepPreview() {
         LoginScreenContent(
             uiState = LoginPreviewsData.codeStepState,
             onNavigateBack = {},
-            onEmailChanged = {},
-            onCodeChanged = {},
+            onEmailChange = {},
+            onCodeChange = {},
             onPositiveAction = {},
         )
     }
@@ -237,8 +240,8 @@ private fun LoginErrorsPreview() {
         LoginScreenContent(
             uiState = LoginPreviewsData.emailErrorState,
             onNavigateBack = {},
-            onEmailChanged = {},
-            onCodeChanged = {},
+            onEmailChange = {},
+            onCodeChange = {},
             onPositiveAction = {},
         )
     }

@@ -35,6 +35,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,6 +66,7 @@ fun AccountDetailScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
+    val currentOnNavigateBack by rememberUpdatedState(onNavigateBack)
 
     LaunchedEffect(accountId) {
         viewModel.loadAccount(accountId)
@@ -86,7 +88,7 @@ fun AccountDetailScreen(
                     }
                     context.startActivity(Intent.createChooser(intent, context.getString(R.string.my_bank_account)))
                 }
-                is AccountDetailEvent.NavigateBack -> onNavigateBack()
+                is AccountDetailEvent.NavigateBack -> currentOnNavigateBack()
             }
         }
     }
@@ -266,13 +268,13 @@ internal fun AccountDetailScreenContent(
         ConfirmDialog(
             title = stringResource(R.string.confirmation),
             message = stringResource(R.string.confirm_deleted_account),
-            confirmText = stringResource(R.string.confirm),
-            dismissText = stringResource(R.string.cancel),
             onConfirm = {
                 showDeleteDialog = false
                 onDeleteAccount()
             },
             onDismiss = { showDeleteDialog = false },
+            confirmText = stringResource(R.string.confirm),
+            dismissText = stringResource(R.string.cancel),
         )
     }
 }

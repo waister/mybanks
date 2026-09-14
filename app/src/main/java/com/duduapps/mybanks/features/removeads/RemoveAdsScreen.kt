@@ -110,7 +110,7 @@ fun RemoveAdsScreen(
     RemoveAdsScreenContent(
         uiState = uiState,
         onNavigateBack = onNavigateBack,
-        onWatchAdClicked = viewModel::onWatchAdClicked,
+        onWatchAdClick = viewModel::onWatchAdClicked,
         showSuccessDialog = showSuccessDialog,
         onDismissSuccessDialog = {
             showSuccessDialog = false
@@ -123,10 +123,10 @@ fun RemoveAdsScreen(
 internal fun RemoveAdsScreenContent(
     uiState: RemoveAdsUiState,
     onNavigateBack: () -> Unit,
-    onWatchAdClicked: () -> Unit,
+    onWatchAdClick: () -> Unit,
+    modifier: Modifier = Modifier,
     showSuccessDialog: Boolean = false,
     onDismissSuccessDialog: () -> Unit = {},
-    modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier,
@@ -186,7 +186,7 @@ internal fun RemoveAdsScreenContent(
             }
 
             Button(
-                onClick = onWatchAdClicked,
+                onClick = onWatchAdClick,
                 enabled = uiState.isAdLoaded,
                 modifier = Modifier.fillMaxWidth(0.85f),
             ) {
@@ -227,7 +227,7 @@ private fun RemoveAdsFreePlanAdLoadedPreview() {
         RemoveAdsScreenContent(
             uiState = RemoveAdsPreviewsData.freePlanAdLoadedState,
             onNavigateBack = {},
-            onWatchAdClicked = {},
+            onWatchAdClick = {},
         )
     }
 }
@@ -239,7 +239,7 @@ private fun RemoveAdsFreePlanAdLoadingPreview() {
         RemoveAdsScreenContent(
             uiState = RemoveAdsPreviewsData.freePlanAdLoadingState,
             onNavigateBack = {},
-            onWatchAdClicked = {},
+            onWatchAdClick = {},
         )
     }
 }
@@ -251,7 +251,7 @@ private fun RemoveAdsActivePlanPreview() {
         RemoveAdsScreenContent(
             uiState = RemoveAdsPreviewsData.activePlanState,
             onNavigateBack = {},
-            onWatchAdClicked = {},
+            onWatchAdClick = {},
         )
     }
 }

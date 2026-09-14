@@ -9,10 +9,10 @@ import androidx.compose.runtime.Composable
 fun ConfirmDialog(
     title: String,
     message: String,
-    confirmText: String = "Confirmar",
-    dismissText: String = "Cancelar",
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
+    confirmText: String = "Confirmar",
+    dismissText: String = "Cancelar",
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,

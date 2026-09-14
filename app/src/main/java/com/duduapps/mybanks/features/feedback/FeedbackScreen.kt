@@ -21,6 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -44,6 +45,7 @@ fun FeedbackScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val currentOnNavigateBack by rememberUpdatedState(onNavigateBack)
 
     var successMessage by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -60,7 +62,7 @@ fun FeedbackScreen(
                 is FeedbackEvent.ShowErrorDialog -> {
                     errorMessage = event.message
                 }
-                is FeedbackEvent.NavigateBack -> onNavigateBack()
+                is FeedbackEvent.NavigateBack -> currentOnNavigateBack()
             }
         }
     }
@@ -68,9 +70,9 @@ fun FeedbackScreen(
     FeedbackScreenContent(
         uiState = uiState,
         onNavigateBack = onNavigateBack,
-        onNameChanged = viewModel::onNameChanged,
-        onEmailChanged = viewModel::onEmailChanged,
-        onCommentsChanged = viewModel::onCommentsChanged,
+        onNameChange = viewModel::onNameChanged,
+        onEmailChange = viewModel::onEmailChanged,
+        onCommentsChange = viewModel::onCommentsChanged,
         onSubmit = viewModel::onSubmit,
         successMessage = successMessage,
         errorMessage = errorMessage,
@@ -88,9 +90,9 @@ fun FeedbackScreen(
 internal fun FeedbackScreenContent(
     uiState: FeedbackUiState,
     onNavigateBack: () -> Unit,
-    onNameChanged: (String) -> Unit,
-    onEmailChanged: (String) -> Unit,
-    onCommentsChanged: (String) -> Unit,
+    onNameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onCommentsChange: (String) -> Unit,
     onSubmit: () -> Unit,
     successMessage: String? = null,
     errorMessage: String? = null,
@@ -116,7 +118,7 @@ internal fun FeedbackScreenContent(
         ) {
             OutlinedTextField(
                 value = uiState.name,
-                onValueChange = onNameChanged,
+                onValueChange = onNameChange,
                 label = { Text(stringResource(R.string.name)) },
                 isError = uiState.nameError != null,
                 supportingText = uiState.nameError?.let { { Text(it) } },
@@ -132,7 +134,7 @@ internal fun FeedbackScreenContent(
 
             OutlinedTextField(
                 value = uiState.email,
-                onValueChange = onEmailChanged,
+                onValueChange = onEmailChange,
                 label = { Text(stringResource(R.string.email)) },
                 isError = uiState.emailError != null,
                 supportingText = uiState.emailError?.let { { Text(it) } },
@@ -148,7 +150,7 @@ internal fun FeedbackScreenContent(
 
             OutlinedTextField(
                 value = uiState.comments,
-                onValueChange = onCommentsChanged,
+                onValueChange = onCommentsChange,
                 label = { Text(stringResource(R.string.message)) },
                 isError = uiState.commentsError != null,
                 supportingText = uiState.commentsError?.let { { Text(it) } },
@@ -210,9 +212,9 @@ private fun FeedbackEmptyPreview() {
         FeedbackScreenContent(
             uiState = FeedbackPreviewsData.emptyState,
             onNavigateBack = {},
-            onNameChanged = {},
-            onEmailChanged = {},
-            onCommentsChanged = {},
+            onNameChange = {},
+            onEmailChange = {},
+            onCommentsChange = {},
             onSubmit = {},
         )
     }
@@ -225,9 +227,9 @@ private fun FeedbackFilledPreview() {
         FeedbackScreenContent(
             uiState = FeedbackPreviewsData.filledState,
             onNavigateBack = {},
-            onNameChanged = {},
-            onEmailChanged = {},
-            onCommentsChanged = {},
+            onNameChange = {},
+            onEmailChange = {},
+            onCommentsChange = {},
             onSubmit = {},
         )
     }
@@ -240,9 +242,9 @@ private fun FeedbackErrorsPreview() {
         FeedbackScreenContent(
             uiState = FeedbackPreviewsData.errorState,
             onNavigateBack = {},
-            onNameChanged = {},
-            onEmailChanged = {},
-            onCommentsChanged = {},
+            onNameChange = {},
+            onEmailChange = {},
+            onCommentsChange = {},
             onSubmit = {},
         )
     }

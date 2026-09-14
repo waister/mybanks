@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,11 +37,12 @@ fun SplashScreen(
     viewModel: SplashViewModel = koinViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val currentOnNavigateToMain by rememberUpdatedState(onNavigateToMain)
 
     LaunchedEffect(viewModel.events) {
         viewModel.events.collect { event ->
             when (event) {
-                is SplashEvent.NavigateToMain -> onNavigateToMain()
+                is SplashEvent.NavigateToMain -> currentOnNavigateToMain()
                 is SplashEvent.ShowToast -> {}
             }
         }

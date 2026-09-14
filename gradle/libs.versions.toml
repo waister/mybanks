@@ -5,6 +5,7 @@ ksp = "2.3.6"
 googleServices = "4.5.0"
 firebaseCrashlyticsGradle = "3.0.8"
 ktlintGradle = "14.2.0"
+ktlintComposeRules = "0.6.6"
 kover = "0.9.9"
 
 # AndroidX / Compose
@@ -104,10 +105,10 @@ androidx-test-core = { group = "androidx.test", name = "core", version.ref = "an
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestExt" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
 okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
+ktlint-compose-rules = { group = "io.nlopez.compose.rules", name = "ktlint", version.ref = "ktlintComposeRules" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 google-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }

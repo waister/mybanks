@@ -33,6 +33,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +61,7 @@ fun AccountFormScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val currentOnNavigateBack by rememberUpdatedState(onNavigateBack)
 
     LaunchedEffect(accountId) {
         viewModel.initialize(accountId ?: 0L)
@@ -71,8 +73,14 @@ fun AccountFormScreen(
                 is AccountFormEvent.ShowToast -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
-                is AccountFormEvent.AccountSaved -> onNavigateBack()
-                is AccountFormEvent.NavigateBack -> onNavigateBack()
+
+                is AccountFormEvent.AccountSaved -> {
+                    currentOnNavigateBack()
+                }
+
+                is AccountFormEvent.NavigateBack -> {
+                    currentOnNavigateBack()
+                }
             }
         }
     }
@@ -80,16 +88,16 @@ fun AccountFormScreen(
     AccountFormScreenContent(
         uiState = uiState,
         onNavigateBack = onNavigateBack,
-        onLabelChanged = viewModel::onLabelChanged,
-        onBankSelected = viewModel::onBankSelected,
-        onPixCodeChanged = viewModel::onPixCodeChanged,
-        onAgencyChanged = viewModel::onAgencyChanged,
-        onAccountChanged = viewModel::onAccountChanged,
-        onOperationChanged = viewModel::onOperationChanged,
-        onTypeChanged = viewModel::onTypeChanged,
-        onHolderChanged = viewModel::onHolderChanged,
-        onLegalAccountChanged = viewModel::onLegalAccountChanged,
-        onDocumentChanged = viewModel::onDocumentChanged,
+        onLabelChange = viewModel::onLabelChanged,
+        onBankSelect = viewModel::onBankSelected,
+        onPixCodeChange = viewModel::onPixCodeChanged,
+        onAgencyChange = viewModel::onAgencyChanged,
+        onAccountChange = viewModel::onAccountChanged,
+        onOperationChange = viewModel::onOperationChanged,
+        onTypeChange = viewModel::onTypeChanged,
+        onHolderChange = viewModel::onHolderChanged,
+        onLegalAccountChange = viewModel::onLegalAccountChanged,
+        onDocumentChange = viewModel::onDocumentChanged,
         onSubmit = viewModel::onSubmit,
         onDismissSuccessDialog = viewModel::dismissSuccessDialog,
         onResetFormForNewAccount = viewModel::onResetFormForNewAccount,
@@ -101,16 +109,16 @@ fun AccountFormScreen(
 internal fun AccountFormScreenContent(
     uiState: AccountFormUiState,
     onNavigateBack: () -> Unit,
-    onLabelChanged: (String) -> Unit,
-    onBankSelected: (Bank) -> Unit,
-    onPixCodeChanged: (String) -> Unit,
-    onAgencyChanged: (String) -> Unit,
-    onAccountChanged: (String) -> Unit,
-    onOperationChanged: (String) -> Unit,
-    onTypeChanged: (String) -> Unit,
-    onHolderChanged: (String) -> Unit,
-    onLegalAccountChanged: (Boolean) -> Unit,
-    onDocumentChanged: (String) -> Unit,
+    onLabelChange: (String) -> Unit,
+    onBankSelect: (Bank) -> Unit,
+    onPixCodeChange: (String) -> Unit,
+    onAgencyChange: (String) -> Unit,
+    onAccountChange: (String) -> Unit,
+    onOperationChange: (String) -> Unit,
+    onTypeChange: (String) -> Unit,
+    onHolderChange: (String) -> Unit,
+    onLegalAccountChange: (Boolean) -> Unit,
+    onDocumentChange: (String) -> Unit,
     onSubmit: () -> Unit,
     onDismissSuccessDialog: () -> Unit,
     onResetFormForNewAccount: () -> Unit,
@@ -143,7 +151,7 @@ internal fun AccountFormScreenContent(
         ) {
             OutlinedTextField(
                 value = uiState.label,
-                onValueChange = onLabelChanged,
+                onValueChange = onLabelChange,
                 label = { Text(stringResource(R.string.account_nickname)) },
                 placeholder = { Text("Ex: Nubank, Banco do Brasil") },
                 isError = uiState.labelError != null,
@@ -200,7 +208,7 @@ internal fun AccountFormScreenContent(
                             DropdownMenuItem(
                                 text = { Text(bank.getDisplayName()) },
                                 onClick = {
-                                    onBankSelected(bank)
+                                    onBankSelect(bank)
                                     bankFilterText = ""
                                     bankDropdownExpanded = false
                                 },
@@ -214,7 +222,7 @@ internal fun AccountFormScreenContent(
 
             OutlinedTextField(
                 value = uiState.pixCode,
-                onValueChange = onPixCodeChanged,
+                onValueChange = onPixCodeChange,
                 label = { Text(stringResource(R.string.pix_code)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -226,7 +234,7 @@ internal fun AccountFormScreenContent(
             Row(modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
                     value = uiState.agency,
-                    onValueChange = onAgencyChanged,
+                    onValueChange = onAgencyChange,
                     label = { Text(stringResource(R.string.agency)) },
                     isError = uiState.agencyError != null,
                     supportingText = uiState.agencyError?.let { { Text(it) } },
@@ -242,7 +250,7 @@ internal fun AccountFormScreenContent(
 
                 OutlinedTextField(
                     value = uiState.account,
-                    onValueChange = onAccountChanged,
+                    onValueChange = onAccountChange,
                     label = { Text(stringResource(R.string.account)) },
                     isError = uiState.accountError != null,
                     supportingText = uiState.accountError?.let { { Text(it) } },
@@ -259,7 +267,7 @@ internal fun AccountFormScreenContent(
 
             OutlinedTextField(
                 value = uiState.operation,
-                onValueChange = onOperationChanged,
+                onValueChange = onOperationChange,
                 label = { Text(stringResource(R.string.operation)) },
                 placeholder = { Text("Ex: 013 (Poupança CEF)") },
                 singleLine = true,
@@ -290,7 +298,7 @@ internal fun AccountFormScreenContent(
                     modifier = Modifier
                         .selectable(
                             selected = (uiState.type == checkingText),
-                            onClick = { onTypeChanged(checkingText) },
+                            onClick = { onTypeChange(checkingText) },
                             role = Role.RadioButton,
                         )
                         .padding(vertical = 8.dp),
@@ -310,7 +318,7 @@ internal fun AccountFormScreenContent(
                     modifier = Modifier
                         .selectable(
                             selected = (uiState.type == savingsText),
-                            onClick = { onTypeChanged(savingsText) },
+                            onClick = { onTypeChange(savingsText) },
                             role = Role.RadioButton,
                         )
                         .padding(vertical = 8.dp),
@@ -329,7 +337,7 @@ internal fun AccountFormScreenContent(
 
             OutlinedTextField(
                 value = uiState.holder,
-                onValueChange = onHolderChanged,
+                onValueChange = onHolderChange,
                 label = { Text(stringResource(R.string.holder)) },
                 isError = uiState.holderError != null,
                 supportingText = uiState.holderError?.let { { Text(it) } },
@@ -346,13 +354,13 @@ internal fun AccountFormScreenContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onLegalAccountChanged(!uiState.isLegalAccount) }
+                    .clickable { onLegalAccountChange(!uiState.isLegalAccount) }
                     .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Checkbox(
                     checked = uiState.isLegalAccount,
-                    onCheckedChange = onLegalAccountChanged,
+                    onCheckedChange = onLegalAccountChange,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = stringResource(R.string.is_legal_account))
@@ -368,7 +376,7 @@ internal fun AccountFormScreenContent(
 
             OutlinedTextField(
                 value = uiState.document,
-                onValueChange = onDocumentChanged,
+                onValueChange = onDocumentChange,
                 label = { Text(docLabel) },
                 isError = uiState.documentError != null,
                 supportingText = uiState.documentError?.let { { Text(it) } },
@@ -412,10 +420,12 @@ internal fun AccountFormScreenContent(
             title = { Text(stringResource(R.string.success)) },
             text = { Text(stringResource(R.string.success_account_added)) },
             confirmButton = {
-                TextButton(onClick = {
-                    onDismissSuccessDialog()
-                    onNavigateBack()
-                }) {
+                TextButton(
+                    onClick = {
+                        onDismissSuccessDialog()
+                        onNavigateBack()
+                    },
+                ) {
                     Text(stringResource(R.string.finish))
                 }
             },
@@ -435,16 +445,16 @@ private fun AccountFormNewAccountPreview() {
         AccountFormScreenContent(
             uiState = AccountFormPreviewsData.newAccountState,
             onNavigateBack = {},
-            onLabelChanged = {},
-            onBankSelected = {},
-            onPixCodeChanged = {},
-            onAgencyChanged = {},
-            onAccountChanged = {},
-            onOperationChanged = {},
-            onTypeChanged = {},
-            onHolderChanged = {},
-            onLegalAccountChanged = {},
-            onDocumentChanged = {},
+            onLabelChange = {},
+            onBankSelect = {},
+            onPixCodeChange = {},
+            onAgencyChange = {},
+            onAccountChange = {},
+            onOperationChange = {},
+            onTypeChange = {},
+            onHolderChange = {},
+            onLegalAccountChange = {},
+            onDocumentChange = {},
             onSubmit = {},
             onDismissSuccessDialog = {},
             onResetFormForNewAccount = {},
@@ -459,16 +469,16 @@ private fun AccountFormEditAccountPreview() {
         AccountFormScreenContent(
             uiState = AccountFormPreviewsData.editAccountState,
             onNavigateBack = {},
-            onLabelChanged = {},
-            onBankSelected = {},
-            onPixCodeChanged = {},
-            onAgencyChanged = {},
-            onAccountChanged = {},
-            onOperationChanged = {},
-            onTypeChanged = {},
-            onHolderChanged = {},
-            onLegalAccountChanged = {},
-            onDocumentChanged = {},
+            onLabelChange = {},
+            onBankSelect = {},
+            onPixCodeChange = {},
+            onAgencyChange = {},
+            onAccountChange = {},
+            onOperationChange = {},
+            onTypeChange = {},
+            onHolderChange = {},
+            onLegalAccountChange = {},
+            onDocumentChange = {},
             onSubmit = {},
             onDismissSuccessDialog = {},
             onResetFormForNewAccount = {},
@@ -483,16 +493,16 @@ private fun AccountFormErrorsPreview() {
         AccountFormScreenContent(
             uiState = AccountFormPreviewsData.errorState,
             onNavigateBack = {},
-            onLabelChanged = {},
-            onBankSelected = {},
-            onPixCodeChanged = {},
-            onAgencyChanged = {},
-            onAccountChanged = {},
-            onOperationChanged = {},
-            onTypeChanged = {},
-            onHolderChanged = {},
-            onLegalAccountChanged = {},
-            onDocumentChanged = {},
+            onLabelChange = {},
+            onBankSelect = {},
+            onPixCodeChange = {},
+            onAgencyChange = {},
+            onAccountChange = {},
+            onOperationChange = {},
+            onTypeChange = {},
+            onHolderChange = {},
+            onLegalAccountChange = {},
+            onDocumentChange = {},
             onSubmit = {},
             onDismissSuccessDialog = {},
             onResetFormForNewAccount = {},
