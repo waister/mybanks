@@ -16,8 +16,8 @@ import android.webkit.URLUtil
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.duduapps.mybanks.BuildConfig
+import com.duduapps.mybanks.MainActivity
 import com.duduapps.mybanks.R
-import com.duduapps.mybanks.activity.MainActivity
 import com.duduapps.mybanks.data.repository.AppConfigRepository
 import com.duduapps.mybanks.data.repository.PreferencesRepository
 import com.google.firebase.messaging.FirebaseMessagingService

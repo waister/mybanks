@@ -1,4 +1,4 @@
-package com.duduapps.mybanks.activity
+package com.duduapps.mybanks
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

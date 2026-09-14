@@ -10,11 +10,9 @@ object Routes {
     const val FEEDBACK = "feedback"
 
     fun accountDetail(accountId: Long): String = "account_detail/$accountId"
-    fun accountForm(accountId: Long? = null): String {
-        return if (accountId != null && accountId > 0) {
-            "account_form?accountId=$accountId"
-        } else {
-            "account_form"
-        }
+    fun accountForm(accountId: Long? = null): String = if (accountId != null && accountId > 0) {
+        "account_form?accountId=$accountId"
+    } else {
+        "account_form"
     }
 }

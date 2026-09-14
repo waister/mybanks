@@ -19,7 +19,7 @@ class RemoveAdsViewModel(
     private val _uiState = MutableStateFlow(RemoveAdsUiState())
     val uiState: StateFlow<RemoveAdsUiState> = _uiState.asStateFlow()
 
-    private val _events = MutableSharedFlow<RemoveAdsEvent>()
+    private val _events = MutableSharedFlow<RemoveAdsEvent>(extraBufferCapacity = 64)
     val events: SharedFlow<RemoveAdsEvent> = _events.asSharedFlow()
 
     companion object {

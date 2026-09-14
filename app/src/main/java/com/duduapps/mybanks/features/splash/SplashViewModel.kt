@@ -23,7 +23,7 @@ class SplashViewModel(
     private val _uiState = MutableStateFlow(SplashUiState())
     val uiState: StateFlow<SplashUiState> = _uiState.asStateFlow()
 
-    private val _events = MutableSharedFlow<SplashEvent>()
+    private val _events = MutableSharedFlow<SplashEvent>(extraBufferCapacity = 64)
     val events: SharedFlow<SplashEvent> = _events.asSharedFlow()
 
     init {

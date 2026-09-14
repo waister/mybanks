@@ -30,15 +30,13 @@ class AccountRepositoryImpl(
 
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
 
-    override fun getAccountsFlow(): Flow<List<Account>> {
-        return combine(
-            accountDao.getAllAccountsFlow(),
-            bankDao.getAllBanksFlow(),
-        ) { accounts, banks ->
-            val bankMap = banks.associate { it.id to it.toDomain() }
-            accounts.map { accountEntity ->
-                accountEntity.toDomain(bankMap[accountEntity.bankId])
-            }
+    override fun getAccountsFlow(): Flow<List<Account>> = combine(
+        accountDao.getAllAccountsFlow(),
+        bankDao.getAllBanksFlow(),
+    ) { accounts, banks ->
+        val bankMap = banks.associate { it.id to it.toDomain() }
+        accounts.map { accountEntity ->
+            accountEntity.toDomain(bankMap[accountEntity.bankId])
         }
     }
 

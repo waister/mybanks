@@ -20,7 +20,7 @@ class AccountDetailViewModel(
     private val _uiState = MutableStateFlow(AccountDetailUiState())
     val uiState: StateFlow<AccountDetailUiState> = _uiState.asStateFlow()
 
-    private val _events = MutableSharedFlow<AccountDetailEvent>()
+    private val _events = MutableSharedFlow<AccountDetailEvent>(extraBufferCapacity = 64)
     val events: SharedFlow<AccountDetailEvent> = _events.asSharedFlow()
 
     fun loadAccount(accountId: Long) {
@@ -70,17 +70,15 @@ class AccountDetailViewModel(
         }
     }
 
-    private fun formatAccountText(account: Account): String {
-        return buildString {
-            if (account.pixCode.isNotEmpty()) append("PIX: ${account.pixCode}\n")
-            append("Banco: ${account.bankName()}\n")
-            append("Agência: ${account.agency}\n")
-            append("Conta: ${account.account}\n")
-            if (account.operation.isNotEmpty()) append("Operação: ${account.operation}\n")
-            append("Tipo: ${account.type}\n")
-            append("Titular: ${account.holder}\n")
-            val docLabel = if (account.legalAccount) "CNPJ" else "CPF"
-            append("$docLabel: ${account.document}")
-        }
+    private fun formatAccountText(account: Account): String = buildString {
+        if (account.pixCode.isNotEmpty()) append("PIX: ${account.pixCode}\n")
+        append("Banco: ${account.bankName()}\n")
+        append("Agência: ${account.agency}\n")
+        append("Conta: ${account.account}\n")
+        if (account.operation.isNotEmpty()) append("Operação: ${account.operation}\n")
+        append("Tipo: ${account.type}\n")
+        append("Titular: ${account.holder}\n")
+        val docLabel = if (account.legalAccount) "CNPJ" else "CPF"
+        append("$docLabel: ${account.document}")
     }
 }

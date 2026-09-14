@@ -25,7 +25,7 @@ class AccountFormViewModel(
     private val _uiState = MutableStateFlow(AccountFormUiState())
     val uiState: StateFlow<AccountFormUiState> = _uiState.asStateFlow()
 
-    private val _events = MutableSharedFlow<AccountFormEvent>()
+    private val _events = MutableSharedFlow<AccountFormEvent>(extraBufferCapacity = 64)
     val events: SharedFlow<AccountFormEvent> = _events.asSharedFlow()
 
     fun initialize(accountId: Long) {

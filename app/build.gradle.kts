@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.ksp)
     alias(libs.plugins.google.services)
@@ -11,12 +10,12 @@ plugins {
 
 android {
     namespace = "com.duduapps.mybanks"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.duduapps.mybanks"
-        minSdk = 23
-        targetSdk = 35
+        minSdk = 24
+        targetSdk = 37
         versionCode = 13
         versionName = "1.0.12"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -36,17 +35,19 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-
-    kotlinOptions {
-        jvmTarget = "21"
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
+        }
     }
 }
 
@@ -70,8 +71,6 @@ tasks.withType<Test>().configureEach {
 dependencies {
     // AndroidX & Core
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
 
     // Lifecycle
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -92,7 +91,6 @@ dependencies {
 
     // Room
     implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
     // Koin
@@ -117,7 +115,6 @@ dependencies {
     // Ads & Play Services
     implementation(libs.play.services.ads)
     implementation(libs.play.app.update)
-    implementation(libs.play.app.update.ktx)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)

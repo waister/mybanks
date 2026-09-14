@@ -4,8 +4,6 @@ import app.cash.turbine.test
 import com.duduapps.mybanks.data.repository.FeedbackRepository
 import com.duduapps.mybanks.data.repository.PreferencesRepository
 import com.duduapps.mybanks.utils.MainDispatcherRule
-import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -21,7 +19,20 @@ class FeedbackViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val feedbackRepository: FeedbackRepository = mockk(relaxed = true)
+    private class FakeFeedbackRepository : FeedbackRepository {
+        var sendFeedbackResult: Result<String> = Result.failure(Exception("Not set"))
+        var sentName: String? = null
+        var sentEmail: String? = null
+        var sentComments: String? = null
+
+        override suspend fun sendFeedback(name: String, email: String, comments: String): Result<String> {
+            sentName = name
+            sentEmail = email
+            sentComments = comments
+            return sendFeedbackResult
+        }
+    }
+
     private val preferencesRepository: PreferencesRepository = mockk(relaxed = true)
 
     @Before
@@ -33,8 +44,9 @@ class FeedbackViewModelTest {
 
     @Test
     fun `given empty comments, when onSubmit called, then shows error`() {
+        val fakeRepo = FakeFeedbackRepository()
         val viewModel = FeedbackViewModel(
-            feedbackRepository = feedbackRepository,
+            feedbackRepository = fakeRepo,
             preferencesRepository = preferencesRepository,
         )
 
@@ -46,10 +58,12 @@ class FeedbackViewModelTest {
 
     @Test
     fun `given valid input, when onSubmit called successfully, then sends message and emits ShowSuccessDialog`() = runTest {
-        coEvery { feedbackRepository.sendFeedback(any(), any(), any()) } returns Result.success("Mensagem enviada!")
+        val fakeRepo = FakeFeedbackRepository().apply {
+            sendFeedbackResult = Result.success("Mensagem enviada!")
+        }
 
         val viewModel = FeedbackViewModel(
-            feedbackRepository = feedbackRepository,
+            feedbackRepository = fakeRepo,
             preferencesRepository = preferencesRepository,
         )
         viewModel.onNameChanged("Tester")
@@ -64,6 +78,8 @@ class FeedbackViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
 
-        coVerify { feedbackRepository.sendFeedback("Tester", "tester@example.com", "Excelente app!") }
+        assertEquals("Tester", fakeRepo.sentName)
+        assertEquals("tester@example.com", fakeRepo.sentEmail)
+        assertEquals("Excelente app!", fakeRepo.sentComments)
     }
 }

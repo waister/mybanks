@@ -17,7 +17,7 @@ val localModule = module {
             androidContext(),
             AppDatabase::class.java,
             "mybanks_database",
-        ).fallbackToDestructiveMigration().build()
+        ).fallbackToDestructiveMigration(true).build()
     }
 
     single { get<AppDatabase>().bankDao() }

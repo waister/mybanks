@@ -31,7 +31,7 @@ class MainViewModel(
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
-    private val _events = MutableSharedFlow<MainEvent>()
+    private val _events = MutableSharedFlow<MainEvent>(extraBufferCapacity = 64)
     val events: SharedFlow<MainEvent> = _events.asSharedFlow()
 
     init {
@@ -92,17 +92,15 @@ class MainViewModel(
         }
     }
 
-    private fun filterAccounts(accounts: List<Account>, query: String): List<Account> {
-        return if (query.isEmpty()) {
-            accounts.sortedBy { it.label.lowercase() }
-        } else {
-            accounts.filter {
-                it.label.contains(query, ignoreCase = true) ||
-                    it.holder.contains(query, ignoreCase = true) ||
-                    (it.bank?.name?.contains(query, ignoreCase = true) == true) ||
-                    it.pixCode.contains(query, ignoreCase = true)
-            }.sortedBy { it.label.lowercase() }
-        }
+    private fun filterAccounts(accounts: List<Account>, query: String): List<Account> = if (query.isEmpty()) {
+        accounts.sortedBy { it.label.lowercase() }
+    } else {
+        accounts.filter {
+            it.label.contains(query, ignoreCase = true) ||
+                it.holder.contains(query, ignoreCase = true) ||
+                (it.bank?.name?.contains(query, ignoreCase = true) == true) ||
+                it.pixCode.contains(query, ignoreCase = true)
+        }.sortedBy { it.label.lowercase() }
     }
 
     fun onCopyAllClicked() {
@@ -141,19 +139,17 @@ class MainViewModel(
         }
     }
 
-    private fun formatAccountsText(accounts: List<Account>): String {
-        return accounts.joinToString("\n--\n") { account ->
-            buildString {
-                if (account.pixCode.isNotEmpty()) append("PIX: ${account.pixCode}\n")
-                append("Banco: ${account.bankName()}\n")
-                append("Agência: ${account.agency}\n")
-                append("Conta: ${account.account}\n")
-                if (account.operation.isNotEmpty()) append("Operação: ${account.operation}\n")
-                append("Tipo: ${account.type}\n")
-                append("Titular: ${account.holder}\n")
-                val docLabel = if (account.legalAccount) "CNPJ" else "CPF"
-                append("$docLabel: ${account.document}")
-            }
+    private fun formatAccountsText(accounts: List<Account>): String = accounts.joinToString("\n--\n") { account ->
+        buildString {
+            if (account.pixCode.isNotEmpty()) append("PIX: ${account.pixCode}\n")
+            append("Banco: ${account.bankName()}\n")
+            append("Agência: ${account.agency}\n")
+            append("Conta: ${account.account}\n")
+            if (account.operation.isNotEmpty()) append("Operação: ${account.operation}\n")
+            append("Tipo: ${account.type}\n")
+            append("Titular: ${account.holder}\n")
+            val docLabel = if (account.legalAccount) "CNPJ" else "CPF"
+            append("$docLabel: ${account.document}")
         }
     }
 

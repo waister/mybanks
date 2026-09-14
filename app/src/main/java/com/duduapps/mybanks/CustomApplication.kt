@@ -1,4 +1,4 @@
-package com.duduapps.mybanks.application
+package com.duduapps.mybanks
 
 import android.app.Application
 import com.duduapps.mybanks.di.appModule

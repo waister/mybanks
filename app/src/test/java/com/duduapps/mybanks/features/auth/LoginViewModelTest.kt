@@ -4,14 +4,10 @@ import app.cash.turbine.test
 import com.duduapps.mybanks.data.repository.AuthRepository
 import com.duduapps.mybanks.models.EmailCodeResponse
 import com.duduapps.mybanks.utils.MainDispatcherRule
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -20,17 +16,27 @@ class LoginViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val authRepository: AuthRepository = mockk(relaxed = true)
+    private class FakeAuthRepository : AuthRepository {
+        var sendEmailCodeResult: Result<EmailCodeResponse> = Result.failure(Exception("Not set"))
+        var confirmCodeResult: Result<Unit> = Result.failure(Exception("Not set"))
+        var confirmCodeCalledWith: String? = null
 
-    private lateinit var viewModel: LoginViewModel
+        override suspend fun sendEmailCode(email: String): Result<EmailCodeResponse> = sendEmailCodeResult
 
-    @Before
-    fun setUp() {
-        viewModel = LoginViewModel(authRepository = authRepository)
+        override suspend fun confirmCode(identifier: String): Result<Unit> {
+            confirmCodeCalledWith = identifier
+            return confirmCodeResult
+        }
+
+        override suspend fun logout() {}
+
+        override fun decodeVerifier(base64Verifier: String): String = "1234"
     }
 
     @Test
     fun `given invalid email, when sendCode called, then sets email error`() {
+        val fakeRepo = FakeAuthRepository()
+        val viewModel = LoginViewModel(authRepository = fakeRepo)
         viewModel.onEmailChanged("invalid-email")
         viewModel.onPositiveAction()
 
@@ -39,15 +45,18 @@ class LoginViewModelTest {
 
     @Test
     fun `given valid email, when sendCode called successfully, then transitions to code step`() = runTest {
-        val response = EmailCodeResponse(
-            success = true,
-            message = "Código enviado",
-            identifier = "ident123",
-            verifier = "MTIzNA==",
-        )
-        coEvery { authRepository.sendEmailCode("user@example.com") } returns Result.success(response)
-        coEvery { authRepository.decodeVerifier("MTIzNA==") } returns "1234"
+        val fakeRepo = FakeAuthRepository().apply {
+            sendEmailCodeResult = Result.success(
+                EmailCodeResponse(
+                    success = true,
+                    message = "Código enviado",
+                    identifier = "ident123",
+                    verifier = "MTIzNA==",
+                ),
+            )
+        }
 
+        val viewModel = LoginViewModel(authRepository = fakeRepo)
         viewModel.onEmailChanged("user@example.com")
         viewModel.onPositiveAction()
 
@@ -59,30 +68,37 @@ class LoginViewModelTest {
 
     @Test
     fun `given correct code, when confirmCode called, then confirms in repository and emits LoginSuccess`() = runTest {
-        val response = EmailCodeResponse(
-            success = true,
-            message = "Código enviado",
-            identifier = "ident123",
-            verifier = "MTIzNA==",
-        )
-        coEvery { authRepository.sendEmailCode("user@example.com") } returns Result.success(response)
-        coEvery { authRepository.decodeVerifier("MTIzNA==") } returns "1234"
-        coEvery { authRepository.confirmCode("ident123") } returns Result.success(Unit)
+        val fakeRepo = FakeAuthRepository().apply {
+            sendEmailCodeResult = Result.success(
+                EmailCodeResponse(
+                    success = true,
+                    message = "Código enviado",
+                    identifier = "ident123",
+                    verifier = "MTIzNA==",
+                ),
+            )
+            confirmCodeResult = Result.success(Unit)
+        }
 
-        viewModel.onEmailChanged("user@example.com")
-        viewModel.onPositiveAction()
+        val viewModel = LoginViewModel(authRepository = fakeRepo)
 
         viewModel.events.test {
-            viewModel.onCodeChanged("1234")
+            viewModel.onEmailChanged("user@example.com")
             viewModel.onPositiveAction()
 
             val event1 = awaitItem()
-            assertTrue(event1 is LoginEvent.ShowToast)
+            assertTrue(event1 is LoginEvent.ShowSuccessDialog)
+
+            viewModel.onCodeChanged("1234")
+            viewModel.onPositiveAction()
+
             val event2 = awaitItem()
-            assertEquals(LoginEvent.LoginSuccess, event2)
+            assertTrue(event2 is LoginEvent.ShowToast)
+            val event3 = awaitItem()
+            assertEquals(LoginEvent.LoginSuccess, event3)
             cancelAndIgnoreRemainingEvents()
         }
 
-        coVerify { authRepository.confirmCode("ident123") }
+        assertEquals("ident123", fakeRepo.confirmCodeCalledWith)
     }
 }

@@ -34,11 +34,9 @@ data class Account(
     val synced: Boolean = true,
     val bank: Bank? = null,
 ) {
-    fun bankName(): String {
-        return if (bank != null) {
-            "${bank.name} (${bank.code})"
-        } else {
-            ""
-        }
+    fun bankName(): String = if (bank != null) {
+        "${bank.name} (${bank.code})"
+    } else {
+        ""
     }
 }

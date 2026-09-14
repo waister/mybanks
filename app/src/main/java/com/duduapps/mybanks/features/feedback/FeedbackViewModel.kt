@@ -21,7 +21,7 @@ class FeedbackViewModel(
     private val _uiState = MutableStateFlow(FeedbackUiState())
     val uiState: StateFlow<FeedbackUiState> = _uiState.asStateFlow()
 
-    private val _events = MutableSharedFlow<FeedbackEvent>()
+    private val _events = MutableSharedFlow<FeedbackEvent>(extraBufferCapacity = 64)
     val events: SharedFlow<FeedbackEvent> = _events.asSharedFlow()
 
     init {

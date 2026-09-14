@@ -38,16 +38,14 @@ class AuthRepositoryImpl(
         accountRepository.clearAccounts()
     }
 
-    override fun decodeVerifier(base64Verifier: String): String {
-        return try {
-            val data = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                java.util.Base64.getDecoder().decode(base64Verifier)
-            } else {
-                android.util.Base64.decode(base64Verifier, android.util.Base64.DEFAULT)
-            }
-            String(data, Charsets.UTF_8)
-        } catch (_: Exception) {
-            ""
+    override fun decodeVerifier(base64Verifier: String): String = try {
+        val data = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            java.util.Base64.getDecoder().decode(base64Verifier)
+        } else {
+            android.util.Base64.decode(base64Verifier, android.util.Base64.DEFAULT)
         }
+        String(data, Charsets.UTF_8)
+    } catch (_: Exception) {
+        ""
     }
 }
