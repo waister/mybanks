@@ -33,12 +33,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.duduapps.mybanks.BuildConfig
 import com.duduapps.mybanks.R
 import com.duduapps.mybanks.data.repository.PreferencesRepository
 import com.duduapps.mybanks.ui.components.AppTopBar
+import com.duduapps.mybanks.ui.theme.MyBanksTheme
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.rewarded.RewardedAd
@@ -105,7 +107,29 @@ fun RemoveAdsScreen(
         }
     }
 
+    RemoveAdsScreenContent(
+        uiState = uiState,
+        onNavigateBack = onNavigateBack,
+        onWatchAdClicked = viewModel::onWatchAdClicked,
+        showSuccessDialog = showSuccessDialog,
+        onDismissSuccessDialog = {
+            showSuccessDialog = false
+            onNavigateBack()
+        },
+    )
+}
+
+@Composable
+internal fun RemoveAdsScreenContent(
+    uiState: RemoveAdsUiState,
+    onNavigateBack: () -> Unit,
+    onWatchAdClicked: () -> Unit,
+    showSuccessDialog: Boolean = false,
+    onDismissSuccessDialog: () -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
     Scaffold(
+        modifier = modifier,
         topBar = {
             AppTopBar(
                 title = stringResource(R.string.remove_adas),
@@ -162,7 +186,7 @@ fun RemoveAdsScreen(
             }
 
             Button(
-                onClick = viewModel::onWatchAdClicked,
+                onClick = onWatchAdClicked,
                 enabled = uiState.isAdLoaded,
                 modifier = Modifier.fillMaxWidth(0.85f),
             ) {
@@ -184,20 +208,50 @@ fun RemoveAdsScreen(
 
     if (showSuccessDialog) {
         AlertDialog(
-            onDismissRequest = {
-                showSuccessDialog = false
-                onNavigateBack()
-            },
+            onDismissRequest = onDismissSuccessDialog,
             title = { Text(stringResource(R.string.plan_success_title)) },
             text = { Text(stringResource(R.string.plan_success_body)) },
             confirmButton = {
-                TextButton(onClick = {
-                    showSuccessDialog = false
-                    onNavigateBack()
-                }) {
+                TextButton(onClick = onDismissSuccessDialog) {
                     Text(stringResource(R.string.ok))
                 }
             },
+        )
+    }
+}
+
+@Preview(name = "Remove Ads - Free Plan (Ad Loaded)", showBackground = true)
+@Composable
+private fun RemoveAdsFreePlanAdLoadedPreview() {
+    MyBanksTheme {
+        RemoveAdsScreenContent(
+            uiState = RemoveAdsPreviewsData.freePlanAdLoadedState,
+            onNavigateBack = {},
+            onWatchAdClicked = {},
+        )
+    }
+}
+
+@Preview(name = "Remove Ads - Free Plan (Ad Loading)", showBackground = true)
+@Composable
+private fun RemoveAdsFreePlanAdLoadingPreview() {
+    MyBanksTheme {
+        RemoveAdsScreenContent(
+            uiState = RemoveAdsPreviewsData.freePlanAdLoadingState,
+            onNavigateBack = {},
+            onWatchAdClicked = {},
+        )
+    }
+}
+
+@Preview(name = "Remove Ads - Active Plan", showBackground = true)
+@Composable
+private fun RemoveAdsActivePlanPreview() {
+    MyBanksTheme {
+        RemoveAdsScreenContent(
+            uiState = RemoveAdsPreviewsData.activePlanState,
+            onNavigateBack = {},
+            onWatchAdClicked = {},
         )
     }
 }

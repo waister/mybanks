@@ -21,10 +21,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.duduapps.mybanks.R
+import com.duduapps.mybanks.ui.theme.MyBanksTheme
 import com.duduapps.mybanks.ui.theme.Primary
 import org.koin.androidx.compose.koinViewModel
 
@@ -44,8 +46,16 @@ fun SplashScreen(
         }
     }
 
+    SplashScreenContent(uiState = uiState)
+}
+
+@Composable
+internal fun SplashScreenContent(
+    uiState: SplashUiState,
+    modifier: Modifier = Modifier,
+) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(Primary),
         contentAlignment = Alignment.Center,
@@ -86,5 +96,21 @@ fun SplashScreen(
                 )
             }
         }
+    }
+}
+
+@Preview(name = "Splash Screen - Loading", showBackground = true)
+@Composable
+private fun SplashScreenLoadingPreview() {
+    MyBanksTheme {
+        SplashScreenContent(uiState = SplashPreviewsData.loadingState)
+    }
+}
+
+@Preview(name = "Splash Screen - Idle", showBackground = true)
+@Composable
+private fun SplashScreenIdlePreview() {
+    MyBanksTheme {
+        SplashScreenContent(uiState = SplashPreviewsData.idleState)
     }
 }

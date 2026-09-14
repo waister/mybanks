@@ -42,14 +42,16 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.duduapps.mybanks.R
+import com.duduapps.mybanks.models.Bank
 import com.duduapps.mybanks.ui.components.AppTopBar
 import com.duduapps.mybanks.ui.components.LoadingDialog
+import com.duduapps.mybanks.ui.theme.MyBanksTheme
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountFormScreen(
     accountId: Long?,
@@ -58,9 +60,6 @@ fun AccountFormScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-
-    var bankDropdownExpanded by remember { mutableStateOf(false) }
-    var bankFilterText by remember { mutableStateOf("") }
 
     LaunchedEffect(accountId) {
         viewModel.initialize(accountId ?: 0L)
@@ -78,6 +77,48 @@ fun AccountFormScreen(
         }
     }
 
+    AccountFormScreenContent(
+        uiState = uiState,
+        onNavigateBack = onNavigateBack,
+        onLabelChanged = viewModel::onLabelChanged,
+        onBankSelected = viewModel::onBankSelected,
+        onPixCodeChanged = viewModel::onPixCodeChanged,
+        onAgencyChanged = viewModel::onAgencyChanged,
+        onAccountChanged = viewModel::onAccountChanged,
+        onOperationChanged = viewModel::onOperationChanged,
+        onTypeChanged = viewModel::onTypeChanged,
+        onHolderChanged = viewModel::onHolderChanged,
+        onLegalAccountChanged = viewModel::onLegalAccountChanged,
+        onDocumentChanged = viewModel::onDocumentChanged,
+        onSubmit = viewModel::onSubmit,
+        onDismissSuccessDialog = viewModel::dismissSuccessDialog,
+        onResetFormForNewAccount = viewModel::onResetFormForNewAccount,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun AccountFormScreenContent(
+    uiState: AccountFormUiState,
+    onNavigateBack: () -> Unit,
+    onLabelChanged: (String) -> Unit,
+    onBankSelected: (Bank) -> Unit,
+    onPixCodeChanged: (String) -> Unit,
+    onAgencyChanged: (String) -> Unit,
+    onAccountChanged: (String) -> Unit,
+    onOperationChanged: (String) -> Unit,
+    onTypeChanged: (String) -> Unit,
+    onHolderChanged: (String) -> Unit,
+    onLegalAccountChanged: (Boolean) -> Unit,
+    onDocumentChanged: (String) -> Unit,
+    onSubmit: () -> Unit,
+    onDismissSuccessDialog: () -> Unit,
+    onResetFormForNewAccount: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var bankDropdownExpanded by remember { mutableStateOf(false) }
+    var bankFilterText by remember { mutableStateOf("") }
+
     val title = if (uiState.isEditMode) {
         stringResource(R.string.label_edit_account, uiState.label)
     } else {
@@ -85,6 +126,7 @@ fun AccountFormScreen(
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             AppTopBar(
                 title = title,
@@ -101,7 +143,7 @@ fun AccountFormScreen(
         ) {
             OutlinedTextField(
                 value = uiState.label,
-                onValueChange = viewModel::onLabelChanged,
+                onValueChange = onLabelChanged,
                 label = { Text(stringResource(R.string.account_nickname)) },
                 placeholder = { Text("Ex: Nubank, Banco do Brasil") },
                 isError = uiState.labelError != null,
@@ -158,7 +200,7 @@ fun AccountFormScreen(
                             DropdownMenuItem(
                                 text = { Text(bank.getDisplayName()) },
                                 onClick = {
-                                    viewModel.onBankSelected(bank)
+                                    onBankSelected(bank)
                                     bankFilterText = ""
                                     bankDropdownExpanded = false
                                 },
@@ -172,7 +214,7 @@ fun AccountFormScreen(
 
             OutlinedTextField(
                 value = uiState.pixCode,
-                onValueChange = viewModel::onPixCodeChanged,
+                onValueChange = onPixCodeChanged,
                 label = { Text(stringResource(R.string.pix_code)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -184,7 +226,7 @@ fun AccountFormScreen(
             Row(modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
                     value = uiState.agency,
-                    onValueChange = viewModel::onAgencyChanged,
+                    onValueChange = onAgencyChanged,
                     label = { Text(stringResource(R.string.agency)) },
                     isError = uiState.agencyError != null,
                     supportingText = uiState.agencyError?.let { { Text(it) } },
@@ -200,7 +242,7 @@ fun AccountFormScreen(
 
                 OutlinedTextField(
                     value = uiState.account,
-                    onValueChange = viewModel::onAccountChanged,
+                    onValueChange = onAccountChanged,
                     label = { Text(stringResource(R.string.account)) },
                     isError = uiState.accountError != null,
                     supportingText = uiState.accountError?.let { { Text(it) } },
@@ -217,7 +259,7 @@ fun AccountFormScreen(
 
             OutlinedTextField(
                 value = uiState.operation,
-                onValueChange = viewModel::onOperationChanged,
+                onValueChange = onOperationChanged,
                 label = { Text(stringResource(R.string.operation)) },
                 placeholder = { Text("Ex: 013 (Poupança CEF)") },
                 singleLine = true,
@@ -248,7 +290,7 @@ fun AccountFormScreen(
                     modifier = Modifier
                         .selectable(
                             selected = (uiState.type == checkingText),
-                            onClick = { viewModel.onTypeChanged(checkingText) },
+                            onClick = { onTypeChanged(checkingText) },
                             role = Role.RadioButton,
                         )
                         .padding(vertical = 8.dp),
@@ -268,7 +310,7 @@ fun AccountFormScreen(
                     modifier = Modifier
                         .selectable(
                             selected = (uiState.type == savingsText),
-                            onClick = { viewModel.onTypeChanged(savingsText) },
+                            onClick = { onTypeChanged(savingsText) },
                             role = Role.RadioButton,
                         )
                         .padding(vertical = 8.dp),
@@ -287,7 +329,7 @@ fun AccountFormScreen(
 
             OutlinedTextField(
                 value = uiState.holder,
-                onValueChange = viewModel::onHolderChanged,
+                onValueChange = onHolderChanged,
                 label = { Text(stringResource(R.string.holder)) },
                 isError = uiState.holderError != null,
                 supportingText = uiState.holderError?.let { { Text(it) } },
@@ -304,13 +346,13 @@ fun AccountFormScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { viewModel.onLegalAccountChanged(!uiState.isLegalAccount) }
+                    .clickable { onLegalAccountChanged(!uiState.isLegalAccount) }
                     .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Checkbox(
                     checked = uiState.isLegalAccount,
-                    onCheckedChange = viewModel::onLegalAccountChanged,
+                    onCheckedChange = onLegalAccountChanged,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = stringResource(R.string.is_legal_account))
@@ -326,7 +368,7 @@ fun AccountFormScreen(
 
             OutlinedTextField(
                 value = uiState.document,
-                onValueChange = viewModel::onDocumentChanged,
+                onValueChange = onDocumentChanged,
                 label = { Text(docLabel) },
                 isError = uiState.documentError != null,
                 supportingText = uiState.documentError?.let { { Text(it) } },
@@ -347,7 +389,7 @@ fun AccountFormScreen(
             }
 
             Button(
-                onClick = viewModel::onSubmit,
+                onClick = onSubmit,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(text = submitText)
@@ -364,24 +406,96 @@ fun AccountFormScreen(
     if (uiState.isSuccessDialogVisible) {
         AlertDialog(
             onDismissRequest = {
-                viewModel.dismissSuccessDialog()
+                onDismissSuccessDialog()
                 onNavigateBack()
             },
             title = { Text(stringResource(R.string.success)) },
             text = { Text(stringResource(R.string.success_account_added)) },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.dismissSuccessDialog()
+                    onDismissSuccessDialog()
                     onNavigateBack()
                 }) {
                     Text(stringResource(R.string.finish))
                 }
             },
             dismissButton = {
-                TextButton(onClick = viewModel::onResetFormForNewAccount) {
+                TextButton(onClick = onResetFormForNewAccount) {
                     Text(stringResource(R.string.register_new))
                 }
             },
+        )
+    }
+}
+
+@Preview(name = "Account Form - New Account", showBackground = true)
+@Composable
+private fun AccountFormNewAccountPreview() {
+    MyBanksTheme {
+        AccountFormScreenContent(
+            uiState = AccountFormPreviewsData.newAccountState,
+            onNavigateBack = {},
+            onLabelChanged = {},
+            onBankSelected = {},
+            onPixCodeChanged = {},
+            onAgencyChanged = {},
+            onAccountChanged = {},
+            onOperationChanged = {},
+            onTypeChanged = {},
+            onHolderChanged = {},
+            onLegalAccountChanged = {},
+            onDocumentChanged = {},
+            onSubmit = {},
+            onDismissSuccessDialog = {},
+            onResetFormForNewAccount = {},
+        )
+    }
+}
+
+@Preview(name = "Account Form - Edit Account", showBackground = true)
+@Composable
+private fun AccountFormEditAccountPreview() {
+    MyBanksTheme {
+        AccountFormScreenContent(
+            uiState = AccountFormPreviewsData.editAccountState,
+            onNavigateBack = {},
+            onLabelChanged = {},
+            onBankSelected = {},
+            onPixCodeChanged = {},
+            onAgencyChanged = {},
+            onAccountChanged = {},
+            onOperationChanged = {},
+            onTypeChanged = {},
+            onHolderChanged = {},
+            onLegalAccountChanged = {},
+            onDocumentChanged = {},
+            onSubmit = {},
+            onDismissSuccessDialog = {},
+            onResetFormForNewAccount = {},
+        )
+    }
+}
+
+@Preview(name = "Account Form - Errors", showBackground = true)
+@Composable
+private fun AccountFormErrorsPreview() {
+    MyBanksTheme {
+        AccountFormScreenContent(
+            uiState = AccountFormPreviewsData.errorState,
+            onNavigateBack = {},
+            onLabelChanged = {},
+            onBankSelected = {},
+            onPixCodeChanged = {},
+            onAgencyChanged = {},
+            onAccountChanged = {},
+            onOperationChanged = {},
+            onTypeChanged = {},
+            onHolderChanged = {},
+            onLegalAccountChanged = {},
+            onDocumentChanged = {},
+            onSubmit = {},
+            onDismissSuccessDialog = {},
+            onResetFormForNewAccount = {},
         )
     }
 }

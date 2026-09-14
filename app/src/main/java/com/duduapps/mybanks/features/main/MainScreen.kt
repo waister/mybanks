@@ -49,6 +49,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.duduapps.mybanks.R
@@ -56,11 +57,11 @@ import com.duduapps.mybanks.features.main.components.AccountItem
 import com.duduapps.mybanks.features.main.components.EmptyAccountsView
 import com.duduapps.mybanks.ui.components.AdMobBanner
 import com.duduapps.mybanks.ui.components.ConfirmDialog
+import com.duduapps.mybanks.ui.theme.MyBanksTheme
 import com.duduapps.mybanks.utils.InterstitialAdManager
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     onNavigateToAddAccount: () -> Unit,
@@ -74,9 +75,6 @@ fun MainScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
-
-    var showMenu by remember { mutableStateOf(false) }
-    var showLogoutDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         interstitialAdManager.loadAd(context)
@@ -111,21 +109,69 @@ fun MainScreen(
         }
     }
 
+    MainScreenContent(
+        uiState = uiState,
+        onNavigateToAddAccount = onNavigateToAddAccount,
+        onNavigateToAccountDetail = onNavigateToAccountDetail,
+        onNavigateToLogin = onNavigateToLogin,
+        onNavigateToRemoveAds = onNavigateToRemoveAds,
+        onNavigateToFeedback = onNavigateToFeedback,
+        onSearchQueryChanged = viewModel::onSearchQueryChanged,
+        onToggleSearch = viewModel::toggleSearch,
+        onCopyAllClicked = viewModel::onCopyAllClicked,
+        onShareAllClicked = viewModel::onShareAllClicked,
+        onLogout = viewModel::onLogout,
+        onDismissLoginAlert = viewModel::onDismissLoginAlert,
+        onDismissUpdateDialog = viewModel::dismissUpdateDialog,
+        onUpdateClick = { url ->
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            context.startActivity(intent)
+        },
+        onShareApp = { shareApp(context) },
+        onRateOnStore = { openPlayStore(context) },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun MainScreenContent(
+    uiState: MainUiState,
+    onNavigateToAddAccount: () -> Unit,
+    onNavigateToAccountDetail: (Long) -> Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRemoveAds: () -> Unit,
+    onNavigateToFeedback: () -> Unit,
+    onSearchQueryChanged: (String) -> Unit,
+    onToggleSearch: (Boolean) -> Unit,
+    onCopyAllClicked: () -> Unit,
+    onShareAllClicked: () -> Unit,
+    onLogout: () -> Unit,
+    onDismissLoginAlert: (Boolean) -> Unit,
+    onDismissUpdateDialog: () -> Unit,
+    onUpdateClick: (String) -> Unit,
+    onShareApp: () -> Unit,
+    onRateOnStore: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var showMenu by remember { mutableStateOf(false) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
+
     Scaffold(
+        modifier = modifier,
         topBar = {
             if (uiState.isSearchActive) {
                 SearchBar(
                     inputField = {
                         SearchBarDefaults.InputField(
                             query = uiState.searchQuery,
-                            onQueryChange = viewModel::onSearchQueryChanged,
+                            onQueryChange = onSearchQueryChanged,
                             onSearch = {},
                             expanded = false,
                             onExpandedChange = {},
                             placeholder = { Text(stringResource(R.string.search_hint)) },
                             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                             trailingIcon = {
-                                IconButton(onClick = { viewModel.toggleSearch(false) }) {
+                                IconButton(onClick = { onToggleSearch(false) }) {
                                     Icon(Icons.Default.Close, contentDescription = "Fechar busca")
                                 }
                             },
@@ -145,7 +191,7 @@ fun MainScreen(
                     ),
                     actions = {
                         if (uiState.accounts.size > 3) {
-                            IconButton(onClick = { viewModel.toggleSearch(true) }) {
+                            IconButton(onClick = { onToggleSearch(true) }) {
                                 Icon(Icons.Default.Search, contentDescription = "Buscar contas")
                             }
                         }
@@ -187,14 +233,14 @@ fun MainScreen(
                                 text = { Text(stringResource(R.string.share_app)) },
                                 onClick = {
                                     showMenu = false
-                                    shareApp(context)
+                                    onShareApp()
                                 },
                             )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.rate_on_store)) },
                                 onClick = {
                                     showMenu = false
-                                    openPlayStore(context)
+                                    onRateOnStore()
                                 },
                             )
                             DropdownMenuItem(
@@ -216,7 +262,7 @@ fun MainScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     FloatingActionButton(
-                        onClick = viewModel::onCopyAllClicked,
+                        onClick = onCopyAllClicked,
                         containerColor = MaterialTheme.colorScheme.secondary,
                         contentColor = MaterialTheme.colorScheme.onSecondary,
                     ) {
@@ -224,7 +270,7 @@ fun MainScreen(
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     ExtendedFloatingActionButton(
-                        onClick = viewModel::onShareAllClicked,
+                        onClick = onShareAllClicked,
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary,
                         icon = { Icon(Icons.Default.Share, contentDescription = null) },
@@ -272,7 +318,7 @@ fun MainScreen(
             dismissText = stringResource(R.string.cancel),
             onConfirm = {
                 showLogoutDialog = false
-                viewModel.onLogout()
+                onLogout()
             },
             onDismiss = { showLogoutDialog = false },
         )
@@ -280,12 +326,12 @@ fun MainScreen(
 
     if (uiState.showAlertLogin) {
         AlertDialog(
-            onDismissRequest = { viewModel.onDismissLoginAlert(false) },
+            onDismissRequest = { onDismissLoginAlert(false) },
             title = { Text(stringResource(R.string.active_sync_title)) },
             text = { Text(stringResource(R.string.active_sync_message)) },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.onDismissLoginAlert(false)
+                    onDismissLoginAlert(false)
                     onNavigateToLogin()
                 }) {
                     Text(stringResource(R.string.active_sync_positive))
@@ -293,10 +339,10 @@ fun MainScreen(
             },
             dismissButton = {
                 Row {
-                    TextButton(onClick = { viewModel.onDismissLoginAlert(true) }) {
+                    TextButton(onClick = { onDismissLoginAlert(true) }) {
                         Text(stringResource(R.string.never_show_again))
                     }
-                    TextButton(onClick = { viewModel.onDismissLoginAlert(false) }) {
+                    TextButton(onClick = { onDismissLoginAlert(false) }) {
                         Text(stringResource(R.string.active_sync_negative))
                     }
                 }
@@ -307,7 +353,7 @@ fun MainScreen(
     if (uiState.isUpdateDialogVisible) {
         AlertDialog(
             onDismissRequest = {
-                if (!uiState.isMandatoryUpdate) viewModel.dismissUpdateDialog()
+                if (!uiState.isMandatoryUpdate) onDismissUpdateDialog()
             },
             title = { Text(stringResource(R.string.updated_title)) },
             text = {
@@ -320,16 +366,13 @@ fun MainScreen(
                 )
             },
             confirmButton = {
-                TextButton(onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uiState.updateStoreUrl))
-                    context.startActivity(intent)
-                }) {
+                TextButton(onClick = { onUpdateClick(uiState.updateStoreUrl) }) {
                     Text(stringResource(R.string.updated_positive))
                 }
             },
             dismissButton = {
                 if (!uiState.isMandatoryUpdate) {
-                    TextButton(onClick = viewModel::dismissUpdateDialog) {
+                    TextButton(onClick = onDismissUpdateDialog) {
                         Text(stringResource(R.string.updated_negative))
                     }
                 }
@@ -353,4 +396,79 @@ private fun openPlayStore(context: Context) {
     val storeUrl = "https://play.google.com/store/apps/details?id=${context.packageName}"
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(storeUrl))
     context.startActivity(intent)
+}
+
+@Preview(name = "Main Screen - Populated", showBackground = true)
+@Composable
+private fun MainScreenPopulatedPreview() {
+    MyBanksTheme {
+        MainScreenContent(
+            uiState = MainPreviewsData.populatedLoggedState,
+            onNavigateToAddAccount = {},
+            onNavigateToAccountDetail = {},
+            onNavigateToLogin = {},
+            onNavigateToRemoveAds = {},
+            onNavigateToFeedback = {},
+            onSearchQueryChanged = {},
+            onToggleSearch = {},
+            onCopyAllClicked = {},
+            onShareAllClicked = {},
+            onLogout = {},
+            onDismissLoginAlert = {},
+            onDismissUpdateDialog = {},
+            onUpdateClick = {},
+            onShareApp = {},
+            onRateOnStore = {},
+        )
+    }
+}
+
+@Preview(name = "Main Screen - Empty", showBackground = true)
+@Composable
+private fun MainScreenEmptyPreview() {
+    MyBanksTheme {
+        MainScreenContent(
+            uiState = MainPreviewsData.emptyState,
+            onNavigateToAddAccount = {},
+            onNavigateToAccountDetail = {},
+            onNavigateToLogin = {},
+            onNavigateToRemoveAds = {},
+            onNavigateToFeedback = {},
+            onSearchQueryChanged = {},
+            onToggleSearch = {},
+            onCopyAllClicked = {},
+            onShareAllClicked = {},
+            onLogout = {},
+            onDismissLoginAlert = {},
+            onDismissUpdateDialog = {},
+            onUpdateClick = {},
+            onShareApp = {},
+            onRateOnStore = {},
+        )
+    }
+}
+
+@Preview(name = "Main Screen - Searching", showBackground = true)
+@Composable
+private fun MainScreenSearchingPreview() {
+    MyBanksTheme {
+        MainScreenContent(
+            uiState = MainPreviewsData.searchActiveState,
+            onNavigateToAddAccount = {},
+            onNavigateToAccountDetail = {},
+            onNavigateToLogin = {},
+            onNavigateToRemoveAds = {},
+            onNavigateToFeedback = {},
+            onSearchQueryChanged = {},
+            onToggleSearch = {},
+            onCopyAllClicked = {},
+            onShareAllClicked = {},
+            onLogout = {},
+            onDismissLoginAlert = {},
+            onDismissUpdateDialog = {},
+            onUpdateClick = {},
+            onShareApp = {},
+            onRateOnStore = {},
+        )
+    }
 }

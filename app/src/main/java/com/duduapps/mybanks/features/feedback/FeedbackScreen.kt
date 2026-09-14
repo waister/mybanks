@@ -28,11 +28,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.duduapps.mybanks.R
 import com.duduapps.mybanks.ui.components.AppTopBar
 import com.duduapps.mybanks.ui.components.LoadingDialog
+import com.duduapps.mybanks.ui.theme.MyBanksTheme
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -63,7 +65,41 @@ fun FeedbackScreen(
         }
     }
 
+    FeedbackScreenContent(
+        uiState = uiState,
+        onNavigateBack = onNavigateBack,
+        onNameChanged = viewModel::onNameChanged,
+        onEmailChanged = viewModel::onEmailChanged,
+        onCommentsChanged = viewModel::onCommentsChanged,
+        onSubmit = viewModel::onSubmit,
+        successMessage = successMessage,
+        errorMessage = errorMessage,
+        onDismissSuccessDialog = {
+            successMessage = null
+            onNavigateBack()
+        },
+        onDismissErrorDialog = {
+            errorMessage = null
+        },
+    )
+}
+
+@Composable
+internal fun FeedbackScreenContent(
+    uiState: FeedbackUiState,
+    onNavigateBack: () -> Unit,
+    onNameChanged: (String) -> Unit,
+    onEmailChanged: (String) -> Unit,
+    onCommentsChanged: (String) -> Unit,
+    onSubmit: () -> Unit,
+    successMessage: String? = null,
+    errorMessage: String? = null,
+    onDismissSuccessDialog: () -> Unit = {},
+    onDismissErrorDialog: () -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
     Scaffold(
+        modifier = modifier,
         topBar = {
             AppTopBar(
                 title = stringResource(R.string.send_feedback),
@@ -80,7 +116,7 @@ fun FeedbackScreen(
         ) {
             OutlinedTextField(
                 value = uiState.name,
-                onValueChange = viewModel::onNameChanged,
+                onValueChange = onNameChanged,
                 label = { Text(stringResource(R.string.name)) },
                 isError = uiState.nameError != null,
                 supportingText = uiState.nameError?.let { { Text(it) } },
@@ -96,7 +132,7 @@ fun FeedbackScreen(
 
             OutlinedTextField(
                 value = uiState.email,
-                onValueChange = viewModel::onEmailChanged,
+                onValueChange = onEmailChanged,
                 label = { Text(stringResource(R.string.email)) },
                 isError = uiState.emailError != null,
                 supportingText = uiState.emailError?.let { { Text(it) } },
@@ -112,7 +148,7 @@ fun FeedbackScreen(
 
             OutlinedTextField(
                 value = uiState.comments,
-                onValueChange = viewModel::onCommentsChanged,
+                onValueChange = onCommentsChanged,
                 label = { Text(stringResource(R.string.message)) },
                 isError = uiState.commentsError != null,
                 supportingText = uiState.commentsError?.let { { Text(it) } },
@@ -128,7 +164,7 @@ fun FeedbackScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = viewModel::onSubmit,
+                onClick = onSubmit,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(text = stringResource(R.string.send_feedback))
@@ -142,17 +178,11 @@ fun FeedbackScreen(
 
     successMessage?.let { msg ->
         AlertDialog(
-            onDismissRequest = {
-                successMessage = null
-                onNavigateBack()
-            },
+            onDismissRequest = onDismissSuccessDialog,
             title = { Text(stringResource(R.string.success)) },
             text = { Text(msg) },
             confirmButton = {
-                TextButton(onClick = {
-                    successMessage = null
-                    onNavigateBack()
-                }) {
+                TextButton(onClick = onDismissSuccessDialog) {
                     Text(stringResource(R.string.ok))
                 }
             },
@@ -161,14 +191,59 @@ fun FeedbackScreen(
 
     errorMessage?.let { msg ->
         AlertDialog(
-            onDismissRequest = { errorMessage = null },
+            onDismissRequest = onDismissErrorDialog,
             title = { Text(stringResource(R.string.ops)) },
             text = { Text(msg) },
             confirmButton = {
-                TextButton(onClick = { errorMessage = null }) {
+                TextButton(onClick = onDismissErrorDialog) {
                     Text(stringResource(R.string.ok))
                 }
             },
+        )
+    }
+}
+
+@Preview(name = "Feedback - Empty", showBackground = true)
+@Composable
+private fun FeedbackEmptyPreview() {
+    MyBanksTheme {
+        FeedbackScreenContent(
+            uiState = FeedbackPreviewsData.emptyState,
+            onNavigateBack = {},
+            onNameChanged = {},
+            onEmailChanged = {},
+            onCommentsChanged = {},
+            onSubmit = {},
+        )
+    }
+}
+
+@Preview(name = "Feedback - Filled", showBackground = true)
+@Composable
+private fun FeedbackFilledPreview() {
+    MyBanksTheme {
+        FeedbackScreenContent(
+            uiState = FeedbackPreviewsData.filledState,
+            onNavigateBack = {},
+            onNameChanged = {},
+            onEmailChanged = {},
+            onCommentsChanged = {},
+            onSubmit = {},
+        )
+    }
+}
+
+@Preview(name = "Feedback - Errors", showBackground = true)
+@Composable
+private fun FeedbackErrorsPreview() {
+    MyBanksTheme {
+        FeedbackScreenContent(
+            uiState = FeedbackPreviewsData.errorState,
+            onNavigateBack = {},
+            onNameChanged = {},
+            onEmailChanged = {},
+            onCommentsChanged = {},
+            onSubmit = {},
         )
     }
 }

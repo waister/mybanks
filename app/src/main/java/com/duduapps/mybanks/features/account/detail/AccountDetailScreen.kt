@@ -43,12 +43,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.duduapps.mybanks.R
 import com.duduapps.mybanks.ui.components.AdMobBanner
 import com.duduapps.mybanks.ui.components.AppTopBar
 import com.duduapps.mybanks.ui.components.ConfirmDialog
+import com.duduapps.mybanks.ui.theme.MyBanksTheme
 import com.google.android.gms.ads.AdSize
 import org.koin.androidx.compose.koinViewModel
 
@@ -63,9 +65,6 @@ fun AccountDetailScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
-
-    var showMenu by remember { mutableStateOf(false) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(accountId) {
         viewModel.loadAccount(accountId)
@@ -92,7 +91,37 @@ fun AccountDetailScreen(
         }
     }
 
+    AccountDetailScreenContent(
+        uiState = uiState,
+        accountId = accountId,
+        onNavigateBack = onNavigateBack,
+        onNavigateToEdit = onNavigateToEdit,
+        onNavigateToRemoveAds = onNavigateToRemoveAds,
+        onCopyField = viewModel::onCopyField,
+        onCopyAll = viewModel::onCopyAll,
+        onShareAll = viewModel::onShareAll,
+        onDeleteAccount = viewModel::onDeleteAccount,
+    )
+}
+
+@Composable
+internal fun AccountDetailScreenContent(
+    uiState: AccountDetailUiState,
+    accountId: Long,
+    onNavigateBack: () -> Unit,
+    onNavigateToEdit: (Long) -> Unit,
+    onNavigateToRemoveAds: () -> Unit,
+    onCopyField: (String, String) -> Unit,
+    onCopyAll: () -> Unit,
+    onShareAll: () -> Unit,
+    onDeleteAccount: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var showMenu by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
     Scaffold(
+        modifier = modifier,
         topBar = {
             AppTopBar(
                 title = uiState.account?.label ?: stringResource(R.string.account_details),
@@ -151,7 +180,7 @@ fun AccountDetailScreen(
                     DetailRow(
                         label = "Chave PIX",
                         value = account.pixCode,
-                        onClick = { viewModel.onCopyField(account.pixCode, "Chave PIX") },
+                        onClick = { onCopyField(account.pixCode, "Chave PIX") },
                     )
                 }
 
@@ -159,47 +188,47 @@ fun AccountDetailScreen(
                     DetailRow(
                         label = "Banco",
                         value = "${account.bank.name} (${account.bank.code})",
-                        onClick = { viewModel.onCopyField(account.bank.code, "Código do Banco") },
+                        onClick = { onCopyField(account.bank.code, "Código do Banco") },
                     )
                 }
 
                 DetailRow(
                     label = "Agência",
                     value = account.agency,
-                    onClick = { viewModel.onCopyField(account.agency, "Agência") },
+                    onClick = { onCopyField(account.agency, "Agência") },
                 )
 
                 DetailRow(
                     label = "Conta",
                     value = account.account,
-                    onClick = { viewModel.onCopyField(account.account, "Conta") },
+                    onClick = { onCopyField(account.account, "Conta") },
                 )
 
                 if (account.operation.isNotEmpty()) {
                     DetailRow(
                         label = "Operação",
                         value = account.operation,
-                        onClick = { viewModel.onCopyField(account.operation, "Operação") },
+                        onClick = { onCopyField(account.operation, "Operação") },
                     )
                 }
 
                 DetailRow(
                     label = "Tipo",
                     value = account.type,
-                    onClick = { viewModel.onCopyField(account.type, "Tipo") },
+                    onClick = { onCopyField(account.type, "Tipo") },
                 )
 
                 DetailRow(
                     label = "Titular",
                     value = account.holder,
-                    onClick = { viewModel.onCopyField(account.holder, "Titular") },
+                    onClick = { onCopyField(account.holder, "Titular") },
                 )
 
                 val docLabel = if (account.legalAccount) "CNPJ" else "CPF"
                 DetailRow(
                     label = docLabel,
                     value = account.document,
-                    onClick = { viewModel.onCopyField(account.document, docLabel) },
+                    onClick = { onCopyField(account.document, docLabel) },
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -208,7 +237,7 @@ fun AccountDetailScreen(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     OutlinedButton(
-                        onClick = viewModel::onCopyAll,
+                        onClick = onCopyAll,
                         modifier = Modifier.weight(1f),
                     ) {
                         Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -219,7 +248,7 @@ fun AccountDetailScreen(
                     Spacer(modifier = Modifier.width(12.dp))
 
                     Button(
-                        onClick = viewModel::onShareAll,
+                        onClick = onShareAll,
                         modifier = Modifier.weight(1f),
                     ) {
                         Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -241,7 +270,7 @@ fun AccountDetailScreen(
             dismissText = stringResource(R.string.cancel),
             onConfirm = {
                 showDeleteDialog = false
-                viewModel.onDeleteAccount()
+                onDeleteAccount()
             },
             onDismiss = { showDeleteDialog = false },
         )
@@ -289,6 +318,42 @@ private fun DetailRow(
         HorizontalDivider(
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
             thickness = 0.5.dp,
+        )
+    }
+}
+
+@Preview(name = "Account Detail - Individual", showBackground = true)
+@Composable
+private fun AccountDetailIndividualPreview() {
+    MyBanksTheme {
+        AccountDetailScreenContent(
+            uiState = AccountDetailPreviewsData.individualAccountState,
+            accountId = 1L,
+            onNavigateBack = {},
+            onNavigateToEdit = {},
+            onNavigateToRemoveAds = {},
+            onCopyField = { _, _ -> },
+            onCopyAll = {},
+            onShareAll = {},
+            onDeleteAccount = {},
+        )
+    }
+}
+
+@Preview(name = "Account Detail - Legal Entity", showBackground = true)
+@Composable
+private fun AccountDetailLegalPreview() {
+    MyBanksTheme {
+        AccountDetailScreenContent(
+            uiState = AccountDetailPreviewsData.legalAccountState,
+            accountId = 2L,
+            onNavigateBack = {},
+            onNavigateToEdit = {},
+            onNavigateToRemoveAds = {},
+            onCopyField = { _, _ -> },
+            onCopyAll = {},
+            onShareAll = {},
+            onDeleteAccount = {},
         )
     }
 }

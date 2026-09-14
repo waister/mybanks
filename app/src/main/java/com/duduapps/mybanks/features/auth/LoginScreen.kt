@@ -29,11 +29,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.duduapps.mybanks.R
 import com.duduapps.mybanks.ui.components.AppTopBar
 import com.duduapps.mybanks.ui.components.LoadingDialog
+import com.duduapps.mybanks.ui.theme.MyBanksTheme
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -68,7 +70,32 @@ fun LoginScreen(
         }
     }
 
+    LoginScreenContent(
+        uiState = uiState,
+        onNavigateBack = onNavigateBack,
+        onEmailChanged = viewModel::onEmailChanged,
+        onCodeChanged = viewModel::onCodeChanged,
+        onPositiveAction = viewModel::onPositiveAction,
+        dialogTitle = dialogTitle,
+        dialogMessage = dialogMessage,
+        onDismissDialog = { dialogMessage = null },
+    )
+}
+
+@Composable
+internal fun LoginScreenContent(
+    uiState: LoginUiState,
+    onNavigateBack: () -> Unit,
+    onEmailChanged: (String) -> Unit,
+    onCodeChanged: (String) -> Unit,
+    onPositiveAction: () -> Unit,
+    dialogTitle: String? = null,
+    dialogMessage: String? = null,
+    onDismissDialog: () -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
     Scaffold(
+        modifier = modifier,
         topBar = {
             AppTopBar(
                 title = stringResource(R.string.login_title),
@@ -102,7 +129,7 @@ fun LoginScreen(
             if (!uiState.isCodeStep) {
                 OutlinedTextField(
                     value = uiState.email,
-                    onValueChange = viewModel::onEmailChanged,
+                    onValueChange = onEmailChanged,
                     label = { Text(stringResource(R.string.email)) },
                     placeholder = { Text(stringResource(R.string.write_your_email)) },
                     isError = uiState.emailError != null,
@@ -117,7 +144,7 @@ fun LoginScreen(
             } else {
                 OutlinedTextField(
                     value = uiState.code,
-                    onValueChange = viewModel::onCodeChanged,
+                    onValueChange = onCodeChanged,
                     label = { Text(stringResource(R.string.code_sent_to_email)) },
                     placeholder = { Text("0000") },
                     isError = uiState.codeError != null,
@@ -140,7 +167,7 @@ fun LoginScreen(
             }
 
             Button(
-                onClick = viewModel::onPositiveAction,
+                onClick = onPositiveAction,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(text = positiveText)
@@ -163,14 +190,56 @@ fun LoginScreen(
 
     dialogMessage?.let { msg ->
         AlertDialog(
-            onDismissRequest = { dialogMessage = null },
+            onDismissRequest = onDismissDialog,
             title = { Text(dialogTitle ?: "") },
             text = { Text(msg) },
             confirmButton = {
-                TextButton(onClick = { dialogMessage = null }) {
+                TextButton(onClick = onDismissDialog) {
                     Text(stringResource(R.string.ok))
                 }
             },
+        )
+    }
+}
+
+@Preview(name = "Login - Email Step", showBackground = true)
+@Composable
+private fun LoginEmailStepPreview() {
+    MyBanksTheme {
+        LoginScreenContent(
+            uiState = LoginPreviewsData.emailStepState,
+            onNavigateBack = {},
+            onEmailChanged = {},
+            onCodeChanged = {},
+            onPositiveAction = {},
+        )
+    }
+}
+
+@Preview(name = "Login - Code Step", showBackground = true)
+@Composable
+private fun LoginCodeStepPreview() {
+    MyBanksTheme {
+        LoginScreenContent(
+            uiState = LoginPreviewsData.codeStepState,
+            onNavigateBack = {},
+            onEmailChanged = {},
+            onCodeChanged = {},
+            onPositiveAction = {},
+        )
+    }
+}
+
+@Preview(name = "Login - Errors", showBackground = true)
+@Composable
+private fun LoginErrorsPreview() {
+    MyBanksTheme {
+        LoginScreenContent(
+            uiState = LoginPreviewsData.emailErrorState,
+            onNavigateBack = {},
+            onEmailChanged = {},
+            onCodeChanged = {},
+            onPositiveAction = {},
         )
     }
 }
