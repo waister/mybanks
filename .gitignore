@@ -1,24 +1,41 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# Android / Gradle
+.gradle/
+build/
+captures/
+.cxx/
 local.properties
+*.apk
+*.aab
+*.ap_
+*.dex
+.kotlin/
 
+# Secrets & Keys
+*.jks
+*.keystore
+*.pepk
+keystore/
 keystore.properties
-
-# Service Account
+signing.properties
 service_account_key.json
-
+google-services.json
 network_security_config_proxy_local.xml
 
-*.aab
+# IDE / Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+.artifacts/
+
+# OS / Logs
+.DS_Store
+*.log
+*.hprof
+hs_err_pid*
+replay_pid*
+
+# Gradle Wrapper (necessário devido ao *.jar)
+*.jar
+!/gradle/wrapper/gradle-wrapper.jar

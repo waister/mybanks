@@ -1,49 +1,39 @@
 package com.duduapps.mybanks.application
 
 import android.app.Application
-import com.duduapps.mybanks.BuildConfig
-import com.duduapps.mybanks.util.API_ANDROID
-import com.duduapps.mybanks.util.API_DEBUG
-import com.duduapps.mybanks.util.API_IDENTIFIER
-import com.duduapps.mybanks.util.API_IDENTIFIER_OLD
-import com.duduapps.mybanks.util.API_PLATFORM
-import com.duduapps.mybanks.util.API_ROOT
-import com.duduapps.mybanks.util.API_V
-import com.duduapps.mybanks.util.API_VERSION
-import com.duduapps.mybanks.util.AppOpenManager
-import com.duduapps.mybanks.util.PREF_DEVICE_ID
-import com.duduapps.mybanks.util.PREF_DEVICE_ID_OLD
-import com.github.kittinunf.fuel.core.FuelManager
+import com.duduapps.mybanks.di.appModule
+import com.duduapps.mybanks.di.localModule
+import com.duduapps.mybanks.di.networkModule
+import com.duduapps.mybanks.di.repositoryModule
+import com.duduapps.mybanks.di.viewModelModule
+import com.duduapps.mybanks.utils.AppOpenAdManager
 import com.google.android.gms.ads.MobileAds
-import com.orhanobut.hawk.Hawk
+import org.koin.android.ext.android.inject
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
+import org.koin.core.logger.Level
 
 class CustomApplication : Application() {
 
-    var isCheckUpdatesNeeded: Boolean = true
+    private val appOpenAdManager: AppOpenAdManager by inject()
 
     override fun onCreate() {
         super.onCreate()
 
-        Hawk.init(this).build()
+        startKoin {
+            androidLogger(Level.ERROR)
+            androidContext(this@CustomApplication)
+            modules(
+                appModule,
+                localModule,
+                networkModule,
+                repositoryModule,
+                viewModelModule,
+            )
+        }
 
         MobileAds.initialize(this) {}
-
-        AppOpenManager(this)
-
-        FuelManager.instance.basePath = API_ROOT
-
-        updateFuelParams()
+        appOpenAdManager.loadAd()
     }
-
-    fun updateFuelParams() {
-        FuelManager.instance.baseParams = listOf(
-            API_IDENTIFIER to Hawk.get(PREF_DEVICE_ID, ""),
-            API_IDENTIFIER_OLD to Hawk.get(PREF_DEVICE_ID_OLD, ""),
-            API_VERSION to BuildConfig.VERSION_CODE,
-            API_PLATFORM to API_ANDROID,
-            API_DEBUG to (if (BuildConfig.DEBUG) "1" else "0"),
-            API_V to 8
-        )
-    }
-
 }
