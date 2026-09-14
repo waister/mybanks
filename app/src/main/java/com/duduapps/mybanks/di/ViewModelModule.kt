@@ -9,7 +9,7 @@ import com.duduapps.mybanks.features.removeads.RemoveAdsViewModel
 import com.duduapps.mybanks.features.splash.SplashViewModel
 import com.duduapps.mybanks.utils.AppOpenAdManager
 import com.duduapps.mybanks.utils.InterstitialAdManager
-import org.koin.androidx.viewmodel.dsl.viewModelOf
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val viewModelModule = module {
