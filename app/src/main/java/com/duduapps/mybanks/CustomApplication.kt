@@ -8,6 +8,7 @@ import com.duduapps.mybanks.di.repositoryModule
 import com.duduapps.mybanks.di.viewModelModule
 import com.duduapps.mybanks.utils.AppOpenAdManager
 import com.google.android.gms.ads.MobileAds
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -35,5 +36,7 @@ class CustomApplication : Application() {
 
         MobileAds.initialize(this) {}
         appOpenAdManager.loadAd()
+
+        FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = !BuildConfig.DEBUG
     }
 }
