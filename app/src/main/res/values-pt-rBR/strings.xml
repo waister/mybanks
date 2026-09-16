@@ -104,7 +104,7 @@
     <string name="action_login">Entrar / Fazer backup</string>
     <string name="action_logout">Sair da conta</string>
     <string name="logout_account">Sair dessa conta</string>
-    <string name="remove_adas">Remover anúncios</string>
+    <string name="remove_ads">Remover anúncios</string>
     <string name="search">Pesquisar</string>
     <string name="search_hint">Buscar contas…</string>
     <string name="wait_settings">Aguarde as configurações carregarem</string>

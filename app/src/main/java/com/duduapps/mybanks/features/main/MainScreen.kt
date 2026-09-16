@@ -228,7 +228,7 @@ internal fun MainScreenContent(
                                 HorizontalDivider()
                             }
                             DropdownMenuItem(
-                                text = { Text(stringResource(R.string.remove_adas)) },
+                                text = { Text(stringResource(R.string.remove_ads)) },
                                 onClick = {
                                     showMenu = false
                                     onNavigateToRemoveAds()

@@ -93,6 +93,7 @@ fun RemoveAdsScreen(
                 is RemoveAdsEvent.ShowToast -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
+
                 is RemoveAdsEvent.ShowRewardedAd -> {
                     (context as? Activity)?.let { activity ->
                         rewardedAd?.show(activity) {
@@ -100,6 +101,7 @@ fun RemoveAdsScreen(
                         }
                     }
                 }
+
                 is RemoveAdsEvent.AdRewardSuccess -> {
                     showSuccessDialog = true
                 }
@@ -132,7 +134,7 @@ internal fun RemoveAdsScreenContent(
         modifier = modifier,
         topBar = {
             AppTopBar(
-                title = stringResource(R.string.remove_adas),
+                title = stringResource(R.string.remove_ads),
                 onBackClick = onNavigateBack,
             )
         },

@@ -79,10 +79,12 @@ fun AccountDetailScreen(
                 is AccountDetailEvent.ShowToast -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
+
                 is AccountDetailEvent.CopyToClipboard -> {
                     val clip = android.content.ClipData.newPlainText(event.label, event.text).toClipEntry()
                     clipboard.setClipEntry(clip)
                 }
+
                 is AccountDetailEvent.ShareAccount -> {
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
@@ -90,6 +92,7 @@ fun AccountDetailScreen(
                     }
                     context.startActivity(Intent.createChooser(intent, shareAccountTitle))
                 }
+
                 is AccountDetailEvent.NavigateBack -> currentOnNavigateBack()
             }
         }
@@ -157,7 +160,7 @@ internal fun AccountDetailScreenContent(
                         onDismissRequest = { showMenu = false },
                     ) {
                         DropdownMenuItem(
-                            text = { Text(stringResource(R.string.remove_adas)) },
+                            text = { Text(stringResource(R.string.remove_ads)) },
                             onClick = {
                                 showMenu = false
                                 onNavigateToRemoveAds()
