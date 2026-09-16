@@ -1,6 +1,7 @@
 package com.duduapps.mybanks.features.auth
 
 import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -51,7 +52,7 @@ fun LoginScreen(
     val currentOnLoginSuccess by rememberUpdatedState(onLoginSuccess)
 
     var dialogMessage by remember { mutableStateOf<String?>(null) }
-    var dialogTitle by remember { mutableStateOf<String?>(null) }
+    var dialogTitleRes by remember { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(viewModel.events) {
         viewModel.events.collect { event ->
@@ -59,15 +60,19 @@ fun LoginScreen(
                 is LoginEvent.ShowToast -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
+
                 is LoginEvent.ShowSuccessDialog -> {
-                    dialogTitle = context.getString(R.string.success)
+                    dialogTitleRes = R.string.success
                     dialogMessage = event.message
                 }
+
                 is LoginEvent.ShowErrorDialog -> {
-                    dialogTitle = context.getString(R.string.ops)
+                    dialogTitleRes = R.string.ops
                     dialogMessage = event.message
                 }
+
                 is LoginEvent.LoginSuccess -> currentOnLoginSuccess()
+
                 is LoginEvent.NavigateBack -> currentOnNavigateBack()
             }
         }
@@ -79,7 +84,7 @@ fun LoginScreen(
         onEmailChange = viewModel::onEmailChanged,
         onCodeChange = viewModel::onCodeChanged,
         onPositiveAction = viewModel::onPositiveAction,
-        dialogTitle = dialogTitle,
+        dialogTitleRes = dialogTitleRes,
         dialogMessage = dialogMessage,
         onDismissDialog = { dialogMessage = null },
     )
@@ -92,10 +97,10 @@ internal fun LoginScreenContent(
     onEmailChange: (String) -> Unit,
     onCodeChange: (String) -> Unit,
     onPositiveAction: () -> Unit,
-    dialogTitle: String? = null,
+    modifier: Modifier = Modifier,
+    @StringRes dialogTitleRes: Int? = null,
     dialogMessage: String? = null,
     onDismissDialog: () -> Unit = {},
-    modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier,
@@ -194,7 +199,7 @@ internal fun LoginScreenContent(
     dialogMessage?.let { msg ->
         AlertDialog(
             onDismissRequest = onDismissDialog,
-            title = { Text(dialogTitle ?: "") },
+            title = dialogTitleRes?.let { { Text(stringResource(it)) } },
             text = { Text(msg) },
             confirmButton = {
                 TextButton(onClick = onDismissDialog) {

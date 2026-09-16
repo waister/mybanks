@@ -8,5 +8,5 @@ data class AccountsResponse(
     @SerializedName("message")
     val message: String? = null,
     @SerializedName("accounts")
-    val accounts: List<Account> = emptyList(),
+    val accounts: List<AccountDto> = emptyList(),
 )

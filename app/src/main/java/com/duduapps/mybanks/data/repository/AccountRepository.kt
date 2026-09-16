@@ -103,7 +103,7 @@ class AccountRepositoryImpl(
                 val remoteAccounts = body.accounts
                 if (remoteAccounts.isNotEmpty()) {
                     accountDao.insertAccounts(
-                        remoteAccounts.map { it.copy(synced = true).toEntity() },
+                        remoteAccounts.map { it.toEntity() },
                     )
                 }
             }
@@ -120,10 +120,10 @@ class AccountRepositoryImpl(
             val remoteAccounts = response.body()!!.accounts
             if (remoteAccounts.isNotEmpty()) {
                 accountDao.insertAccounts(
-                    remoteAccounts.map { it.copy(synced = true).toEntity() },
+                    remoteAccounts.map { it.toEntity() },
                 )
             }
-            remoteAccounts
+            remoteAccounts.map { it.toDomain() }
         } else {
             val errorMsg = response.body()?.message ?: "Falha ao sincronizar contas"
             throw Exception(errorMsg)

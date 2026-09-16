@@ -102,4 +102,73 @@ class AccountRepositoryTest {
         assertTrue(result.isSuccess)
         coVerify { accountDao.markAsDeleted(1L, any()) }
     }
+
+    @Test
+    fun `given remote accounts with nullable fields, when fetchRemoteAccounts called, then inserts mapped entities into DAO`() = runTest {
+        coEvery { preferencesRepository.isLogged } returns true
+
+        val json = """
+            {
+                "success": true,
+                "message": "Contas carregadas com sucesso.",
+                "accounts": [
+                    {
+                        "id": 19,
+                        "user_id": 230416,
+                        "bank_id": 340,
+                        "pix_code": "bb@waister.com.br",
+                        "label": "Banco do Brasil",
+                        "type": "Corrente",
+                        "agency": "2973-4",
+                        "account": "54461-2",
+                        "operation": null,
+                        "holder": "Waister Nunes Guimarães",
+                        "document": "017.916.291-80",
+                        "legal_account": false,
+                        "sort": 0,
+                        "created_at": "2019-07-04 11:03:40",
+                        "updated_at": "2023-03-24 13:32:15",
+                        "deleted_at": "2023-03-24 13:32:14",
+                        "bank_name": "Banco do Brasil",
+                        "bank_code": "001"
+                    },
+                    {
+                        "id": 72,
+                        "user_id": 230416,
+                        "bank_id": 405,
+                        "pix_code": null,
+                        "label": "BS2",
+                        "type": "Corrente",
+                        "agency": "0001",
+                        "account": "179442-6",
+                        "operation": null,
+                        "holder": "Waister Nunes Guimarães",
+                        "document": "017.916.291-80",
+                        "legal_account": false,
+                        "sort": 0,
+                        "created_at": "2019-10-02 09:48:19",
+                        "updated_at": "2021-02-20 18:18:37",
+                        "deleted_at": null,
+                        "bank_name": "BS2",
+                        "bank_code": "218"
+                    }
+                ]
+            }
+        """.trimIndent()
+
+        val gson = com.google.gson.Gson()
+        val accountsResponse = gson.fromJson(json, com.duduapps.mybanks.models.AccountsResponse::class.java)
+
+        coEvery { apiService.getAccounts() } returns retrofit2.Response.success(accountsResponse)
+
+        val result = repository.fetchRemoteAccounts()
+
+        assertTrue(result.isSuccess)
+        val accounts = result.getOrNull()
+        assertEquals(2, accounts?.size)
+        assertEquals("", accounts?.get(0)?.operation)
+        assertEquals("", accounts?.get(1)?.pixCode)
+        assertEquals("BS2", accounts?.get(1)?.label)
+        coVerify { accountDao.insertAccounts(match { it.size == 2 && it[1].pixCode == "" && it[1].operation == "" }) }
+    }
 }
