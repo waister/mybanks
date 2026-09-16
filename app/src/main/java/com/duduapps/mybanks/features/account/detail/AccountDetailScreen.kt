@@ -18,11 +18,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -60,7 +57,7 @@ fun AccountDetailScreen(
     accountId: Long,
     onNavigateBack: () -> Unit,
     onNavigateToEdit: (Long) -> Unit,
-    onNavigateToRemoveAds: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: AccountDetailViewModel = koinViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -103,11 +100,11 @@ fun AccountDetailScreen(
         accountId = accountId,
         onNavigateBack = onNavigateBack,
         onNavigateToEdit = onNavigateToEdit,
-        onNavigateToRemoveAds = onNavigateToRemoveAds,
         onCopyField = viewModel::onCopyField,
         onCopyAll = viewModel::onCopyAll,
         onShareAll = viewModel::onShareAll,
         onDeleteAccount = viewModel::onDeleteAccount,
+        modifier = modifier,
     )
 }
 
@@ -117,14 +114,12 @@ internal fun AccountDetailScreenContent(
     accountId: Long,
     onNavigateBack: () -> Unit,
     onNavigateToEdit: (Long) -> Unit,
-    onNavigateToRemoveAds: () -> Unit,
     onCopyField: (String, String) -> Unit,
     onCopyAll: () -> Unit,
     onShareAll: () -> Unit,
     onDeleteAccount: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var showMenu by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -146,25 +141,6 @@ internal fun AccountDetailScreenContent(
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Excluir conta",
                             tint = MaterialTheme.colorScheme.onPrimary,
-                        )
-                    }
-                    IconButton(onClick = { showMenu = true }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "Mais opções",
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false },
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.remove_ads)) },
-                            onClick = {
-                                showMenu = false
-                                onNavigateToRemoveAds()
-                            },
                         )
                     }
                 },
@@ -338,7 +314,6 @@ private fun AccountDetailIndividualPreview() {
             accountId = 1L,
             onNavigateBack = {},
             onNavigateToEdit = {},
-            onNavigateToRemoveAds = {},
             onCopyField = { _, _ -> },
             onCopyAll = {},
             onShareAll = {},
@@ -356,7 +331,6 @@ private fun AccountDetailLegalPreview() {
             accountId = 2L,
             onNavigateBack = {},
             onNavigateToEdit = {},
-            onNavigateToRemoveAds = {},
             onCopyField = { _, _ -> },
             onCopyAll = {},
             onShareAll = {},

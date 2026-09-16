@@ -69,9 +69,6 @@ fun AppNavHost(
                 onNavigateToEdit = { id ->
                     navController.navigate(Routes.accountForm(id))
                 },
-                onNavigateToRemoveAds = {
-                    navController.navigate(Routes.REMOVE_ADS)
-                },
             )
         }
 
