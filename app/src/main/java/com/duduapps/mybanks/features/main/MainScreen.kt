@@ -3,15 +3,12 @@ package com.duduapps.mybanks.features.main
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -25,8 +22,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,14 +39,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.duduapps.mybanks.R
 import com.duduapps.mybanks.features.main.components.AccountItem
@@ -74,7 +69,10 @@ fun MainScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val clipboardManager = LocalClipboardManager.current
+    val clipboard = LocalClipboard.current
+    val shareAccountsTitle = stringResource(R.string.my_bank_accounts)
+    val shareAppSubject = stringResource(R.string.share_subject)
+    val shareAppTextTemplate = stringResource(R.string.share_text)
 
     LaunchedEffect(Unit) {
         interstitialAdManager.loadAd(context)
@@ -86,20 +84,25 @@ fun MainScreen(
                 is MainEvent.ShowToast -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
+
                 is MainEvent.CopyToClipboard -> {
-                    clipboardManager.setText(AnnotatedString(event.text))
+                    val clip = android.content.ClipData.newPlainText("accounts", event.text).toClipEntry()
+                    clipboard.setClipEntry(clip)
                 }
+
                 is MainEvent.ShareAccounts -> {
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
                         putExtra(Intent.EXTRA_TEXT, event.text)
                     }
-                    context.startActivity(Intent.createChooser(intent, context.getString(R.string.my_bank_accounts)))
+                    context.startActivity(Intent.createChooser(intent, shareAccountsTitle))
                 }
+
                 is MainEvent.OpenUrl -> {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(event.url))
+                    val intent = Intent(Intent.ACTION_VIEW, event.url.toUri())
                     context.startActivity(intent)
                 }
+
                 is MainEvent.ShowInterstitialAd -> {
                     (context as? Activity)?.let { activity ->
                         interstitialAdManager.showAd(activity)
@@ -124,10 +127,10 @@ fun MainScreen(
         onDismissLoginAlert = viewModel::onDismissLoginAlert,
         onDismissUpdateDialog = viewModel::dismissUpdateDialog,
         onUpdateClick = { url ->
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
             context.startActivity(intent)
         },
-        onShareApp = { shareApp(context) },
+        onShareApp = { shareApp(context, shareAppSubject, shareAppTextTemplate) },
         onRateOnStore = { openPlayStore(context) },
     )
 }
@@ -205,22 +208,24 @@ internal fun MainScreenContent(
                             expanded = showMenu,
                             onDismissRequest = { showMenu = false },
                         ) {
-                            if (!uiState.isLogged) {
+                            if (uiState.accounts.isNotEmpty()) {
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.action_login)) },
+                                    text = { Text(stringResource(R.string.copy_accounts)) },
+                                    leadingIcon = { Icon(Icons.Default.ContentCopy, contentDescription = null) },
                                     onClick = {
                                         showMenu = false
-                                        onNavigateToLogin()
+                                        onCopyAllClick()
                                     },
                                 )
-                            } else {
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.action_logout)) },
+                                    text = { Text(stringResource(R.string.share_accounts)) },
+                                    leadingIcon = { Icon(Icons.Default.Share, contentDescription = null) },
                                     onClick = {
                                         showMenu = false
-                                        showLogoutDialog = true
+                                        onShareAllClick()
                                     },
                                 )
+                                HorizontalDivider()
                             }
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.remove_adas)) },
@@ -250,33 +255,26 @@ internal fun MainScreenContent(
                                     onNavigateToFeedback()
                                 },
                             )
+                            if (!uiState.isLogged) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.action_login)) },
+                                    onClick = {
+                                        showMenu = false
+                                        onNavigateToLogin()
+                                    },
+                                )
+                            } else {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.logout_account)) },
+                                    onClick = {
+                                        showMenu = false
+                                        showLogoutDialog = true
+                                    },
+                                )
+                            }
                         }
                     },
                 )
-            }
-        },
-        floatingActionButton = {
-            if (uiState.filteredAccounts.isNotEmpty()) {
-                Row(
-                    modifier = Modifier.padding(bottom = 60.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    FloatingActionButton(
-                        onClick = onCopyAllClick,
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        contentColor = MaterialTheme.colorScheme.onSecondary,
-                    ) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copiar todas as contas")
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    ExtendedFloatingActionButton(
-                        onClick = onShareAllClick,
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        icon = { Icon(Icons.Default.Share, contentDescription = null) },
-                        text = { Text(stringResource(R.string.share_accounts)) },
-                    )
-                }
             }
         },
         bottomBar = {
@@ -330,10 +328,12 @@ internal fun MainScreenContent(
             title = { Text(stringResource(R.string.active_sync_title)) },
             text = { Text(stringResource(R.string.active_sync_message)) },
             confirmButton = {
-                TextButton(onClick = {
-                    onDismissLoginAlert(false)
-                    onNavigateToLogin()
-                }) {
+                TextButton(
+                    onClick = {
+                        onDismissLoginAlert(false)
+                        onNavigateToLogin()
+                    },
+                ) {
                     Text(stringResource(R.string.active_sync_positive))
                 }
             },
@@ -381,20 +381,20 @@ internal fun MainScreenContent(
     }
 }
 
-private fun shareApp(context: Context) {
+private fun shareApp(context: Context, subject: String, textTemplate: String) {
     val storeUrl = "https://play.google.com/store/apps/details?id=${context.packageName}"
-    val text = context.getString(R.string.share_text, storeUrl)
+    val text = textTemplate.format(storeUrl)
     val intent = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
-        putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.share_subject))
+        putExtra(Intent.EXTRA_SUBJECT, subject)
         putExtra(Intent.EXTRA_TEXT, text)
     }
-    context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_subject)))
+    context.startActivity(Intent.createChooser(intent, subject))
 }
 
 private fun openPlayStore(context: Context) {
     val storeUrl = "https://play.google.com/store/apps/details?id=${context.packageName}"
-    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(storeUrl))
+    val intent = Intent(Intent.ACTION_VIEW, storeUrl.toUri())
     context.startActivity(intent)
 }
 

@@ -39,10 +39,10 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -65,7 +65,8 @@ fun AccountDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val clipboardManager = LocalClipboardManager.current
+    val clipboard = LocalClipboard.current
+    val shareAccountTitle = stringResource(R.string.my_bank_account)
     val currentOnNavigateBack by rememberUpdatedState(onNavigateBack)
 
     LaunchedEffect(accountId) {
@@ -79,14 +80,15 @@ fun AccountDetailScreen(
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
                 is AccountDetailEvent.CopyToClipboard -> {
-                    clipboardManager.setText(AnnotatedString(event.text))
+                    val clip = android.content.ClipData.newPlainText(event.label, event.text).toClipEntry()
+                    clipboard.setClipEntry(clip)
                 }
                 is AccountDetailEvent.ShareAccount -> {
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
                         putExtra(Intent.EXTRA_TEXT, event.text)
                     }
-                    context.startActivity(Intent.createChooser(intent, context.getString(R.string.my_bank_account)))
+                    context.startActivity(Intent.createChooser(intent, shareAccountTitle))
                 }
                 is AccountDetailEvent.NavigateBack -> currentOnNavigateBack()
             }
