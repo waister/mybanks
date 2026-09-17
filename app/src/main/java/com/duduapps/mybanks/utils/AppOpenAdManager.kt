@@ -3,6 +3,7 @@ package com.duduapps.mybanks.utils
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import android.util.Log
 import com.duduapps.mybanks.BuildConfig
 import com.duduapps.mybanks.data.repository.PreferencesRepository
 import com.google.android.gms.ads.AdError
@@ -29,10 +30,13 @@ class AppOpenAdManager(
     fun loadAd() {
         if (isAdAvailable || preferencesRepository.havePlan()) return
 
-        val adUnitId = preferencesRepository.adMobOpenAppId
-        if (adUnitId.isEmpty()) return
+        val actualAdUnitId = if (BuildConfig.DEBUG) {
+            "ca-app-pub-3940256099942544/9257395921"
+        } else {
+            preferencesRepository.adMobOpenAppId
+        }
+        if (actualAdUnitId.isEmpty()) return
 
-        val actualAdUnitId = if (BuildConfig.DEBUG) "ca-app-pub-3940256099942544/9257395921" else adUnitId
         val request = AdRequest.Builder().build()
         AppOpenAd.load(
             application,
@@ -45,6 +49,12 @@ class AppOpenAdManager(
                 }
 
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                    if (BuildConfig.DEBUG) {
+                        Log.e(
+                            "AppOpenAdManager",
+                            "Failed to load app open ad: ${loadAdError.message} (code: ${loadAdError.code})",
+                        )
+                    }
                     appOpenAd = null
                 }
             },

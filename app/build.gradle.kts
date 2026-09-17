@@ -25,7 +25,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
+        }
         release {
+            manifestPlaceholders["admobAppId"] = "ca-app-pub-6521704558504566~2400373493"
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

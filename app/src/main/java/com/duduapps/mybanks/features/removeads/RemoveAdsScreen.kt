@@ -79,6 +79,12 @@ fun RemoveAdsScreen(
                     }
 
                     override fun onAdFailedToLoad(error: LoadAdError) {
+                        if (BuildConfig.DEBUG) {
+                            android.util.Log.e(
+                                "RemoveAdsScreen",
+                                "Failed to load rewarded ad: ${error.message} (code: ${error.code})",
+                            )
+                        }
                         rewardedAd = null
                         viewModel.onAdLoaded(false)
                     }
