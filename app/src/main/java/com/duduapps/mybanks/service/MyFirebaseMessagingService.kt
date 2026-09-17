@@ -3,18 +3,17 @@ package com.duduapps.mybanks.service
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.app.TaskStackBuilder
-import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.webkit.URLUtil
 import androidx.core.app.NotificationCompat
+import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import com.duduapps.mybanks.BuildConfig
 import com.duduapps.mybanks.MainActivity
 import com.duduapps.mybanks.R
@@ -23,8 +22,7 @@ import com.duduapps.mybanks.data.repository.PreferencesRepository
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import java.io.IOException
-import java.net.ConnectException
-import java.net.URL
+import java.net.URI
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -52,8 +50,19 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         private const val PARAM_ITEM_ID = "ParamItemId"
     }
 
+    @Deprecated("Deprecated in FirebaseMessagingService, use onRegistered instead")
+    @Suppress("DEPRECATION")
     override fun onNewToken(token: String) {
         super.onNewToken(token)
+        updateFcmToken(token)
+    }
+
+    override fun onRegistered(installationId: String) {
+        super.onRegistered(installationId)
+        updateFcmToken(installationId)
+    }
+
+    private fun updateFcmToken(token: String) {
         preferencesRepository.fcmToken = token
         serviceScope.launch {
             appConfigRepository.identify(token)
@@ -87,7 +96,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
 
         val notifyIntent: Intent = if (link.isNotEmpty() && URLUtil.isValidUrl(link)) {
-            Intent(Intent.ACTION_VIEW, Uri.parse(link))
+            Intent(Intent.ACTION_VIEW, link.toUri())
         } else {
             Intent(applicationContext, MainActivity::class.java).apply {
                 putExtra(PARAM_TYPE, type)
@@ -99,6 +108,17 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val pendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
             addNextIntentWithParentStack(notifyIntent)
             getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        }
+
+        val manager = ContextCompat.getSystemService(this, NotificationManager::class.java)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                channelId,
+                getString(R.string.channel_updates),
+                NotificationManager.IMPORTANCE_HIGH,
+            )
+            manager?.createNotificationChannel(channel)
         }
 
         val builder = NotificationCompat.Builder(applicationContext, channelId)
@@ -123,47 +143,34 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             }
 
             try {
-                val url = URL(thumbUrl)
+                val url = URI.create(thumbUrl).toURL()
                 val icon = BitmapFactory.decodeStream(url.openConnection().getInputStream())
                 if (icon != null) {
                     builder.setLargeIcon(icon)
                 }
             } catch (_: IOException) {
-            } catch (_: ConnectException) {
             }
         }
 
-        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                getString(R.string.channel_updates),
-                NotificationManager.IMPORTANCE_HIGH,
-            )
-            manager.createNotificationChannel(channel)
-            builder.setChannelId(channelId)
-        }
-
-        manager.notify(NOTIFICATION_DEFAULT_ID, builder.build())
+        manager?.notify(NOTIFICATION_DEFAULT_ID, builder.build())
 
         if (vibrate.isNotEmpty()) {
             val pattern = longArrayOf(0, 100, 0, 100)
             val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val vm = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                vm.defaultVibrator
+                val vm = ContextCompat.getSystemService(this, VibratorManager::class.java)
+                vm?.defaultVibrator
             } else {
                 @Suppress("DEPRECATION")
-                getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                ContextCompat.getSystemService(this, Vibrator::class.java)
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(
+                vibrator?.vibrate(
                     VibrationEffect.createWaveform(pattern, -1),
                 )
             } else {
                 @Suppress("DEPRECATION")
-                vibrator.vibrate(pattern, -1)
+                vibrator?.vibrate(pattern, -1)
             }
         }
     }

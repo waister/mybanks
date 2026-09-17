@@ -19,7 +19,7 @@ class BaseParamsInterceptor(
             .addQueryParameter("version", BuildConfig.VERSION_CODE.toString())
             .addQueryParameter("platform", "android")
             .addQueryParameter("debug", if (BuildConfig.DEBUG) "1" else "0")
-            .addQueryParameter("api_v", "8")
+            .addQueryParameter("api_v", "11")
 
         val requestBuilder = original.newBuilder().url(urlBuilder.build())
         return chain.proceed(requestBuilder.build())
