@@ -139,4 +139,7 @@
     <string name="try_again">Try again</string>
     <string name="update_later">Update later</string>
     <string name="share_with">Share with:</string>
+    <string name="notification_permission_banner_title">Notifications disabled</string>
+    <string name="notification_permission_banner_desc">Turn on notifications to receive important updates and alerts about your accounts.</string>
+    <string name="notification_permission_banner_action">Enable</string>
 </resources>

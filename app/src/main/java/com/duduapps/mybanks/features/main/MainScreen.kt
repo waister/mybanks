@@ -1,10 +1,18 @@
 package com.duduapps.mybanks.features.main
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,11 +53,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.duduapps.mybanks.R
 import com.duduapps.mybanks.features.main.components.AccountItem
 import com.duduapps.mybanks.features.main.components.EmptyAccountsView
+import com.duduapps.mybanks.features.main.components.NotificationPermissionBanner
 import com.duduapps.mybanks.ui.components.AdMobBanner
 import com.duduapps.mybanks.ui.components.ConfirmDialog
 import com.duduapps.mybanks.ui.theme.MyBanksTheme
@@ -73,6 +85,39 @@ fun MainScreen(
     val shareAccountsTitle = stringResource(R.string.my_bank_accounts)
     val shareAppSubject = stringResource(R.string.share_subject)
     val shareAppTextTemplate = stringResource(R.string.share_text)
+
+    var areNotificationsEnabled by remember {
+        mutableStateOf(NotificationManagerCompat.from(context).areNotificationsEnabled())
+    }
+    var isNotificationBannerDismissed by remember { mutableStateOf(false) }
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { isGranted ->
+        areNotificationsEnabled = isGranted || NotificationManagerCompat.from(context).areNotificationsEnabled()
+    }
+
+    val onEnableNotifications = {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val hasPermission = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS,
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (!hasPermission) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                openAppNotificationSettings(context)
+            }
+        } else {
+            openAppNotificationSettings(context)
+        }
+    }
+
+    LifecycleResumeEffect(Unit) {
+        areNotificationsEnabled = NotificationManagerCompat.from(context).areNotificationsEnabled()
+        onPauseOrDispose { }
+    }
 
     LaunchedEffect(Unit) {
         interstitialAdManager.loadAd(context)
@@ -132,6 +177,9 @@ fun MainScreen(
         },
         onShareApp = { shareApp(context, shareAppSubject, shareAppTextTemplate) },
         onRateOnStore = { openPlayStore(context) },
+        showNotificationWarning = !areNotificationsEnabled && !isNotificationBannerDismissed,
+        onEnableNotifications = onEnableNotifications,
+        onDismissNotificationWarning = { isNotificationBannerDismissed = true },
     )
 }
 
@@ -154,6 +202,9 @@ internal fun MainScreenContent(
     onUpdateClick: (String) -> Unit,
     onShareApp: () -> Unit,
     onRateOnStore: () -> Unit,
+    showNotificationWarning: Boolean = false,
+    onEnableNotifications: () -> Unit = {},
+    onDismissNotificationWarning: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -281,27 +332,40 @@ internal fun MainScreenContent(
             AdMobBanner()
         },
     ) { innerPadding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
         ) {
-            if (uiState.filteredAccounts.isEmpty()) {
-                EmptyAccountsView(
-                    isLogged = uiState.isLogged,
-                    onAddAccountClick = onNavigateToAddAccount,
-                    onLoginClick = onNavigateToLogin,
+            if (showNotificationWarning) {
+                NotificationPermissionBanner(
+                    onEnableClick = onEnableNotifications,
+                    onDismissClick = onDismissNotificationWarning,
                 )
-            } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(
-                        items = uiState.filteredAccounts,
-                        key = { it.id },
-                    ) { account ->
-                        AccountItem(
-                            account = account,
-                            onClick = { onNavigateToAccountDetail(account.id) },
-                        )
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+            ) {
+                if (uiState.filteredAccounts.isEmpty()) {
+                    EmptyAccountsView(
+                        isLogged = uiState.isLogged,
+                        onAddAccountClick = onNavigateToAddAccount,
+                        onLoginClick = onNavigateToLogin,
+                    )
+                } else {
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        items(
+                            items = uiState.filteredAccounts,
+                            key = { it.id },
+                        ) { account ->
+                            AccountItem(
+                                account = account,
+                                onClick = { onNavigateToAccountDetail(account.id) },
+                            )
+                        }
                     }
                 }
             }
@@ -395,6 +459,19 @@ private fun shareApp(context: Context, subject: String, textTemplate: String) {
 private fun openPlayStore(context: Context) {
     val storeUrl = "https://play.google.com/store/apps/details?id=${context.packageName}"
     val intent = Intent(Intent.ACTION_VIEW, storeUrl.toUri())
+    context.startActivity(intent)
+}
+
+private fun openAppNotificationSettings(context: Context) {
+    val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+        }
+    } else {
+        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", context.packageName, null)
+        }
+    }
     context.startActivity(intent)
 }
 

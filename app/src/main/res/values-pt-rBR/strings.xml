@@ -139,4 +139,7 @@
     <string name="try_again">Tentar novamente</string>
     <string name="update_later">Atualizar depois</string>
     <string name="share_with">Compatilhar com:</string>
+    <string name="notification_permission_banner_title">Notificações desativadas</string>
+    <string name="notification_permission_banner_desc">Ative as notificações para receber atualizações importantes e avisos sobre suas contas.</string>
+    <string name="notification_permission_banner_action">Ativar</string>
 </resources>
