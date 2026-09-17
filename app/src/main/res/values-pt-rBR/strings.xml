@@ -93,6 +93,7 @@
     <string name="active_sync_positive">Ativar backup agora!</string>
     <string name="active_sync_negative">Ativar depois</string>
     <string name="not_interested">Não tenho interesse</string>
+    <string name="never_show_again">Não mostrar novamente</string>
     <string name="login_title">Identificação</string>
     <string name="login_message">Precisamos identificar quem é você para ativar o backup automático.\n\nInforme seu email abaixo que enviatemos um código númerico para ele:</string>
     <string name="write_your_email">Digite seu e-mail</string>
@@ -100,9 +101,12 @@
     <string name="confirm_code">Confirmar código</string>
     <string name="code_sent_to_email">Código enviado por email</string>
     <string name="active_auto_backup">Ativar o backup automático</string>
+    <string name="action_login">Entrar / Fazer backup</string>
+    <string name="action_logout">Sair da conta</string>
     <string name="logout_account">Sair dessa conta</string>
-    <string name="remove_adas">Remover anúncios</string>
+    <string name="remove_ads">Remover anúncios</string>
     <string name="search">Pesquisar</string>
+    <string name="search_hint">Buscar contas…</string>
     <string name="wait_settings">Aguarde as configurações carregarem</string>
     <string name="watch_to_by_phrase">Também odiamos anúncios!</string>
     <string name="watch_to_by_body">Você pode assistir um vídeo publicitário para remover os anúncios por %1$d dias, e ainda nos ajuda a manter o app sempre atualizado e ainda.</string>
@@ -135,4 +139,7 @@
     <string name="try_again">Tentar novamente</string>
     <string name="update_later">Atualizar depois</string>
     <string name="share_with">Compatilhar com:</string>
+    <string name="notification_permission_banner_title">Notificações desativadas</string>
+    <string name="notification_permission_banner_desc">Ative as notificações para receber atualizações importantes e avisos sobre suas contas.</string>
+    <string name="notification_permission_banner_action">Ativar</string>
 </resources>
