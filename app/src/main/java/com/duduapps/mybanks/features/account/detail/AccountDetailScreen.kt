@@ -216,30 +216,28 @@ internal fun AccountDetailScreenContent(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Row(
+                OutlinedButton(
+                    onClick = onCopyAll,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                 ) {
-                    OutlinedButton(
-                        onClick = onCopyAll,
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.copy_account))
-                    }
+                    Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.copy_account))
+                }
 
-                    Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                    Button(
-                        onClick = onShareAll,
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.share_account))
-                    }
+                Button(
+                    onClick = onShareAll,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                ) {
+                    Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.share_account))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
