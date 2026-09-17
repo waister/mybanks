@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -24,11 +27,31 @@ android {
         buildConfigField("String", "API_BASE_URL", "\"https://maggapps.com/api/mybanks/\"")
     }
 
+    val signingPropertiesFile = rootProject.file("keystore/signing.properties")
+    val keystoreFile = rootProject.file("keystore/keystore.jks")
+
+    signingConfigs {
+        create("release") {
+            if (signingPropertiesFile.exists() && keystoreFile.exists()) {
+                val properties = Properties().apply {
+                    FileInputStream(signingPropertiesFile).use { load(it) }
+                }
+                storeFile = keystoreFile
+                storePassword = properties.getProperty("storePassword")
+                keyAlias = properties.getProperty("keyAlias")
+                keyPassword = properties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         debug {
             manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
         }
         release {
+            if (signingPropertiesFile.exists() && keystoreFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             manifestPlaceholders["admobAppId"] = "ca-app-pub-6521704558504566~2400373493"
             isMinifyEnabled = true
             isShrinkResources = true
